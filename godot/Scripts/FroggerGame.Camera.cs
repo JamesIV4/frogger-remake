@@ -4,10 +4,10 @@ namespace FroggerRemake;
 
 public partial class FroggerGame
 {
-    // The classic overhead board remains the fresh-install default. Each mode
-    // can be toggled independently, including follow with the orthographic view.
-    private bool perspectiveView;
-    private bool followCamera;
+    // Fresh installs start close to the action. Each mode remains independent,
+    // including follow with the orthographic view when players opt into it.
+    private bool perspectiveView=true;
+    private bool followCamera=true;
     private Vector3 cameraLookTarget=new(0,0,-.12f);
 
     private void UpdateCamera(double delta) {

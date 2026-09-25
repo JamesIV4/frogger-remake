@@ -660,6 +660,7 @@ source=['// Generated from the Blender mesh bounds in art/scripts/build_assets.p
     '    public const float RiverGatorSnoutTiles=0.605000f;',
     f'    public const float LogTopTiles={footprints["log"]["maxZ"]:.6f}f;',
     f'    public const float SnakeBottomTiles={footprints["snake"]["minZ"]:.6f}f;',
+    f'    public const float LadyBottomTiles={footprints["lady_frog"]["minZ"]:.6f}f;',
     '    // Vehicles rotate their local length axis into the ROM X direction.',
     '    // Presentation scales every vehicle root to 0.84.',
     '    public static ModelFootprint Vehicle(int lane)=>lane switch {']

@@ -13,6 +13,10 @@ internal static class FeedbackTests
         return s;
     }
     public static void Run(byte[] rom) {
+        Check(GameDefaults.FromStored(0,false,false,false,false)==new GameOptions(true,true,true,true),
+            "older settings did not migrate to modern collision and fullscreen follow perspective");
+        Check(GameDefaults.FromStored(GameDefaults.PreferencesVersion,false,false,false,false)==new GameOptions(false,false,false,false),
+            "explicit settings were not preserved after migration");
         // Both sides of a long log stay visible until the actual geometry exits.
         Check(BoardVisuals.IntersectsPlayfield(-25,46),"left long log culled too early");
         Check(BoardVisuals.IntersectsPlayfield(260,46),"right long log culled too early");
@@ -210,6 +214,36 @@ internal static class FeedbackTests
         var snakeBounds=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()=="snake").GetProperty("footprintTiles");
         Check(Math.Abs(ModelFootprints.LogTopTiles-logBounds.GetProperty("maxZ").GetDouble())<.001&&
               Math.Abs(ModelFootprints.SnakeBottomTiles-snakeBounds.GetProperty("minZ").GetDouble())<.001,"snake/log seating bounds drifted from Blender");
+        var ladyBounds=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()=="lady_frog").GetProperty("footprintTiles");
+        Check(Math.Abs(ModelFootprints.LadyBottomTiles-ladyBounds.GetProperty("minZ").GetDouble())<.001,"pink frog bottom drifted from Blender");
+        float ladyScale=.62f,logTop=-.18f+ModelFootprints.LogTopTiles;
+        Check(Math.Abs(BoardVisuals.LadyFrogHeight(ladyScale)+ModelFootprints.LadyBottomTiles*ladyScale-logTop-.012f)<.001f,
+            "pink frog is not seated on the inset log");
+        var hiddenLady=new FrameState();
+        hiddenLady.ram[0x83fe-0x8000]=1;hiddenLady.ram[0x8135-0x8000]=1;
+        hiddenLady.ram[0x8040-0x8000]=0;hiddenLady.ram[0x8041-0x8000]=0;
+        hiddenLady.ram[0x8043-0x8000]=0; // ROM cleared shared sprite descriptor
+        hiddenLady.ram[0x811c-0x8000]=100;hiddenLady.ram[0x833d-0x8000]=1;
+        float ladyHalfWidth=ModelFootprints.FrogAlongX*ladyScale;
+        var ladyPresentation=new LadyFrogPresentation();
+        ladyPresentation.Observe(hiddenLady,address=>rom[address]);
+        Check(ladyPresentation.Visible(ladyHalfWidth)&&ladyPresentation.X==80,"armed pink frog vanished or shifted when ROM erased its descriptor");
+        hiddenLady.ram[0x8041-0x8000]=0x19;
+        hiddenLady.ram[0x8040-0x8000]=216; // goal popup X must not hijack patrol X
+        ladyPresentation.Observe(hiddenLady,address=>rom[address]);
+        Check(ladyPresentation.Visible(ladyHalfWidth)&&ladyPresentation.X==80,"goal popup stole the pink frog's visual position");
+        hiddenLady.ram[0x8041-0x8000]=0;hiddenLady.ram[0x811c-0x8000]=25;
+        ladyPresentation.Observe(hiddenLady,address=>rom[address]);
+        Check(ladyPresentation.Visible(ladyHalfWidth)&&ladyPresentation.X==5,"pink frog disappears while partly across the board edge");
+        hiddenLady.ram[0x811c-0x8000]=21;
+        ladyPresentation.Observe(hiddenLady,address=>rom[address]);
+        Check(!ladyPresentation.Visible(ladyHalfWidth)&&ladyPresentation.X==1,"off-board pink frog still rendered");
+        hiddenLady.ram[0x8040-0x8000]=120;hiddenLady.ram[0x8134-0x8000]=1;
+        ladyPresentation.Observe(hiddenLady,address=>rom[address]);
+        Check(!ladyPresentation.Visible(ladyHalfWidth),"rescued pink frog duplicated on the log");
+        hiddenLady.ram[0x8134-0x8000]=0;hiddenLady.ram[0x8135-0x8000]=0;
+        ladyPresentation.Observe(hiddenLady,address=>rom[address]);
+        Check(!ladyPresentation.Visible(ladyHalfWidth),"unarmed pink frog still rendered");
         foreach(int lane in Enumerable.Range(6,5)){
             string model=lane switch{6=>"truck",7=>"sport",8=>"car",9=>"dozer",_=>"racecar"};
             var record=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()==model).GetProperty("footprintTiles");
@@ -227,6 +261,7 @@ internal static class FeedbackTests
         Check(ArcadeSimulation.ModelContact(-40,160,40,160,0,0,160,car),"frog swept through car");
         Check(ArcadeSimulation.ModelContact(0,160,0,160,-40,40,160,car),"moving car swept through frog");
         Check(!ArcadeSimulation.ModelContact(-40,190,40,190,0,0,160,car),"collision ignores model row separation");
+        VerifyOriginalLadySpriteClear(rom);
         foreach(int side in new[]{-1,1}){
             using var impact=Started(rom);impact.Modern(true);
             for(int lane=6;lane<=10;lane++)impact.Poke(0x8100+lane*9,0);
@@ -246,6 +281,54 @@ internal static class FeedbackTests
             modelCollisionLiveSides=2
         },new JsonSerializerOptions{WriteIndented=true}));
         Console.WriteLine("Feedback regressions: wrapping, death/bonus continuity, smooth diving, held hops, both grass rows and model-bound road collision passed");
+    }
+    private static void VerifyOriginalLadySpriteClear(byte[] rom){
+        // Reproduce ROM 0x1AA9 -> 0x27DE: an expiring fly bonus erases the
+        // shared lady-frog sprite descriptor, but not its pickup latch.
+        using var game=Started(rom);
+        game.Poke(0x8044,120);game.Poke(0x8047,224);game.Poke(0x8004,0);game.Poke(0x83cd,0);
+        game.Poke(0x8134,0);game.Poke(0x8135,1);game.Poke(0x813d,0);
+        game.Poke(0x8040,80);game.Poke(0x8041,0x21);game.Poke(0x8042,4);game.Poke(0x8043,96);
+        game.Poke(0x811c,100);game.Poke(0x833d,1);game.Poke(0x833e,50);
+        game.Poke(0x8340,2);
+        object Sample()=>new{frame=game.Frame,x=game.Peek(0x8040),
+            code=game.Peek(0x8041),color=game.Peek(0x8042),row=game.Peek(0x8043),
+            latch=game.Peek(0x8135),attached=game.Peek(0x8134),bonusTimer=game.Peek(0x8340),
+            gameState=game.Peek(0x83fe)};
+        var ladyPresentation=new LadyFrogPresentation();
+        ladyPresentation.Observe(game.Snapshot(),game.Peek);
+        var before=Sample();
+        var timeline=new List<object>();
+        for(int frame=0;frame<180;frame++){
+            game.Step();
+            if(frame%10==0||game.Peek(0x8340)!=2)timeline.Add(Sample());
+            if(game.Peek(0x8340)==1&&game.Peek(0x8041)==0)break;
+        }
+        var cleared=Sample();
+        ladyPresentation.Observe(game.Snapshot(),game.Peek);
+        float clearVisualX=ladyPresentation.X;
+        bool clearVisible=ladyPresentation.Visible(ModelFootprints.FrogAlongX*.62f);
+        bool spriteWiped=game.Peek(0x8340)==1&&game.Peek(0x8135)==1&&game.Peek(0x8134)==0&&
+            game.Peek(0x8040)==0&&game.Peek(0x8041)==0&&game.Peek(0x8042)==0&&game.Peek(0x8043)==0;
+        game.Step();var patrolling=Sample();
+        ladyPresentation.Observe(game.Snapshot(),game.Peek);
+        float patrolVisualX=ladyPresentation.X;
+        bool invisiblePatrol=game.Peek(0x8040)>=8&&game.Peek(0x8040)<=232&&
+            game.Peek(0x8041)==0&&game.Peek(0x8042)==0&&game.Peek(0x8043)==0&&game.Peek(0x8135)==1;
+        float ladyHalfWidth=ModelFootprints.FrogAlongX*.62f;
+        bool visible=ladyPresentation.Visible(ladyHalfWidth);
+        int pickupX=game.Peek(0x8040);
+        game.Poke(0x8044,pickupX);game.Poke(0x8047,96);
+        game.Poke(0x8004,0);game.Poke(0x83cd,0);
+        game.Step();var pickedUp=Sample();
+        File.WriteAllText("docs/evidence/lady-rom-bug.json",JsonSerializer.Serialize(new{before,timeline,cleared,
+            spriteWiped,clearVisualX,clearVisible,patrolling,invisiblePatrol,patrolVisualX,
+            presentationVisible=visible,pickedUp},
+            new JsonSerializerOptions{WriteIndented=true})+"\n");
+        Check(spriteWiped&&invisiblePatrol,"original ROM 0x1AA9/0x27DE invisible-lady transition was not reproduced");
+        Check(game.Peek(0x8135)!=0&&game.Peek(0x8134)!=0,"original ROM sprite clear no longer allows invisible pickup");
+        Check(clearVisible&&visible&&Math.Abs(clearVisualX-80)<=2&&patrolVisualX==pickupX,
+            "pink-frog renderer missed or displaced her after ROM 0x27DE blanked the shared sprite");
     }
     private static void Check(bool condition,string message){if(!condition)throw new Exception(message);}
 }

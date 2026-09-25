@@ -87,7 +87,7 @@ public partial class FroggerGame
         // These are spare frogs, despite the upstream TIME_REMAINING names.
         int count=state.At(player==1?0x83e5:0x83e6);lives.Text=$"FROGS   {new string('●',Math.Clamp(count,0,12))}";
         timer.Value=Math.Clamp(state.At(0x83dd)/60.0,0,1)*100;
-        if(started&&!paused){if(state.At(0x83fe)==0)message.Text="GAME OVER\nPress Enter for another crossing";else if(state.At(0x8297)>0&&state.At(0x842f)>=5)message.Text="ALL FROGS HOME!";else message.Text="";}
+        if(started&&!paused){if(state.At(0x83fe)==0)message.Text="GAME OVER\nPress Enter or controller A to restart";else if(state.At(0x8297)>0&&state.At(0x842f)>=5)message.Text="ALL FROGS HOME!";else message.Text="";}
         messagePanel.Visible=message.Text.Length>0;
     }
 }

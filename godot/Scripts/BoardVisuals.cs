@@ -7,6 +7,9 @@ public readonly record struct RiverGatorFit(float CenterOffsetPixels,float Width
 public static class BoardVisuals
 {
     public const float LeftEdge=8,RightEdge=232;
+    public const int LadyFrogRow=96;
+    public static float LadyFrogHeight(float scale)=>
+        -.18f+ModelFootprints.LogTopTiles-scale*ModelFootprints.LadyBottomTiles+.012f;
     public static RiverGatorFit FitRiverGator(int nativeWidth){
         float lengthScale=(nativeWidth-3f)/(16f*ModelFootprints.RiverGatorLengthTiles);
         float widthScale=14f/(16f*ModelFootprints.RiverGatorWidthTiles);
@@ -75,6 +78,32 @@ public static class BoardVisuals
             int tile=TileAt(state,x+dx,row,col);if(tile>=0x68&&tile<=0x6b||tile>=0xd0&&tile<=0xd3)return true;
         }
         return false;
+    }
+}
+
+/// Presentation-only pink-frog position. The ROM's fly-bonus teardown erases
+/// its shared sprite descriptor while leaving the pickup latch armed, so the
+/// separate patrol table is authoritative until the descriptor is valid again.
+public sealed class LadyFrogPresentation
+{
+    private float? lastX;
+    public bool Active {get;private set;}
+    public float X {get;private set;}
+    public bool Visible(float halfWidth)=>Active&&BoardVisuals.IntersectsPlayfield(X,halfWidth);
+    public void Reset(){Active=false;lastX=null;X=0;}
+    public void Observe(FrameState state,Func<int,int> readRom){
+        Active=state.At(0x83fe)!=0&&state.At(0x8135)!=0&&state.At(0x8134)==0;
+        if(!Active){lastX=null;return;}
+        int code=state.At(0x8041),color=state.At(0x8042),row=state.At(0x8043);
+        bool patrolSprite=(code is 0x1e or 0x21 or 0xa1)&&color==4&&row==BoardVisuals.LadyFrogRow;
+        int x;
+        if(patrolSprite)x=state.At(0x8040);
+        else {
+            int index=(state.At(0x833d)&0x7f)+1;
+            int offset=readRom(0x279f+index);
+            x=offset>=2?(offset+state.At(0x811c))&255:lastX.HasValue?(int)lastX.Value:state.At(0x8040);
+        }
+        X=x;lastX=x;
     }
 }
 

@@ -11,6 +11,7 @@ public partial class FroggerGame : Node3D
     private AudioStreamPlayer audioPlayer=null!;
     private AudioStreamGeneratorPlayback audioPlayback=null!;
     private bool started,paused,modern=true,muted;
+    private bool fullscreen=true;
     private double accumulator;
     private int facing=2,coinFrames,renderFrames,highScore;
     private string screenshot="";
@@ -82,9 +83,9 @@ public partial class FroggerGame : Node3D
             case Key.Escape:case Key.P:if(started){paused=!paused;if(paused)ShowMenu(true);else Resume();}break;
             case Key.C:case Key.Key5:coinFrames=6;break;case Key.R:if(started)StartGame(1);break;
             case Key.M:muted=!muted;SavePreferences();break;
-            case Key.F11:DisplayServer.WindowSetMode(DisplayServer.WindowGetMode()==DisplayServer.WindowMode.Fullscreen?DisplayServer.WindowMode.Windowed:DisplayServer.WindowMode.Fullscreen);break;
+            case Key.F11:fullscreen=!fullscreen;ApplyFullscreen();SavePreferences();break;
         }
-        if(input is InputEventJoypadButton b&&b.Pressed){if(b.ButtonIndex==JoyButton.A&&!started)StartGame(1);if(b.ButtonIndex==JoyButton.Start){if(!started)StartGame(1);else{paused=!paused;if(paused)ShowMenu(true);else Resume();}}}
+        if(input is InputEventJoypadButton b&&b.Pressed){if(b.ButtonIndex==JoyButton.A&&(!started||state.At(0x83fe)==0))StartGame(1);if(b.ButtonIndex==JoyButton.Start){if(!started)StartGame(1);else{paused=!paused;if(paused)ShowMenu(true);else Resume();}}}
     }
     private void Resume(){paused=false;menu.Visible=false;Input.MouseMode=Input.MouseModeEnum.Hidden;accumulator=0;}
     private ModelActor Actor(string key,string model){if(!actors.TryGetValue(key,out var actor)){actor=new ModelActor(this,model);actors.Add(key,actor);}return actor;}
@@ -112,7 +113,39 @@ public partial class FroggerGame : Node3D
         int n=Math.Min(samples.Count,audioPlayback.GetFramesAvailable());
         if(n>0){var buffer=new Vector2[n];for(int i=0;i<n;i++){float v=samples.Dequeue();buffer[i]=new Vector2(v,v);}audioPlayback.PushBuffer(buffer);}
     }
-    private void LoadPreferences(){if(screenshot!=""){muted=true;return;}var c=new ConfigFile();if(c.Load("user://settings.cfg")==Error.Ok){highScore=(int)c.GetValue("play","high_score",0);modern=(bool)c.GetValue("play","modern_collision",true);muted=(bool)c.GetValue("play","muted",false);perspectiveView=(bool)c.GetValue("play","perspective_view",false);followCamera=(bool)c.GetValue("play","follow_camera",false);}}
-    private void SavePreferences(){if(screenshot!="")return;var c=new ConfigFile();c.SetValue("play","high_score",highScore);c.SetValue("play","modern_collision",modern);c.SetValue("play","muted",muted);c.SetValue("play","perspective_view",perspectiveView);c.SetValue("play","follow_camera",followCamera);c.Save("user://settings.cfg");}
+    private void ApplyFullscreen()=>DisplayServer.WindowSetMode(fullscreen?DisplayServer.WindowMode.Fullscreen:DisplayServer.WindowMode.Windowed);
+    private void LoadPreferences(){
+        if(screenshot!=""){muted=true;return;}
+        var c=new ConfigFile();
+        if(c.Load("user://settings.cfg")==Error.Ok){
+            highScore=(int)c.GetValue("play","high_score",0);
+            muted=(bool)c.GetValue("play","muted",false);
+            // Older settings files saved the former overhead defaults even
+            // when the player never chose them. Apply the new defaults once,
+            // then preserve every later preference change.
+            int version=(int)c.GetValue("play","defaults_version",0);
+            var defaults=GameDefaults.FromStored(version,
+                (bool)c.GetValue("play","modern_collision",true),
+                (bool)c.GetValue("play","perspective_view",true),
+                (bool)c.GetValue("play","follow_camera",true),
+                (bool)c.GetValue("play","fullscreen",true));
+            modern=defaults.ModernCollision;perspectiveView=defaults.Perspective;
+            followCamera=defaults.Follow;fullscreen=defaults.Fullscreen;
+            if(version<GameDefaults.PreferencesVersion)SavePreferences();
+        } else SavePreferences();
+        ApplyFullscreen();
+    }
+    private void SavePreferences(){
+        if(screenshot!="")return;
+        var c=new ConfigFile();
+        c.SetValue("play","defaults_version",GameDefaults.PreferencesVersion);
+        c.SetValue("play","high_score",highScore);
+        c.SetValue("play","modern_collision",modern);
+        c.SetValue("play","muted",muted);
+        c.SetValue("play","perspective_view",perspectiveView);
+        c.SetValue("play","follow_camera",followCamera);
+        c.SetValue("play","fullscreen",fullscreen);
+        c.Save("user://settings.cfg");
+    }
     public override void _ExitTree(){simulation?.Dispose();}
 }

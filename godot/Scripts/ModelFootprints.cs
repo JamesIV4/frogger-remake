@@ -10,6 +10,7 @@ public static class ModelFootprints {
     public const float RiverGatorSnoutTiles=0.605000f;
     public const float LogTopTiles=0.436645f;
     public const float SnakeBottomTiles=0.021363f;
+    public const float LadyBottomTiles=-0.006061f;
     // Vehicles rotate their local length axis into the ROM X direction.
     // Presentation scales every vehicle root to 0.84.
     public static ModelFootprint Vehicle(int lane)=>lane switch {

@@ -6,6 +6,7 @@ namespace FroggerRemake;
 public partial class FroggerGame
 {
     private readonly FrogVisualState frogVisual=new();
+    private readonly LadyFrogPresentation ladyVisual=new();
     private readonly HomeArrivalVisual homeArrival=new();
     private readonly PresentationMotion movingVisuals=new();
     private readonly PresentationMotion frogMotion=new(4,.35f,72f);
@@ -27,10 +28,10 @@ public partial class FroggerGame
     private const float LadyInRiverScale=.62f,PassengerScale=.76f;
 
     private void ObserveFrame() {
-        state=simulation.Snapshot();frogVisual.Observe(state);TrackLadyHop();
+        state=simulation.Snapshot();frogVisual.Observe(state);ladyVisual.Observe(state,simulation.Peek);TrackLadyHop();
     }
     private void ClearPresentation() {
-        frogVisual.Reset();homeArrival.Reset();movingVisuals.Reset();frogMotion.Reset();snakeFacing.Clear();foreach(var gator in homeGatorVisuals)gator.Reset();facing=2;ladyFacing=2;ladyHopStartFrame=ladyLastMotionFrame=anchoredDeathFrame=lastLivePlayerFrame=-1;knownDivingGroups.Clear();knownDivingLevel=-1;
+        frogVisual.Reset();ladyVisual.Reset();homeArrival.Reset();movingVisuals.Reset();frogMotion.Reset();snakeFacing.Clear();foreach(var gator in homeGatorVisuals)gator.Reset();facing=2;ladyFacing=2;ladyHopStartFrame=ladyLastMotionFrame=anchoredDeathFrame=lastLivePlayerFrame=-1;knownDivingGroups.Clear();knownDivingLevel=-1;
         foreach(var popup in popups)popup.View.QueueFree();popups.Clear();
     }
     private float RenderFraction=>paused?0:(float)Math.Clamp(accumulator/ArcadeSimulation.FrameSeconds,0,1);
@@ -219,9 +220,12 @@ public partial class FroggerGame
             a.Root.Rotation=new Vector3(0,heading*Mathf.Pi/2,0);
             a.Root.Scale=Vector3.One*.75f;a.Play("Move");
         }
-        int bx=state.At(0x8040),by=state.At(0x8043);
-        if(!frogVisual.Carrying&&state.At(0x8135)!=0&&bx>7&&bx<235&&by>=32&&by<128&&state.At(0x8041)!=0x19) {
-            var a=Actor("lady","lady_frog");a.Root.Visible=true;a.Root.Position=Pos(movingVisuals.Step(50000,bx,state.frame,presentationDelta,paused),by,BoardVisuals.SurfaceHeight(by));
+        if(ladyVisual.Visible(ModelFootprints.FrogAlongX*LadyInRiverScale)) {
+            var a=Actor("lady","lady_frog");a.Root.Visible=true;
+            // The shared descriptor may have been erased by the original ROM's
+            // fly-bonus timer. The separate ROM patrol still gives her X.
+            a.Root.Position=Pos(movingVisuals.Step(50000,ladyVisual.X,state.frame,presentationDelta,paused),
+                BoardVisuals.LadyFrogRow,BoardVisuals.LadyFrogHeight(LadyInRiverScale));
             a.Root.Scale=Vector3.One*LadyInRiverScale;
             a.Root.Rotation=new Vector3(0,ladyFacing*Mathf.Pi/2,0);
             if(ladyHopStartFrame>0&&ladyLastMotionFrame>=ladyHopStartFrame&&state.frame-ladyHopStartFrame<12)

@@ -18,10 +18,15 @@ public partial class FroggerGame
     private bool reviewTurtleClose;
     private bool reviewGatorClose;
     private bool reviewSnakeClose;
+    private bool reviewLadyClearVisible,reviewLadyPatrolVisible;
     private readonly List<object> reviewMeasurements=new();
     private int[] ReviewFrames=>review switch {
         "carry" or "carry-left"=>new[]{1,5,9,13,25},
         "lady-move"=>new[]{1,8,17,25,30,40,45},
+        "lady-hidden"=>new[]{1,8},
+        "lady-hidden-pickup"=>new[]{1,8,9,12},
+        "lady-goal-overwrite"=>new[]{1,8},
+        "lady-rom-clear"=>Enumerable.Range(1,12).ToArray(),
         "snake" or "snake-left"=>new[]{1,8},
         "bottom-grass"=>new[]{1,8},
         "hop-right"=>new[]{1,6,12,24,48},
@@ -36,6 +41,8 @@ public partial class FroggerGame
         "home-normal"=>new[]{1,13,25,30,50},
         "final-home"=>new[]{1,3,4,5,7,9,11,16,25,28},
         "game-over"=>new[]{1,10},
+        "game-over-a"=>new[]{1,2,4,8},
+        "default-view"=>new[]{1,40},
         "home-gator"=>new[]{1,20,40,60,80,100},
         "home-gator-retreat"=>new[]{1,20,40,60,80,100,175,176,178,182,186,188,190},
         "river-gator"=>new[]{1,12,24},
@@ -50,9 +57,10 @@ public partial class FroggerGame
     private void ReadReviewArgs() {
         if(screenshot=="")return;
         foreach(var arg in OS.GetCmdlineUserArgs())if(arg.StartsWith("--review="))review=arg[9..];
-        if(review is "perspective" or "perspective-follow")perspectiveView=true;
-        if(review is "perspective-follow" or "ortho-follow")followCamera=true;
-        if(review=="bonus-follow")followCamera=true;
+        if(review!=""&&review!="default-view"){
+            perspectiveView=review is "perspective" or "perspective-follow";
+            followCamera=review is "perspective-follow" or "ortho-follow" or "bonus-follow";
+        }
         reviewClose=Array.Exists(OS.GetCmdlineUserArgs(),a=>a=="--review-close");
         reviewLadyClose=Array.Exists(OS.GetCmdlineUserArgs(),a=>a=="--review-lady-close");
         reviewTurtleClose=Array.Exists(OS.GetCmdlineUserArgs(),a=>a=="--review-turtle-close");
@@ -132,6 +140,18 @@ public partial class FroggerGame
         // between the original ROM's integer coordinate updates.
         if((review=="motion"||review=="frog-motion")&&reviewFrame%2==0){accumulator=0;return;}
         simulation.Step(input);
+        if(review=="lady-rom-clear"&&reviewFrame==1){
+            SetReviewFrog(120,224);
+            simulation.Poke(0x8134,0);simulation.Poke(0x8135,1);simulation.Poke(0x813d,0);
+            simulation.Poke(0x8040,80);simulation.Poke(0x8041,0x21);
+            simulation.Poke(0x8042,4);simulation.Poke(0x8043,96);
+            simulation.Poke(0x811c,100);simulation.Poke(0x833d,1);simulation.Poke(0x833e,50);
+            simulation.Poke(0x8340,2);
+        }
+        if(review=="game-over-a"){
+            if(reviewFrame==1)simulation.Poke(0x83fe,0);
+            if(reviewFrame==2)_UnhandledInput(new InputEventJoypadButton{ButtonIndex=JoyButton.A,Pressed=true});
+        }
         if(review=="river-gator"){
             // Put one native lane-0 object at a known screen position and mark
             // its ROM tile as the gator sprite; the renderer follows the same
@@ -174,6 +194,17 @@ public partial class FroggerGame
             simulation.Poke(0x8040,bx);simulation.Poke(0x8041,reviewFrame<=16?0xa1:reviewFrame<=30?0x21:0x1e);
             simulation.Poke(0x8042,4);simulation.Poke(0x8043,96);
         }
+        if(review is "lady-hidden" or "lady-hidden-pickup" or "lady-goal-overwrite"){
+            const int patrolX=80;
+            if(reviewFrame==1)SetReviewFrog(120,224);
+            if(review=="lady-hidden-pickup"&&reviewFrame>=9)SetReviewFrog(patrolX,96);
+            simulation.Poke(0x8135,1);simulation.Poke(0x8134,review=="lady-hidden-pickup"&&reviewFrame>=9?1:0);
+            simulation.Poke(0x811c,100);simulation.Poke(0x833d,1);simulation.Poke(0x833e,49);
+            simulation.Poke(0x8040,review=="lady-goal-overwrite"?216:0);
+            simulation.Poke(0x8041,review=="lady-goal-overwrite"?0x19:0);
+            simulation.Poke(0x8042,review=="lady-goal-overwrite"?3:0);
+            simulation.Poke(0x8043,review=="lady-goal-overwrite"?16:0);
+        }
         if(review is "snake" or "snake-left"){
             int x=review=="snake-left"?180-reviewFrame:(simulation.Peek(0x811c)-34)&255;
             if(review=="snake"&&(x<50||x>195))x=(simulation.Peek(0x811d)-34)&255;
@@ -197,6 +228,10 @@ public partial class FroggerGame
         int body=Enumerable.Range(0,player.Skeleton!.GetBoneCount()).Single(i=>player.Skeleton.GetBoneParent(i)==-1);
         var bodyScale=player.Skeleton.GetBonePoseScale(body);var bodyPose=player.Skeleton.GetBoneGlobalPose(body);
         bool riderVisible=actors.TryGetValue("passenger",out var rider)&&rider.Root.IsVisibleInTree();
+        if(review=="lady-rom-clear"&&state.At(0x8135)!=0&&state.At(0x8041)==0){
+            if(state.At(0x8040)==0)reviewLadyClearVisible|=freeLady?.Root.IsVisibleInTree()??false;
+            else reviewLadyPatrolVisible|=freeLady?.Root.IsVisibleInTree()??false;
+        }
         float socketError=riderVisible?(rider!.Root.GlobalPosition-player.PassengerSocket!.GlobalPosition).Length():0;
         reviewMeasurements.Add(new{frame,romFrame=state.frame,dying=frogVisual.Dying,drowning=frogVisual.Drowning,
             gameState=state.At(0x83fe),started,menuVisible=menu.Visible,mouseMode=Input.MouseMode.ToString(),messageText=message.Text,
@@ -215,7 +250,9 @@ public partial class FroggerGame
             riderScale=riderVisible?rider!.Root.Scale.X:0,
             ladyVisible=freeLady?.Root.IsVisibleInTree()??false,
             ladyYaw=freeLady?.Root.GlobalRotation.Y??0,ladyScale=freeLady?.Root.Scale.X??0,
-            ladyCode=state.At(0x8041),ladyX=state.At(0x8040),
+            ladyCode=state.At(0x8041),ladyX=state.At(0x8040),ladyRow=state.At(0x8043),
+            ladyArmed=state.At(0x8135)!=0,ladyAttached=state.At(0x8134)!=0,
+            ladyY=freeLady?.Root.GlobalPosition.Y??0,ladyVisualX=ladyVisual.X,
             snakeVisible=snake?.Root.IsVisibleInTree()??false,
             snakeY=snake?.Root.GlobalPosition.Y??0,
             snakeX=state.At(0x8048),snakeRow=state.At(0x804b),snakeCode=state.At(0x8049),
@@ -241,7 +278,9 @@ public partial class FroggerGame
             homeX=homeArrival.X,homeRow=homeArrival.Row,homeVisualRow=homeArrival.VisualRow(state.frame,0),
             bonusLabels=popups.Select(p=>new{amount=p.Award.Amount,kind=p.Award.Kind.ToString(),text=p.DisplayText,
                 screenX=p.View.Position.X,screenY=p.View.Position.Y}).ToArray(),
-            cameraMode=camera.Projection.ToString(),following=followCamera,cameraSize=camera.Size,cameraFov=camera.Fov,
+            cameraMode=camera.Projection.ToString(),following=followCamera,modernCollision=modern,
+            fullscreenPreference=fullscreen,windowMode=DisplayServer.WindowGetMode().ToString(),
+            cameraSize=camera.Size,cameraFov=camera.Fov,
             cameraPosition=new[]{camera.Position.X,camera.Position.Y,camera.Position.Z},
             motionLogX=movingVisuals.DisplayX(3*16),motionCarX=movingVisuals.DisplayX(8*16),
             nativeLogX=state.At(0x811c)-34,nativeCarX=state.At(0x8149)-12,
@@ -250,6 +289,12 @@ public partial class FroggerGame
         if(error!=Error.Ok){GetTree().Quit(1);return;}
         if(frame==ReviewFrames[^1]){
             if(review=="lady-move"&&ladyFacing!=3){GD.PushError("Pink frog lost its left-facing pose during neutral log drift");GetTree().Quit(1);return;}
+            if(review=="lady-hidden"&&!(freeLady?.Root.IsVisibleInTree()??false)){GD.PushError("Armed pink frog is invisible with a blank ROM sprite");GetTree().Quit(1);return;}
+            if(review=="lady-goal-overwrite"&&(!(freeLady?.Root.IsVisibleInTree()??false)||Math.Abs(ladyVisual.X-80)>1)){GD.PushError("Goal sprite overwrote the pink frog's position");GetTree().Quit(1);return;}
+            if(review=="lady-rom-clear"&&(!reviewLadyClearVisible||!reviewLadyPatrolVisible)){GD.PushError("The original ROM clear made the pink frog invisible in Godot");GetTree().Quit(1);return;}
+            if(review=="lady-hidden-pickup"&&(!riderVisible||(freeLady?.Root.IsVisibleInTree()??false))){GD.PushError("Pink frog did not move visibly from log to passenger");GetTree().Quit(1);return;}
+            if(review=="game-over-a"&&state.At(0x83fe)==0){GD.PushError("Controller A did not restart after game over");GetTree().Quit(1);return;}
+            if(review=="default-view"&&(!modern||!perspectiveView||!followCamera||!fullscreen)){GD.PushError("Fresh-game defaults changed unexpectedly");GetTree().Quit(1);return;}
             if(review=="snake-left"&&snake?.Root.Rotation.Y> -1.3f){GD.PushError("Snake failed to face its leftward travel");GetTree().Quit(1);return;}
             if(review=="snake-motion"&&snake?.Root.Rotation.Y<1.3f){GD.PushError("Snake followed a ROM flip instead of its rightward lane travel");GetTree().Quit(1);return;}
             System.IO.File.WriteAllText(stem+".json",JsonSerializer.Serialize(reviewMeasurements,new JsonSerializerOptions{WriteIndented=true}));

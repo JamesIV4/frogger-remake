@@ -5,6 +5,7 @@
     <Compile Include="../../godot/Scripts/Z80Program.cs" Link="Z80Program.cs" />
     <Compile Include="../../godot/Scripts/NativeSound.cs" Link="NativeSound.cs" />
     <Compile Include="../../godot/Scripts/BoardVisuals.cs" Link="BoardVisuals.cs" />
+    <Compile Include="../../godot/Scripts/GameDefaults.cs" Link="GameDefaults.cs" />
     <Compile Include="../../godot/Scripts/FrogVisualState.cs" Link="FrogVisualState.cs" />
     <Compile Include="../../godot/Scripts/InputPulse.cs" Link="InputPulse.cs" />
     <Compile Include="../../godot/Scripts/ModelFootprints.cs" Link="ModelFootprints.cs" />
