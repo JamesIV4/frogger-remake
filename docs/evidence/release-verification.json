@@ -1,0 +1,24 @@
+{
+    "engine":  "Godot 4.7 .NET",
+    "runtime":  "Native C#; both ROM CPUs statically translated",
+    "executable":  "builds/windows/Frogger Remake.exe",
+    "packaged_capture":  "docs/evidence/gameplay.png",
+    "menu_capture":  "docs/evidence/menu.png",
+    "packaged_error_bytes":  0,
+    "menu_error_bytes":  0,
+    "reference_tests_passed":  439,
+    "reference_tests_skipped":  1,
+    "native_ram_parity":  {
+                              "frames":  460,
+                              "bytesPerFrame":  3328,
+                              "comparedBytes":  1530880,
+                              "differentBytes":  0,
+                              "maskedBytes":  0,
+                              "firstDifferences":  [
+
+                                                   ]
+                          },
+    "audit_failures":  [
+
+                       ]
+}

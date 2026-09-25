@@ -1,0 +1,615 @@
+{
+  "rom_size": 16384,
+  "code_bytes": 10729,
+  "table_data_bytes": 0,
+  "analyzed_bytes": 10729,
+  "unreached_bytes": 5655,
+  "coverage_pct": 65.48,
+  "analyzed_pct": 65.48,
+  "table_code_conflicts": [],
+  "instructions": 5277,
+  "entry_points": [
+    {
+      "addr": 0,
+      "why": "Z80 reset vector"
+    },
+    {
+      "addr": 102,
+      "why": "NMI - vblank interrupt handler"
+    },
+    {
+      "addr": 284,
+      "why": "loc_0066 fall-through after the 0x14b7 dispatcher call at 0x0119 (call 0x1802; jp 0x0245)"
+    },
+    {
+      "addr": 565,
+      "why": "loc_0066 fall-through after the 0x14b7 dispatcher call at 0x0232 (call 0x2970; call 0x1fc7; call 0x0292; call nz,0x06a2; -> 0x0245)"
+    },
+    {
+      "addr": 2470,
+      "why": "loc_0942 fall-through after the 0x0faf dispatcher call at 0x09a3 (xor a; ld (0x825a),a)"
+    },
+    {
+      "addr": 2995,
+      "why": "loc_0d11 cp-ladder on mode (0x83d6): case 3 -> 0x0bb3"
+    },
+    {
+      "addr": 3153,
+      "why": "loc_0c6d jp(hl) at 0x0c81, (0x83d7)=1 -> HL=0x0c82+2*1 -> jr 0x0c51"
+    },
+    {
+      "addr": 3181,
+      "why": "loc_0d11 cp-ladder on mode (0x83d6): case 4 -> 0x0c6d"
+    },
+    {
+      "addr": 3210,
+      "why": "loc_0c6d jp(hl) at 0x0c81, (0x83d7)=4 -> HL=0x0c82+2*4=0x0c8a arm body direct (no jr)"
+    },
+    {
+      "addr": 3264,
+      "why": "loc_0c6d jp(hl) at 0x0c81, (0x83d7)=0 -> HL=0x0c82+2*0 -> jr 0x0cc0"
+    },
+    {
+      "addr": 3270,
+      "why": "loc_0c6d jp(hl) at 0x0c81, (0x83d7)=3 -> HL=0x0c82+2*3 -> jr 0x0cc6"
+    },
+    {
+      "addr": 3307,
+      "why": "loc_0c6d jp(hl) at 0x0c81, (0x83d7)=2 -> HL=0x0c82+2*2 -> jr 0x0ceb"
+    },
+    {
+      "addr": 3381,
+      "why": "loc_0d11 cp-ladder on mode (0x83d6): case 5 (inline, no jump) -> 0x0d35"
+    },
+    {
+      "addr": 3404,
+      "why": "loc_0d11 cp-ladder on mode (0x83d6): case credits-present (0x83e1!=0) -> 0x0d4c"
+    },
+    {
+      "addr": 3597,
+      "why": "loc_0de0 jp(hl) at 0x0e00, phase (0x83d7)=7 -> HL=0x0dff+2*7=0x0e0d arm body direct (no jr)"
+    },
+    {
+      "addr": 3607,
+      "why": "loc_0de0 jp(hl) at 0x0e00, phase (0x83d7)=6 -> HL=0x0dff+2*6 -> jr 0x0e17"
+    },
+    {
+      "addr": 3617,
+      "why": "loc_0de0 jp(hl) at 0x0e00, phase (0x83d7)=5 -> HL=0x0dff+2*5 -> jr 0x0e21"
+    },
+    {
+      "addr": 3627,
+      "why": "loc_0de0 jp(hl) at 0x0e00, phase (0x83d7)=4 -> HL=0x0dff+2*4 -> jr 0x0e2b"
+    },
+    {
+      "addr": 3637,
+      "why": "loc_0de0 jp(hl) at 0x0e00, phase (0x83d7)=3 -> HL=0x0dff+2*3 -> jr 0x0e35"
+    },
+    {
+      "addr": 3647,
+      "why": "loc_0de0 jp(hl) at 0x0e00, phase (0x83d7)=2 -> HL=0x0dff+2*2 -> jr 0x0e3f"
+    },
+    {
+      "addr": 3657,
+      "why": "loc_0de0 jp(hl) at 0x0e00, phase (0x83d7)=1 -> HL=0x0dff+2*1 -> jr 0x0e49"
+    },
+    {
+      "addr": 3779,
+      "why": "loc_0e7a jp(hl) at 0x0ec2, phase (0x83d7)=1 -> HL=0x0ec1+2 -> jr 0x0ef9"
+    },
+    {
+      "addr": 3781,
+      "why": "loc_0e7a jp(hl) at 0x0ec2, phase (0x83d7)=2 -> HL=0x0ec1+4 -> jr 0x0ef2"
+    },
+    {
+      "addr": 3783,
+      "why": "loc_0e7a jp(hl) at 0x0ec2, phase (0x83d7)=3 -> HL=0x0ec1+6 -> jr 0x0eeb"
+    },
+    {
+      "addr": 3785,
+      "why": "loc_0e7a jp(hl) at 0x0ec2, phase (0x83d7)=4 -> HL=0x0ec1+8 -> jr 0x0ee4"
+    },
+    {
+      "addr": 3787,
+      "why": "loc_0e7a jp(hl) at 0x0ec2, phase (0x83d7)=5 -> HL=0x0ec1+10 -> jr 0x0edd"
+    },
+    {
+      "addr": 3789,
+      "why": "loc_0e7a jp(hl) at 0x0ec2, phase (0x83d7)=6 -> HL=0x0ec1+12 -> jr 0x0ed6"
+    },
+    {
+      "addr": 3791,
+      "why": "loc_0e7a jp(hl) at 0x0ec2, phase (0x83d7)=7 (boot INIT sets 7) -> HL=0x0ec1+14 -> arm body ld hl,0x8040 direct (no jr)"
+    },
+    {
+      "addr": 4052,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 0 -> ptr (0x0fbe+2*0)=0x0fd4"
+    },
+    {
+      "addr": 4184,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 1 -> ptr (0x0fbe+2*1)=0x1058"
+    },
+    {
+      "addr": 4219,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 2 -> ptr (0x0fbe+2*2)=0x107b"
+    },
+    {
+      "addr": 4251,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 3 -> ptr (0x0fbe+2*3)=0x109b"
+    },
+    {
+      "addr": 4283,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 4 -> ptr (0x0fbe+2*4)=0x10bb"
+    },
+    {
+      "addr": 4315,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 5 -> ptr (0x0fbe+2*5)=0x10db"
+    },
+    {
+      "addr": 4344,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 6 -> ptr (0x0fbe+2*6)=0x10f8"
+    },
+    {
+      "addr": 4376,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 7 -> ptr (0x0fbe+2*7)=0x1118"
+    },
+    {
+      "addr": 4408,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 8 -> ptr (0x0fbe+2*8)=0x1138"
+    },
+    {
+      "addr": 4440,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 9 -> ptr (0x0fbe+2*9)=0x1158"
+    },
+    {
+      "addr": 4472,
+      "why": "loc_0faf jp(hl) at 0x0fbd, frog-anim index (0x8000)&0xff = 10 -> ptr (0x0fbe+2*10)=0x1178"
+    },
+    {
+      "addr": 4617,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 0 -> ptr (0x11e9+2*0)=0x1209 (also the (0x8047)&0x0f>=9 fast-path via jp 0x1209)"
+    },
+    {
+      "addr": 4620,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 1 -> ptr (0x11e9+2*1)=0x120c"
+    },
+    {
+      "addr": 4623,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 2 -> ptr (0x11e9+2*2)=0x120f"
+    },
+    {
+      "addr": 4626,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 3 -> ptr (0x11e9+2*3)=0x1212"
+    },
+    {
+      "addr": 4634,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 4 -> ptr (0x11e9+2*4)=0x121a"
+    },
+    {
+      "addr": 4642,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 5 -> ptr (0x11e9+2*5)=0x1222"
+    },
+    {
+      "addr": 4650,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 6 -> ptr (0x11e9+2*6)=0x122a"
+    },
+    {
+      "addr": 4658,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 7 -> ptr (0x11e9+2*7)=0x1232"
+    },
+    {
+      "addr": 4666,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 8 -> ptr (0x11e9+2*8)=0x123a"
+    },
+    {
+      "addr": 4674,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 9 -> ptr (0x11e9+2*9)=0x1242"
+    },
+    {
+      "addr": 4682,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 10 -> ptr (0x11e9+2*10)=0x124a"
+    },
+    {
+      "addr": 4690,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 11 -> ptr (0x11e9+2*11)=0x1252"
+    },
+    {
+      "addr": 4698,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 12 -> ptr (0x11e9+2*12)=0x125a"
+    },
+    {
+      "addr": 4706,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 13 -> ptr (0x11e9+2*13)=0x1262"
+    },
+    {
+      "addr": 4714,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 14 -> ptr (0x11e9+2*14)=0x126a"
+    },
+    {
+      "addr": 4717,
+      "why": "loc_11bf jp(hl) at 0x11e8, hi-nibble of frog-X (0x8047) = 15 -> ptr (0x11e9+2*15)=0x126d"
+    },
+    {
+      "addr": 4907,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 0 -> ptr (0x130b+2*0)=0x132b (also the low-nibble<5 fast-path via jp 0x132b)"
+    },
+    {
+      "addr": 4910,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 1 -> ptr (0x130b+2*1)=0x132e"
+    },
+    {
+      "addr": 4913,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 2 -> ptr (0x130b+2*2)=0x1331"
+    },
+    {
+      "addr": 4916,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 3 -> ptr (0x130b+2*3)=0x1334"
+    },
+    {
+      "addr": 4924,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 4 -> ptr (0x130b+2*4)=0x133c"
+    },
+    {
+      "addr": 4932,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 5 -> ptr (0x130b+2*5)=0x1344"
+    },
+    {
+      "addr": 4940,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 6 -> ptr (0x130b+2*6)=0x134c"
+    },
+    {
+      "addr": 4948,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 7 -> ptr (0x130b+2*7)=0x1354"
+    },
+    {
+      "addr": 4956,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 8 -> ptr (0x130b+2*8)=0x135c"
+    },
+    {
+      "addr": 4964,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 9 -> ptr (0x130b+2*9)=0x1364"
+    },
+    {
+      "addr": 4972,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 10 -> ptr (0x130b+2*10)=0x136c"
+    },
+    {
+      "addr": 4980,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 11 -> ptr (0x130b+2*11)=0x1374"
+    },
+    {
+      "addr": 4988,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 12 -> ptr (0x130b+2*12)=0x137c"
+    },
+    {
+      "addr": 4996,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 13 -> ptr (0x130b+2*13)=0x1384"
+    },
+    {
+      "addr": 5004,
+      "why": "loc_12e4 jp(hl) at 0x130a, hi-nibble of ((0x8047)+0x0f) = 14 -> ptr (0x130b+2*14)=0x138c"
+    },
+    {
+      "addr": 5341,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 0 -> ptr (0x14c7+2*0)=0x14dd"
+    },
+    {
+      "addr": 5358,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 1 -> ptr (0x14c7+2*1)=0x14ee"
+    },
+    {
+      "addr": 5375,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 2 -> ptr (0x14c7+2*2)=0x14ff"
+    },
+    {
+      "addr": 5392,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 3 -> ptr (0x14c7+2*3)=0x1510"
+    },
+    {
+      "addr": 5409,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 4 -> ptr (0x14c7+2*4)=0x1521"
+    },
+    {
+      "addr": 5426,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 5 -> ptr (0x14c7+2*5)=0x1532"
+    },
+    {
+      "addr": 5443,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 6 -> ptr (0x14c7+2*6)=0x1543"
+    },
+    {
+      "addr": 5460,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 7 -> ptr (0x14c7+2*7)=0x1554"
+    },
+    {
+      "addr": 5477,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 8 -> ptr (0x14c7+2*8)=0x1565"
+    },
+    {
+      "addr": 5494,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 9 -> ptr (0x14c7+2*9)=0x1576"
+    },
+    {
+      "addr": 5511,
+      "why": "loc_14b7 jp(hl) at 0x14c6, object index (0x80ff) = 10 -> ptr (0x14c7+2*10)=0x1587"
+    },
+    {
+      "addr": 9016,
+      "why": "loc_230f fall-through after the 0x0faf dispatcher call at 0x2335 (ld a,0x01; ld (0x825b),a; ld (0x829b),a; ret)"
+    },
+    {
+      "addr": 11555,
+      "why": "loc_2cf0 jp(hl) at 0x2d22, coinage index DE=(0x83d4)=0 -> jr 0x2d49"
+    },
+    {
+      "addr": 11557,
+      "why": "loc_2cf0 jp(hl) at 0x2d22, coinage index DE=2 -> jr 0x2d42"
+    },
+    {
+      "addr": 11559,
+      "why": "loc_2cf0 jp(hl) at 0x2d22, coinage index DE=4 -> jr 0x2d42"
+    },
+    {
+      "addr": 11561,
+      "why": "loc_2cf0 jp(hl) at 0x2d22, coinage index DE=6 -> jr 0x2d49"
+    },
+    {
+      "addr": 11578,
+      "why": "loc_2cf0 jp(hl) at 0x2d39, coinage index DE=0 -> jr 0x2d49"
+    },
+    {
+      "addr": 11580,
+      "why": "loc_2cf0 jp(hl) at 0x2d39, coinage index DE=2 -> jr 0x2d42"
+    },
+    {
+      "addr": 11582,
+      "why": "loc_2cf0 jp(hl) at 0x2d39, coinage index DE=4 -> jr 0x2d51"
+    },
+    {
+      "addr": 11584,
+      "why": "loc_2cf0 jp(hl) at 0x2d39, coinage index DE=6 -> jr 0x2d55"
+    },
+    {
+      "addr": 11656,
+      "why": "loc_0d11 cp-ladder on mode (0x83d6): case 2 -> 0x2d88"
+    }
+  ],
+  "routine_count": 115,
+  "fixpoint_converged": true,
+  "fixpoint_iterations": 3,
+  "noreturn_routines": [
+    {
+      "addr": 4015,
+      "ret_depths": [],
+      "returns_normally": false,
+      "consumes_return_addr": false,
+      "dispatches_inline_table": false
+    },
+    {
+      "addr": 5303,
+      "ret_depths": [],
+      "returns_normally": false,
+      "consumes_return_addr": false,
+      "dispatches_inline_table": false
+    }
+  ],
+  "inline_table_call_sites": [],
+  "jump_tables": [],
+  "unresolved_indirect_jumps": [
+    {
+      "addr": 3201,
+      "text": "jp (hl)",
+      "routine": 3181,
+      "depth": 0
+    },
+    {
+      "addr": 5318,
+      "text": "jp (hl)",
+      "routine": 5511,
+      "depth": 0
+    },
+    {
+      "addr": 4874,
+      "text": "jp (hl)",
+      "routine": 4717,
+      "depth": 0
+    },
+    {
+      "addr": 4029,
+      "text": "jp (hl)",
+      "routine": 4472,
+      "depth": 0
+    },
+    {
+      "addr": 4584,
+      "text": "jp (hl)",
+      "routine": 4543,
+      "depth": 0
+    },
+    {
+      "addr": 3778,
+      "text": "jp (hl)",
+      "routine": 3706,
+      "depth": 0
+    },
+    {
+      "addr": 3584,
+      "text": "jp (hl)",
+      "routine": 3706,
+      "depth": 0
+    },
+    {
+      "addr": 11554,
+      "text": "jp (hl)",
+      "routine": 11504,
+      "depth": 0
+    },
+    {
+      "addr": 11577,
+      "text": "jp (hl)",
+      "routine": 11504,
+      "depth": 0
+    }
+  ],
+  "out_of_range_targets": [
+    {
+      "addr": 5,
+      "text": "jp z,0x4001",
+      "target": 16385
+    }
+  ],
+  "stack_manipulation": [
+    {
+      "addr": 11,
+      "text": "ld sp,0x8800"
+    }
+  ],
+  "decode_overlaps": [
+    {
+      "addr": 10652,
+      "text": "ld d,b"
+    },
+    {
+      "addr": 10653,
+      "text": "add a,b"
+    }
+  ],
+  "depth_escapes": [],
+  "unreached_runs": [
+    {
+      "start": 17,
+      "end": 24,
+      "len": 7
+    },
+    {
+      "start": 53,
+      "end": 56,
+      "len": 3
+    },
+    {
+      "start": 79,
+      "end": 102,
+      "len": 23
+    },
+    {
+      "start": 3109,
+      "end": 3133,
+      "len": 24
+    },
+    {
+      "start": 3202,
+      "end": 3210,
+      "len": 8
+    },
+    {
+      "start": 3585,
+      "end": 3597,
+      "len": 12
+    },
+    {
+      "start": 4030,
+      "end": 4052,
+      "len": 22
+    },
+    {
+      "start": 4318,
+      "end": 4344,
+      "len": 26
+    },
+    {
+      "start": 4585,
+      "end": 4617,
+      "len": 32
+    },
+    {
+      "start": 4669,
+      "end": 4674,
+      "len": 5
+    },
+    {
+      "start": 4875,
+      "end": 4907,
+      "len": 32
+    },
+    {
+      "start": 4959,
+      "end": 4964,
+      "len": 5
+    },
+    {
+      "start": 5101,
+      "end": 5303,
+      "len": 202
+    },
+    {
+      "start": 5319,
+      "end": 5341,
+      "len": 22
+    },
+    {
+      "start": 5429,
+      "end": 5443,
+      "len": 14
+    },
+    {
+      "start": 6209,
+      "end": 6482,
+      "len": 273
+    },
+    {
+      "start": 6646,
+      "end": 6658,
+      "len": 12
+    },
+    {
+      "start": 8592,
+      "end": 8604,
+      "len": 12
+    },
+    {
+      "start": 8753,
+      "end": 8765,
+      "len": 12
+    },
+    {
+      "start": 8800,
+      "end": 8975,
+      "len": 175
+    },
+    {
+      "start": 9068,
+      "end": 9069,
+      "len": 1
+    },
+    {
+      "start": 9119,
+      "end": 9132,
+      "len": 13
+    },
+    {
+      "start": 10143,
+      "end": 10163,
+      "len": 20
+    },
+    {
+      "start": 10601,
+      "end": 10608,
+      "len": 7
+    },
+    {
+      "start": 11478,
+      "end": 11504,
+      "len": 26
+    },
+    {
+      "start": 11597,
+      "end": 11601,
+      "len": 4
+    },
+    {
+      "start": 11721,
+      "end": 16384,
+      "len": 4663
+    }
+  ]
+}

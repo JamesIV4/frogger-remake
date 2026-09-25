@@ -1,0 +1,40 @@
+# UNREACHED spans -- the coverage to-do list
+#
+# Each span is ROM we have not proven reachable from a known entry point.
+# Causes, in rough order of likelihood:
+#   1. data (tables, graphics layout, text) -- fine, will never be code
+#   2. reached only via an indirect jump we could not follow statically
+#   3. reached only on an input/state-gated path not yet exercised
+#
+# To resolve: find the entry point (MAME trace), add it to
+# games/dkong/entrypoints.json, re-run tools/trace.py.
+
+# coverage: 65.48%  reached=10729  unreached=5655
+
+0x2dc9-0x3fff   4663 bytes
+0x1841-0x1951    273 bytes
+0x13ed-0x14b6    202 bytes
+0x2260-0x230e    175 bytes
+0x11e9-0x1208     32 bytes
+0x130b-0x132a     32 bytes
+0x10de-0x10f7     26 bytes
+0x2cd6-0x2cef     26 bytes
+0x0c25-0x0c3c     24 bytes
+0x004f-0x0065     23 bytes
+0x0fbe-0x0fd3     22 bytes
+0x14c7-0x14dc     22 bytes
+0x279f-0x27b2     20 bytes
+0x1535-0x1542     14 bytes
+0x239f-0x23ab     13 bytes
+0x0e01-0x0e0c     12 bytes
+0x19f6-0x1a01     12 bytes
+0x2190-0x219b     12 bytes
+0x2231-0x223c     12 bytes
+0x0c82-0x0c89      8 bytes
+0x0011-0x0017      7 bytes
+0x2969-0x296f      7 bytes
+0x123d-0x1241      5 bytes
+0x135f-0x1363      5 bytes
+0x2d4d-0x2d50      4 bytes
+0x0035-0x0037      3 bytes
+0x236c-0x236c      1 bytes

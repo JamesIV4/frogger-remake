@@ -1,0 +1,142 @@
+[
+  {
+    "asset": "frog",
+    "triangles": 3444,
+    "bones": 8,
+    "clips": [
+      "Idle",
+      "Hop",
+      "Death",
+      "Celebrate"
+    ],
+    "source": "art/source/frog.blend",
+    "glb": "godot/Models/frog.glb"
+  },
+  {
+    "asset": "turtle",
+    "triangles": 1416,
+    "bones": 6,
+    "clips": [
+      "Idle",
+      "Swim",
+      "Dive"
+    ],
+    "source": "art/source/turtle.blend",
+    "glb": "godot/Models/turtle.glb"
+  },
+  {
+    "asset": "gator",
+    "triangles": 1520,
+    "bones": 3,
+    "clips": [
+      "Idle",
+      "Bite"
+    ],
+    "source": "art/source/gator.blend",
+    "glb": "godot/Models/gator.glb"
+  },
+  {
+    "asset": "fly",
+    "triangles": 1008,
+    "bones": 4,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "source": "art/source/fly.blend",
+    "glb": "godot/Models/fly.glb"
+  },
+  {
+    "asset": "snake",
+    "triangles": 1608,
+    "bones": 8,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "source": "art/source/snake.blend",
+    "glb": "godot/Models/snake.glb"
+  },
+  {
+    "asset": "otter",
+    "triangles": 1804,
+    "bones": 3,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "source": "art/source/otter.blend",
+    "glb": "godot/Models/otter.glb"
+  },
+  {
+    "asset": "log",
+    "triangles": 208,
+    "bones": 0,
+    "clips": [],
+    "source": "art/source/log.blend",
+    "glb": "godot/Models/log.glb"
+  },
+  {
+    "asset": "car",
+    "triangles": 560,
+    "bones": 5,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "source": "art/source/car.blend",
+    "glb": "godot/Models/car.glb"
+  },
+  {
+    "asset": "truck",
+    "triangles": 492,
+    "bones": 5,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "source": "art/source/truck.blend",
+    "glb": "godot/Models/truck.glb"
+  },
+  {
+    "asset": "racecar",
+    "triangles": 548,
+    "bones": 5,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "source": "art/source/racecar.blend",
+    "glb": "godot/Models/racecar.glb"
+  },
+  {
+    "asset": "dozer",
+    "triangles": 560,
+    "bones": 5,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "source": "art/source/dozer.blend",
+    "glb": "godot/Models/dozer.glb"
+  },
+  {
+    "asset": "sport",
+    "triangles": 560,
+    "bones": 5,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "source": "art/source/sport.blend",
+    "glb": "godot/Models/sport.glb"
+  },
+  {
+    "asset": "board",
+    "triangles": 2924,
+    "bones": 0,
+    "clips": [],
+    "source": "art/source/board.blend",
+    "glb": "godot/Models/board.glb"
+  }
+]

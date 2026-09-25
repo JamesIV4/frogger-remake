@@ -1,0 +1,9 @@
+* text=auto eol=lf
+# The reference manifest hashes exact bytes; do not rewrite vendored line endings.
+vendor/arcade-js/** -text
+*.glb binary
+*.blend binary
+*.bin binary
+*.png binary
+*.jpg binary
+*.ttf binary

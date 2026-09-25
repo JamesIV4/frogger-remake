@@ -1,0 +1,168 @@
+[
+  {
+    "asset": "frog",
+    "vertices": 7196,
+    "triangles": 3444,
+    "bones": 8,
+    "skinned_vertices": 7196,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Hop",
+      "Death",
+      "Celebrate"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "turtle",
+    "vertices": 3080,
+    "triangles": 1416,
+    "bones": 6,
+    "skinned_vertices": 3080,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Swim",
+      "Dive"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "gator",
+    "vertices": 3316,
+    "triangles": 1520,
+    "bones": 3,
+    "skinned_vertices": 3316,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Bite"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "fly",
+    "vertices": 2160,
+    "triangles": 1008,
+    "bones": 4,
+    "skinned_vertices": 2160,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "snake",
+    "vertices": 3464,
+    "triangles": 1608,
+    "bones": 8,
+    "skinned_vertices": 3464,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "otter",
+    "vertices": 3872,
+    "triangles": 1804,
+    "bones": 3,
+    "skinned_vertices": 3872,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "log",
+    "vertices": 360,
+    "triangles": 208,
+    "bones": 0,
+    "skinned_vertices": 0,
+    "max_weight_error": 0,
+    "clips": [],
+    "passed": true
+  },
+  {
+    "asset": "car",
+    "vertices": 1056,
+    "triangles": 560,
+    "bones": 5,
+    "skinned_vertices": 1056,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "truck",
+    "vertices": 912,
+    "triangles": 492,
+    "bones": 5,
+    "skinned_vertices": 912,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "racecar",
+    "vertices": 1032,
+    "triangles": 548,
+    "bones": 5,
+    "skinned_vertices": 1032,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "dozer",
+    "vertices": 1044,
+    "triangles": 560,
+    "bones": 5,
+    "skinned_vertices": 1044,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "sport",
+    "vertices": 1056,
+    "triangles": 560,
+    "bones": 5,
+    "skinned_vertices": 1056,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Move"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "board",
+    "vertices": 6516,
+    "triangles": 2924,
+    "bones": 0,
+    "skinned_vertices": 0,
+    "max_weight_error": 0,
+    "clips": [],
+    "passed": true
+  }
+]

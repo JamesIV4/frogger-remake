@@ -1,0 +1,60 @@
+{
+  "set": "frogger (Konami, 1981, parent)",
+  "archive_sha256": "b975a63ea4c3fd87781d3233660928e3b822334ad415ac495599cf85230ad01f",
+  "parts": {
+    "frogger.26": {
+      "size": 4096,
+      "sha256": "7338f4465e0265ba3ee3974b077d399381b69490c952d4f597f504d39de4c063"
+    },
+    "frogger.27": {
+      "size": 4096,
+      "sha256": "bdcc15798d75e2df3085773400a46d3ade4eec947c88fd09ab840b6515ec85a7"
+    },
+    "frogger.606": {
+      "size": 2048,
+      "sha256": "aae87a3e7d8353c9dea09f196fb954fa0d79a0392000509d13fdac49fbddd60e"
+    },
+    "frogger.607": {
+      "size": 2048,
+      "sha256": "d080d2719f374c2e8d58e8e638c2784098dba7e1b70bbb73476803a03d84b329"
+    },
+    "frogger.608": {
+      "size": 2048,
+      "sha256": "4a76a0fcebcd8a4444c9e447fe031ea4e1896c6906d5c923c3114cd79ac75c1b"
+    },
+    "frogger.609": {
+      "size": 2048,
+      "sha256": "59cbd849f96d2816b20169af9eeeaf5d7778f12a55dcbf021287bcc9032da2b0"
+    },
+    "frogger.610": {
+      "size": 2048,
+      "sha256": "a0a4fb9bfcd22a0d61f262259f2098eb604b7826ddb765e316b275c7e882fda8"
+    },
+    "frsm3.7": {
+      "size": 4096,
+      "sha256": "79a8ae7d47260bbcb81202afc30b87ed278eed9328fa89673b813e545d88433c"
+    },
+    "pr-91.6l": {
+      "size": 32,
+      "sha256": "db633922b57b4e033df7b8a7fc710c942bdf486821d3895ca413337ade532667"
+    }
+  },
+  "images": {
+    "maincpu": {
+      "size": 16384,
+      "sha256": "f8c0a2ef4105769c627b7bbf13d0844ada8bbe43c00d177eb90dd395d1e3a1e5"
+    },
+    "gfx": {
+      "size": 4096,
+      "sha256": "2718b9527bbd9bfdb5af4b35275b34dd8660d529bc1f4eaeb336ddd6589a238a"
+    },
+    "proms": {
+      "size": 32,
+      "sha256": "db633922b57b4e033df7b8a7fc710c942bdf486821d3895ca413337ade532667"
+    },
+    "audiocpu": {
+      "size": 6144,
+      "sha256": "77cee6c5fc88c666f7d41a9d94a92a96bf44800981e537eb5bc626e3485d5935"
+    }
+  }
+}

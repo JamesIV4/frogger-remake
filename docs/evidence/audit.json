@@ -1,0 +1,22 @@
+{
+  "mainRecoveredRoutines": 165,
+  "mainMapped": 165,
+  "ghidraMainCandidates": 266,
+  "ghidraMainDecompiled": 266,
+  "ghidraAudioCandidates": 87,
+  "ghidraAudioDecompiled": 87,
+  "audioRecoveredEntries": 82,
+  "audioMapped": 82,
+  "nativeReferenceFrames": 460,
+  "nativeReferenceComparedBytes": 1530880,
+  "independentMameFunctions": 5,
+  "blenderAssets": 13,
+  "upstreamCommit": "9387bbe817befacc235cd8f9f4dd56c652172481",
+  "failures": [],
+  "limitations": [
+    "A decompiler producing C is not a semantic correctness proof. MAME fixtures and whole-state tests are separate gates.",
+    "The native translation retains address-level arithmetic and control flow; it is not a handwritten idiomatic C# rewrite.",
+    "Native compilation includes all populated byte offsets, including speculative data decodes. These offsets are not counted as recovered functions.",
+    "Modern road collision is an intentional optional deviation. PSG analogue output is synthesized, not netlist exact."
+  ]
+}

@@ -1,0 +1,740 @@
+[
+  {
+    "address": "0000",
+    "name": "audio_0000",
+    "containing_function": "0000",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0008",
+    "name": "audio_0008",
+    "containing_function": "0008",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0010",
+    "name": "audio_0010",
+    "containing_function": "0010",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0018",
+    "name": "audio_0018",
+    "containing_function": "0018",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0020",
+    "name": "audio_0020",
+    "containing_function": "0020",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0028",
+    "name": "audio_0028",
+    "containing_function": "0028",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0030",
+    "name": "audio_0030",
+    "containing_function": "0030",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0038",
+    "name": "audio_0038",
+    "containing_function": "0038",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "008c",
+    "name": "audio_008c",
+    "containing_function": "008c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "00e6",
+    "name": "audio_00e6",
+    "containing_function": "00e6",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0102",
+    "name": "audio_0102",
+    "containing_function": "0102",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "019d",
+    "name": "audio_019d",
+    "containing_function": "019d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "01d9",
+    "name": "audio_01d9",
+    "containing_function": "01d9",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "01e8",
+    "name": "audio_01e8",
+    "containing_function": "01e8",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0230",
+    "name": "audio_0230",
+    "containing_function": "0230",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "023c",
+    "name": "audio_023c",
+    "containing_function": "023c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "024d",
+    "name": "audio_024d",
+    "containing_function": "024d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0260",
+    "name": "audio_0260",
+    "containing_function": "0260",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "026d",
+    "name": "audio_026d",
+    "containing_function": "026d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "027c",
+    "name": "audio_027c",
+    "containing_function": "027c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "029c",
+    "name": "audio_029c",
+    "containing_function": "029c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "02b0",
+    "name": "audio_02b0",
+    "containing_function": "02b0",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "02c1",
+    "name": "audio_02c1",
+    "containing_function": "02c1",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "02c7",
+    "name": "audio_02c7",
+    "containing_function": "02c7",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0304",
+    "name": "audio_0304",
+    "containing_function": "0304",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0309",
+    "name": "audio_0309",
+    "containing_function": "0309",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "030f",
+    "name": "audio_030f",
+    "containing_function": "030f",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0333",
+    "name": "audio_0333",
+    "containing_function": "0333",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "03bd",
+    "name": "audio_03bd",
+    "containing_function": "03bd",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "03d2",
+    "name": "audio_03d2",
+    "containing_function": "03d2",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "045d",
+    "name": "audio_045d",
+    "containing_function": "045d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0475",
+    "name": "audio_0475",
+    "containing_function": "0475",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "048d",
+    "name": "audio_048d",
+    "containing_function": "048d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "04aa",
+    "name": "audio_04aa",
+    "containing_function": "04aa",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "04eb",
+    "name": "audio_04eb",
+    "containing_function": "04eb",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "04f8",
+    "name": "audio_04f8",
+    "containing_function": "04f8",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0505",
+    "name": "audio_0505",
+    "containing_function": "0505",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "051c",
+    "name": "audio_051c",
+    "containing_function": "051c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "05c3",
+    "name": "audio_05c3",
+    "containing_function": "05c3",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "05e5",
+    "name": "audio_05e5",
+    "containing_function": "05e5",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "05ed",
+    "name": "audio_05ed",
+    "containing_function": "05ed",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "061c",
+    "name": "audio_061c",
+    "containing_function": "061c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "063d",
+    "name": "audio_063d",
+    "containing_function": "063d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0661",
+    "name": "audio_0661",
+    "containing_function": "0661",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "06eb",
+    "name": "audio_06eb",
+    "containing_function": "06eb",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "070e",
+    "name": "audio_070e",
+    "containing_function": "070e",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0759",
+    "name": "audio_0759",
+    "containing_function": "0759",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "077f",
+    "name": "audio_077f",
+    "containing_function": "077f",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "078b",
+    "name": "audio_078b",
+    "containing_function": "078b",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "078e",
+    "name": "audio_078e",
+    "containing_function": "078e",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0791",
+    "name": "audio_0791",
+    "containing_function": "0791",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0797",
+    "name": "audio_0797",
+    "containing_function": "0797",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "079d",
+    "name": "audio_079d",
+    "containing_function": "079d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "07b7",
+    "name": "audio_07b7",
+    "containing_function": "07b7",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0872",
+    "name": "audio_0872",
+    "containing_function": "0872",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0989",
+    "name": "audio_0989",
+    "containing_function": "0989",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0990",
+    "name": "audio_0990",
+    "containing_function": "0990",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0ab0",
+    "name": "audio_0ab0",
+    "containing_function": "0ab0",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0abd",
+    "name": "audio_0abd",
+    "containing_function": "0abd",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0ac4",
+    "name": "audio_0ac4",
+    "containing_function": "0ac4",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0ac7",
+    "name": "audio_0ac7",
+    "containing_function": "0ac7",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b3b",
+    "name": "audio_0b3b",
+    "containing_function": "0b3b",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b4c",
+    "name": "audio_0b4c",
+    "containing_function": "0b4c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b53",
+    "name": "audio_0b53",
+    "containing_function": "0b53",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b56",
+    "name": "audio_0b56",
+    "containing_function": "0b56",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b67",
+    "name": "audio_0b67",
+    "containing_function": "0b67",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b8c",
+    "name": "audio_0b8c",
+    "containing_function": "0b8c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b8f",
+    "name": "audio_0b8f",
+    "containing_function": "0b8f",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b96",
+    "name": "audio_0b96",
+    "containing_function": "0b96",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0b9d",
+    "name": "audio_0b9d",
+    "containing_function": "0b9d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "0ba7",
+    "name": "audio_0ba7",
+    "containing_function": "0ba7",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "1015",
+    "name": "audio_1015",
+    "containing_function": "1015",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "1023",
+    "name": "audio_1023",
+    "containing_function": "1023",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "1026",
+    "name": "audio_1026",
+    "containing_function": "1026",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "102d",
+    "name": "audio_102d",
+    "containing_function": "102d",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "1465",
+    "name": "audio_1465",
+    "containing_function": "1465",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "1472",
+    "name": "audio_1472",
+    "containing_function": "1472",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "1482",
+    "name": "audio_1482",
+    "containing_function": "1482",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "148c",
+    "name": "audio_148c",
+    "containing_function": "148c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "14a9",
+    "name": "audio_14a9",
+    "containing_function": "14a9",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "159c",
+    "name": "audio_159c",
+    "containing_function": "159c",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  },
+  {
+    "address": "1691",
+    "name": "audio_1691",
+    "containing_function": "1691",
+    "instruction": true,
+    "ghidraDecompiled": true,
+    "nativeSource": "godot/Scripts/Generated/SoundProgram.cs",
+    "checked": true
+  }
+]

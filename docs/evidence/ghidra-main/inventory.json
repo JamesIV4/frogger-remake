@@ -1,0 +1,4000 @@
+{
+  "processor": "z80:LE:16:default",
+  "program": "maincpu.bin",
+  "instruction_count": 5211,
+  "instruction_bytes": 10510,
+  "function_count": 266,
+  "decompiled_count": 266,
+  "functions": [
+    {
+      "address": "0000",
+      "name": "seatStackAndEnterColdBoot",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0008",
+      "name": "RST1",
+      "body_bytes": 9,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "02a3"
+      ]
+    },
+    {
+      "address": "0018",
+      "name": "enqueueSoundCommand",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0028",
+      "name": "copyRunUpTileColumn",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0030",
+      "name": "RST6",
+      "body_bytes": 5,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0038",
+      "name": "clearTilemapToTile16",
+      "body_bytes": 23,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0066",
+      "name": "serviceVblankNmi",
+      "body_bytes": 241,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "07ac",
+        "2cf0",
+        "14b7",
+        "05d3"
+      ]
+    },
+    {
+      "address": "011c",
+      "name": "dispatch_011c",
+      "body_bytes": 6,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1802"
+      ]
+    },
+    {
+      "address": "0235",
+      "name": "dispatch_0235",
+      "body_bytes": 34,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "2970",
+        "1fc7",
+        "06a2",
+        "0292"
+      ]
+    },
+    {
+      "address": "0292",
+      "name": "tickFrogRespawnDelay",
+      "body_bytes": 17,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "02a3",
+      "name": "initColdBootAndEnterMainLoop",
+      "body_bytes": 158,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0038",
+        "1048",
+        "0794"
+      ]
+    },
+    {
+      "address": "0341",
+      "name": "drainForegroundThenYieldEachVblank",
+      "body_bytes": 39,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "230f",
+        "0d11",
+        "0b1f",
+        "0b67"
+      ]
+    },
+    {
+      "address": "0368",
+      "name": "endForegroundPassAtPaceTail",
+      "body_bytes": 163,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0038",
+        "223d",
+        "0b0a",
+        "0018",
+        "07d9",
+        "07e6"
+      ]
+    },
+    {
+      "address": "040b",
+      "name": "setUpBoardOrContinueLife",
+      "body_bytes": 76,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0038",
+        "06ee",
+        "0942",
+        "05f0",
+        "07c1",
+        "0a48",
+        "0368",
+        "0b1f",
+        "0a16"
+      ]
+    },
+    {
+      "address": "0457",
+      "name": "beginNextLifeOrIntro",
+      "body_bytes": 56,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0822",
+        "0018",
+        "0368",
+        "0804",
+        "0b1f",
+        "07e6"
+      ]
+    },
+    {
+      "address": "048f",
+      "name": "runIntroTimerThenInitGame",
+      "body_bytes": 100,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0822",
+        "0038",
+        "0f59",
+        "0018",
+        "0368"
+      ]
+    },
+    {
+      "address": "04f3",
+      "name": "setUpPlayerTwoContinue",
+      "body_bytes": 65,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0822",
+        "0038",
+        "0368"
+      ]
+    },
+    {
+      "address": "0534",
+      "name": "clearPlayerOneHomeBayGates",
+      "body_bytes": 19,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0567"
+      ]
+    },
+    {
+      "address": "0547",
+      "name": "coldStartClearSlotGates",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0557",
+      "name": "coldStartClearAltSlotGates",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0567",
+      "name": "coldStartClearPlayRamAndSetMode",
+      "body_bytes": 108,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0038",
+        "07eb",
+        "0368",
+        "07e6",
+        "0b67",
+        "0f69",
+        "0b1f"
+      ]
+    },
+    {
+      "address": "05d3",
+      "name": "armBoardCompleteReveal",
+      "body_bytes": 29,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "05f0",
+      "name": "advanceBoardForeground",
+      "body_bytes": 57,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "223d",
+        "1a02",
+        "08e0",
+        "0018",
+        "0629",
+        "064b"
+      ]
+    },
+    {
+      "address": "0629",
+      "name": "clearAndSeedScoreField",
+      "body_bytes": 34,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0779",
+        "07e6"
+      ]
+    },
+    {
+      "address": "064b",
+      "name": "clearObjectBlocksAndMirrorToObjRam",
+      "body_bytes": 37,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0670",
+      "name": "fillAllHomeSlotsAndAwardLife",
+      "body_bytes": 37,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0695",
+        "0a5f"
+      ]
+    },
+    {
+      "address": "0695",
+      "name": "fillTwoByTwoTileBlock",
+      "body_bytes": 13,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "06a2",
+      "name": "stampHomeBayFrogByColumn",
+      "body_bytes": 76,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "06ee",
+      "name": "swapInActivePlayerPages",
+      "body_bytes": 56,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0726",
+      "name": "swapOutActivePlayerPages",
+      "body_bytes": 64,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0766",
+      "name": "fillTilemapBlock28x32",
+      "body_bytes": 19,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0779",
+      "name": "fillTenCellRun",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0781",
+      "name": "fillTilemapBlock22x32",
+      "body_bytes": 19,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0794",
+      "name": "issueSoundCommand",
+      "body_bytes": 24,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "07ac",
+      "name": "dequeueSoundCommand",
+      "body_bytes": 21,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0794"
+      ]
+    },
+    {
+      "address": "07c1",
+      "name": "raiseActivePlayerStartFlag",
+      "body_bytes": 13,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "07ce",
+      "name": "raiseTwoPlayerStartFlag",
+      "body_bytes": 11,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "07d9",
+      "name": "clearSoundQueue",
+      "body_bytes": 13,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "07e6",
+      "name": "clearActivePlayerWorkRam",
+      "body_bytes": 5,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "07eb",
+      "name": "forceClearPlayerWorkRam",
+      "body_bytes": 25,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0804",
+      "name": "activateFrogObject",
+      "body_bytes": 30,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0822",
+      "name": "handOffToOtherPlayer",
+      "body_bytes": 57,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "085b",
+      "name": "blitEndStripAndSetHold",
+      "body_bytes": 21,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028"
+      ]
+    },
+    {
+      "address": "0870",
+      "name": "driveScoreDisplayCountdown",
+      "body_bytes": 85,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018",
+        "0aba"
+      ]
+    },
+    {
+      "address": "08c5",
+      "name": "driveScoreDisplayCountdown",
+      "body_bytes": 27,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0ba0"
+      ]
+    },
+    {
+      "address": "08e0",
+      "name": "addScoreAndAwardExtraLife",
+      "body_bytes": 98,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018"
+      ]
+    },
+    {
+      "address": "0942",
+      "name": "renderFrogSceneAndTickTimer",
+      "body_bytes": 117,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "19e2",
+        "223d",
+        "09aa",
+        "09db",
+        "1952",
+        "0faf"
+      ]
+    },
+    {
+      "address": "09a6",
+      "name": "dispatch_09a6",
+      "body_bytes": 4,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "09aa",
+      "name": "resetFrogObject",
+      "body_bytes": 32,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "09db",
+      "name": "renderFilledHomeSlots",
+      "body_bytes": 42,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0a05"
+      ]
+    },
+    {
+      "address": "0a05",
+      "name": "FUN_ram_0a05",
+      "body_bytes": 17,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0a16",
+      "name": "renderTimeBar",
+      "body_bytes": 50,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0a48",
+      "name": "renderLivesRow",
+      "body_bytes": 23,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0a5f",
+      "name": "awardExtraLife",
+      "body_bytes": 37,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0a84",
+      "name": "insertHighScoreEntry",
+      "body_bytes": 54,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0aba",
+      "name": "initDisplayFieldOnce",
+      "body_bytes": 52,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028"
+      ]
+    },
+    {
+      "address": "0aee",
+      "name": "nextSpawnRandomByte",
+      "body_bytes": 28,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0b0a",
+      "name": "initNewGameScoreAndTimers",
+      "body_bytes": 21,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0b1f",
+      "name": "renderScoreHeader",
+      "body_bytes": 72,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0ba9",
+        "0b95"
+      ]
+    },
+    {
+      "address": "0b67",
+      "name": "renderCreditLine",
+      "body_bytes": 46,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0ba0"
+      ]
+    },
+    {
+      "address": "0b95",
+      "name": "writeScoreField",
+      "body_bytes": 6,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ba9",
+        "0b9b"
+      ]
+    },
+    {
+      "address": "0b9b",
+      "name": "writePackedBcdWord",
+      "body_bytes": 5,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ba0"
+      ]
+    },
+    {
+      "address": "0ba0",
+      "name": "writePackedBcdByte",
+      "body_bytes": 9,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ba9"
+      ]
+    },
+    {
+      "address": "0ba9",
+      "name": "writeScoreDigitStepUp",
+      "body_bytes": 10,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0bb3",
+      "name": "renderMode3ScoreRankingScreen",
+      "body_bytes": 100,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0ba9",
+        "0b95",
+        "0c3d",
+        "0781"
+      ]
+    },
+    {
+      "address": "0c17",
+      "name": "blitMode3FinalStrip",
+      "body_bytes": 14,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028"
+      ]
+    },
+    {
+      "address": "0c3d",
+      "name": "placeScoreRankMarkers",
+      "body_bytes": 13,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0c4a"
+      ]
+    },
+    {
+      "address": "0c4a",
+      "name": "stampRankMarkerIfPlaced",
+      "body_bytes": 7,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0c51",
+      "name": "dispatch_0c51",
+      "body_bytes": 28,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0ba0"
+      ]
+    },
+    {
+      "address": "0c6d",
+      "name": "renderMode4PointTablePhase",
+      "body_bytes": 29,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0c51",
+        "0cc0",
+        "0cc6",
+        "0ceb"
+      ]
+    },
+    {
+      "address": "0c8a",
+      "name": "dispatch_0c8a",
+      "body_bytes": 54,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0ba0"
+      ]
+    },
+    {
+      "address": "0cc0",
+      "name": "dispatch_0cc0",
+      "body_bytes": 6,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0cc6",
+      "name": "dispatch_0cc6",
+      "body_bytes": 37,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0ba0"
+      ]
+    },
+    {
+      "address": "0ceb",
+      "name": "dispatch_0ceb",
+      "body_bytes": 38,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0b9b"
+      ]
+    },
+    {
+      "address": "0d11",
+      "name": "dispatchGameModeFrame",
+      "body_bytes": 36,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0d35",
+      "name": "dispatch_0d35",
+      "body_bytes": 23,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "0c17"
+      ]
+    },
+    {
+      "address": "0d4c",
+      "name": "initInPlayBoardOnce",
+      "body_bytes": 109,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0766",
+        "0028",
+        "07e6",
+        "0db9",
+        "0b95",
+        "223d",
+        "064b",
+        "0804"
+      ]
+    },
+    {
+      "address": "0db9",
+      "name": "blitPlayerSelectPrompt",
+      "body_bytes": 39,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028"
+      ]
+    },
+    {
+      "address": "0de0",
+      "name": "stampAttractDemoCell",
+      "body_bytes": 317,
+      "decompiled": true,
+      "error": "\nWARNING: Codelabel switchD_ram:0ec2_caseD_ed9 overlaps object: FUN_ram_0ed6\nWARNING: Codelabel switchD_ram:0ec2_caseD_ed7 overlaps object: FUN_ram_0ed6\nWARNING: Codelabel switchD_ram:0ec2_caseD_ee7 overlaps object: FUN_ram_0ee4\nWARNING: Codelabel switchD_ram:0ec2_caseD_ef5 overlaps object: FUN_ram_0ef2",
+      "callees": [
+        "0e49",
+        "0870",
+        "0028",
+        "11bf",
+        "16f8",
+        "0ff1",
+        "0e2b",
+        "14b7",
+        "0e3f",
+        "0e17",
+        "2005",
+        "0018",
+        "0e35",
+        "1802",
+        "2341",
+        "0e7a",
+        "1a55",
+        "19e2",
+        "0e21"
+      ]
+    },
+    {
+      "address": "0e0d",
+      "name": "dispatch_0e0d",
+      "body_bytes": 10,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0e17",
+      "name": "dispatch_0e17",
+      "body_bytes": 10,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0e21",
+      "name": "dispatch_0e21",
+      "body_bytes": 10,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0e2b",
+      "name": "dispatch_0e2b",
+      "body_bytes": 10,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0e35",
+      "name": "dispatch_0e35",
+      "body_bytes": 10,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0e3f",
+      "name": "dispatch_0e3f",
+      "body_bytes": 10,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0e49",
+      "name": "dispatch_0e49",
+      "body_bytes": 43,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0e74",
+      "name": "setAttractIdleMode",
+      "body_bytes": 6,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0e7a",
+      "name": "driveAttractDemoSequencer",
+      "body_bytes": 113,
+      "decompiled": true,
+      "error": "\nWARNING: Codelabel switchD_ram:0ec2_caseD_ed7 overlaps object: FUN_ram_0ed6\nWARNING: Codelabel switchD_ram:0ec2_caseD_ee5 overlaps object: FUN_ram_0ee4\nWARNING: Codelabel switchD_ram:0ec2_caseD_ef3 overlaps object: FUN_ram_0ef2\nWARNING: Codelabel switchD_ram:0ec2_caseD_f5f overlaps object: blitGameOverLine",
+      "callees": [
+        "0766",
+        "0f3e",
+        "064b"
+      ]
+    },
+    {
+      "address": "0ec3",
+      "name": "dispatch_0ec3",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ec5",
+      "name": "dispatch_0ec5",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ec7",
+      "name": "dispatch_0ec7",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ec9",
+      "name": "dispatch_0ec9",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ecb",
+      "name": "dispatch_0ecb",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ecd",
+      "name": "dispatch_0ecd",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ecf",
+      "name": "dispatch_0ecf",
+      "body_bytes": 7,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ed6",
+      "name": "FUN_ram_0ed6",
+      "body_bytes": 7,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0edd",
+      "name": "caseD_edd",
+      "body_bytes": 7,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ee4",
+      "name": "FUN_ram_0ee4",
+      "body_bytes": 7,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0eeb",
+      "name": "caseD_eeb",
+      "body_bytes": 7,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ef2",
+      "name": "FUN_ram_0ef2",
+      "body_bytes": 7,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ef9",
+      "name": "caseD_ef9",
+      "body_bytes": 29,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0f3e"
+      ]
+    },
+    {
+      "address": "0f3e",
+      "name": "FUN_ram_0f3e",
+      "body_bytes": 27,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0f59",
+      "name": "blitGameOverLine",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0028",
+        "19e2"
+      ]
+    },
+    {
+      "address": "0f69",
+      "name": "packScoreRankPair",
+      "body_bytes": 35,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0a84"
+      ]
+    },
+    {
+      "address": "0f8c",
+      "name": "blitFrogAnimColumnOnTrigger",
+      "body_bytes": 35,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0faf",
+      "name": "dispatchFrogAnimationArm",
+      "body_bytes": 158,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0038"
+      ]
+    },
+    {
+      "address": "0fd4",
+      "name": "renderFrogAnimArm0",
+      "body_bytes": 29,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "0ff1",
+      "name": "renderFrogAnimTileColumns",
+      "body_bytes": 56,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1198"
+      ]
+    },
+    {
+      "address": "1029",
+      "name": "advanceFrogAnimIndexAndRedispatch",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1048",
+      "name": "spinWatchdogSettleDelay",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1058",
+      "name": "renderFrogAnimArm1",
+      "body_bytes": 35,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0f8c",
+        "0ff1"
+      ]
+    },
+    {
+      "address": "107b",
+      "name": "renderFrogAnimArm2",
+      "body_bytes": 32,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ff1"
+      ]
+    },
+    {
+      "address": "109b",
+      "name": "renderFrogAnimArm3",
+      "body_bytes": 32,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ff1"
+      ]
+    },
+    {
+      "address": "10bb",
+      "name": "renderFrogAnimArm4",
+      "body_bytes": 32,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ff1"
+      ]
+    },
+    {
+      "address": "10db",
+      "name": "dispatch_10db",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "10f8",
+      "name": "renderFrogAnimArm6",
+      "body_bytes": 32,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ff1"
+      ]
+    },
+    {
+      "address": "1118",
+      "name": "renderFrogAnimArm7",
+      "body_bytes": 32,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ff1"
+      ]
+    },
+    {
+      "address": "1138",
+      "name": "renderFrogAnimArm8",
+      "body_bytes": 32,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ff1"
+      ]
+    },
+    {
+      "address": "1158",
+      "name": "renderFrogAnimArm9",
+      "body_bytes": 32,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0ff1"
+      ]
+    },
+    {
+      "address": "1178",
+      "name": "renderFrogAnimArm10",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1198",
+      "name": "computeVramColumnIndex",
+      "body_bytes": 39,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "11bf",
+      "name": "dispatchFrogMoveAgainstLanes",
+      "body_bytes": 42,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1209",
+      "name": "dispatch_1209",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "12e4"
+      ]
+    },
+    {
+      "address": "120c",
+      "name": "dispatch_120c",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "12e4"
+      ]
+    },
+    {
+      "address": "120f",
+      "name": "dispatch_120f",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "12e4"
+      ]
+    },
+    {
+      "address": "1212",
+      "name": "dispatch_1212",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "121a",
+      "name": "dispatch_121a",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "1222",
+      "name": "dispatch_1222",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "122a",
+      "name": "dispatch_122a",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "1232",
+      "name": "dispatch_1232",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "123a",
+      "name": "dispatch_123a",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "12e4"
+      ]
+    },
+    {
+      "address": "1242",
+      "name": "dispatch_1242",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "124a",
+      "name": "dispatch_124a",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "1252",
+      "name": "dispatch_1252",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "125a",
+      "name": "dispatch_125a",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "1262",
+      "name": "dispatch_1262",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1270"
+      ]
+    },
+    {
+      "address": "126a",
+      "name": "dispatch_126a",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "12e4"
+      ]
+    },
+    {
+      "address": "126d",
+      "name": "dispatch_126d",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "12e4"
+      ]
+    },
+    {
+      "address": "1270",
+      "name": "FUN_ram_1270",
+      "body_bytes": 96,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "12d0",
+        "12e4"
+      ]
+    },
+    {
+      "address": "12d0",
+      "name": "dispatchFrogMoveAgainstLanes",
+      "body_bytes": 20,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "12e4",
+      "name": "resolveFrogMoveAgainstLanes",
+      "body_bytes": 39,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "132b",
+      "name": "dispatch_132b",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "132e",
+      "name": "dispatch_132e",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1331",
+      "name": "dispatch_1331",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1334",
+      "name": "dispatch_1334",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "133c",
+      "name": "dispatch_133c",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "1344",
+      "name": "dispatch_1344",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "134c",
+      "name": "dispatch_134c",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "1354",
+      "name": "dispatch_1354",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "135c",
+      "name": "dispatch_135c",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1364",
+      "name": "dispatch_1364",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "136c",
+      "name": "dispatch_136c",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "1374",
+      "name": "dispatch_1374",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "137c",
+      "name": "dispatch_137c",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "1384",
+      "name": "dispatch_1384",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "138f"
+      ]
+    },
+    {
+      "address": "138c",
+      "name": "dispatch_138c",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "138f",
+      "name": "FUN_ram_138f",
+      "body_bytes": 93,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "13e1",
+      "name": "FUN_ram_13e1",
+      "body_bytes": 1,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "14b7",
+      "name": "moveLaneObjectsAndCarryFrog",
+      "body_bytes": 256,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "15de"
+      ]
+    },
+    {
+      "address": "14dd",
+      "name": "dispatch_14dd",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "14ee",
+      "name": "dispatch_14ee",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "14ff",
+      "name": "dispatch_14ff",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1510",
+      "name": "dispatch_1510",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1521",
+      "name": "dispatch_1521",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1532",
+      "name": "dispatch_1532",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1543",
+      "name": "dispatch_1543",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1554",
+      "name": "dispatch_1554",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1565",
+      "name": "dispatch_1565",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1576",
+      "name": "dispatch_1576",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1587",
+      "name": "dispatch_1587",
+      "body_bytes": 3,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "15de",
+      "name": "caseD_6c",
+      "body_bytes": 13,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "16f8",
+      "name": "driveFrogDeathAnimation",
+      "body_bytes": 266,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018",
+        "0804",
+        "2856",
+        "27b3",
+        "25ce"
+      ]
+    },
+    {
+      "address": "1802",
+      "name": "advanceAnimationFrameBuffer",
+      "body_bytes": 63,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1952",
+      "name": "renderFrogAndArmObjects",
+      "body_bytes": 144,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1a02",
+        "19e2"
+      ]
+    },
+    {
+      "address": "19e2",
+      "name": "blitFourTileGroupColumn",
+      "body_bytes": 20,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1a02",
+      "name": "seedObjectAnimationState",
+      "body_bytes": 83,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1a55",
+      "name": "orchestrateCollisionsAndFrogInput",
+      "body_bytes": 104,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "27ea",
+        "2496",
+        "1acb",
+        "23eb",
+        "2532",
+        "1a9f",
+        "26a6",
+        "291d",
+        "2906",
+        "28bb",
+        "23fa",
+        "25ce"
+      ]
+    },
+    {
+      "address": "1a9f",
+      "name": "FUN_ram_1a9f",
+      "body_bytes": 14,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "269a",
+        "27de"
+      ]
+    },
+    {
+      "address": "1acb",
+      "name": "scanFrogInputAndDispatchHop",
+      "body_bytes": 192,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "23eb"
+      ]
+    },
+    {
+      "address": "1b8b",
+      "name": "animateFrogHop",
+      "body_bytes": 47,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018"
+      ]
+    },
+    {
+      "address": "1bba",
+      "name": "animateFrogHop",
+      "body_bytes": 42,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1be4",
+      "name": "animateFrogHop",
+      "body_bytes": 41,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018"
+      ]
+    },
+    {
+      "address": "1c0d",
+      "name": "animateFrogHop",
+      "body_bytes": 52,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "23eb",
+        "1fd6"
+      ]
+    },
+    {
+      "address": "1c41",
+      "name": "animateFrogHop",
+      "body_bytes": 53,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018"
+      ]
+    },
+    {
+      "address": "1c76",
+      "name": "animateFrogHop",
+      "body_bytes": 42,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1ca0",
+      "name": "animateFrogHop",
+      "body_bytes": 53,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018"
+      ]
+    },
+    {
+      "address": "1cd5",
+      "name": "animateFrogHop",
+      "body_bytes": 42,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1cff",
+      "name": "selectHomeBayGoalHandler",
+      "body_bytes": 120,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1d77",
+      "name": "holdFrogMissedHomeBay",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1acb"
+      ]
+    },
+    {
+      "address": "1d87",
+      "name": "awardHomeBayGoal",
+      "body_bytes": 81,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "27cb",
+        "2673",
+        "1f1c"
+      ]
+    },
+    {
+      "address": "1dd8",
+      "name": "awardHomeBayGoal",
+      "body_bytes": 81,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "27cb",
+        "2673",
+        "1f1c"
+      ]
+    },
+    {
+      "address": "1e29",
+      "name": "awardHomeBayGoal",
+      "body_bytes": 81,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "27cb",
+        "2673",
+        "1f1c"
+      ]
+    },
+    {
+      "address": "1e7a",
+      "name": "awardHomeBayGoal",
+      "body_bytes": 81,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "27cb",
+        "2673",
+        "1f1c"
+      ]
+    },
+    {
+      "address": "1ecb",
+      "name": "awardHomeBayGoal",
+      "body_bytes": 81,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "27cb",
+        "2673",
+        "1f1c"
+      ]
+    },
+    {
+      "address": "1f1c",
+      "name": "stampHomeGoalAndResetFrog",
+      "body_bytes": 171,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "08e0",
+        "27bc",
+        "07e6",
+        "0018",
+        "08c5"
+      ]
+    },
+    {
+      "address": "1fc7",
+      "name": "tickGatedCountdown",
+      "body_bytes": 15,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "1fd6",
+      "name": "scoreFrogRowProgress",
+      "body_bytes": 47,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "08e0"
+      ]
+    },
+    {
+      "address": "2005",
+      "name": "advanceScrollLaneObjects",
+      "body_bytes": 199,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "219c",
+        "20fb",
+        "20cc"
+      ]
+    },
+    {
+      "address": "20cc",
+      "name": "blitScrollTileGrid",
+      "body_bytes": 47,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "20fb",
+      "name": "stampScrollRevealColumn",
+      "body_bytes": 125,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "2178",
+        "2188"
+      ]
+    },
+    {
+      "address": "2178",
+      "name": "FUN_ram_2178",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2188",
+      "name": "FUN_ram_2188",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "219c",
+      "name": "blitScrollBand",
+      "body_bytes": 125,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "2229",
+        "2219"
+      ]
+    },
+    {
+      "address": "2219",
+      "name": "FUN_ram_2219",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2229",
+      "name": "FUN_ram_2229",
+      "body_bytes": 8,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "223d",
+      "name": "loadActivePlayerLaneParams",
+      "body_bytes": 35,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "230f",
+      "name": "setUpPlayStartOnce",
+      "body_bytes": 41,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0629",
+        "19e2",
+        "223d",
+        "0faf",
+        "0aba",
+        "09aa",
+        "1952"
+      ]
+    },
+    {
+      "address": "2338",
+      "name": "dispatch_2338",
+      "body_bytes": 9,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2341",
+      "name": "driveInPlayFrameUpdate",
+      "body_bytes": 44,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "1a55",
+        "0870",
+        "1802",
+        "11bf",
+        "236d",
+        "1fc7",
+        "0942",
+        "16f8",
+        "2005",
+        "14b7",
+        "23b7"
+      ]
+    },
+    {
+      "address": "236d",
+      "name": "driveAttractDemoFrogHop",
+      "body_bytes": 66,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "23b7",
+      "name": "advanceAttractDemoFrogHop",
+      "body_bytes": 47,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "23eb",
+      "name": "advanceHomeBaySlotCursor",
+      "body_bytes": 15,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "23fa",
+      "name": "stampHomeBayFly",
+      "body_bytes": 156,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2496",
+      "name": "stampHomeBayGatorEmerging",
+      "body_bytes": 156,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2532",
+      "name": "stampHomeBayGatorFull",
+      "body_bytes": 156,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "25ce",
+      "name": "stampHomeBaySlot",
+      "body_bytes": 165,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2673",
+      "name": "FUN_ram_2673",
+      "body_bytes": 39,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "08e0"
+      ]
+    },
+    {
+      "address": "269a",
+      "name": "clearFourByteCounterBlock",
+      "body_bytes": 12,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "26a6",
+      "name": "animateFlyEatCollision",
+      "body_bytes": 103,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018",
+        "270d",
+        "272f"
+      ]
+    },
+    {
+      "address": "270d",
+      "name": "FUN_ram_270d",
+      "body_bytes": 34,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "272f",
+      "name": "driveFlyPatrol",
+      "body_bytes": 107,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "279a"
+      ]
+    },
+    {
+      "address": "279a",
+      "name": "FUN_ram_279a",
+      "body_bytes": 5,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "27b3",
+      "name": "clearLatchedCollision",
+      "body_bytes": 9,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "27bc",
+      "name": "clearCollisionSpriteBlock",
+      "body_bytes": 15,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "27cb",
+      "name": "armHomeGoalSprite",
+      "body_bytes": 19,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "27de",
+      "name": "clearFlySpriteBlock",
+      "body_bytes": 12,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "27ea",
+      "name": "driveDiveAnimByLevel",
+      "body_bytes": 20,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "288c"
+      ]
+    },
+    {
+      "address": "27fe",
+      "name": "stepDiveSurfaceTimer",
+      "body_bytes": 29,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "281b",
+      "name": "copyDiveAnimFrame",
+      "body_bytes": 59,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2856",
+      "name": "clearTwoPlayerFrameCells",
+      "body_bytes": 23,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "286d",
+      "name": "selectDiveVariantFrame",
+      "body_bytes": 6,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "281b"
+      ]
+    },
+    {
+      "address": "2874",
+      "name": "armDiveHighPhase",
+      "body_bytes": 10,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "287e",
+        "27fe"
+      ]
+    },
+    {
+      "address": "287e",
+      "name": "armTwoPairFigureFrame",
+      "body_bytes": 14,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "289c"
+      ]
+    },
+    {
+      "address": "288c",
+      "name": "resetDiveSurfaceCounter",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "289c"
+      ]
+    },
+    {
+      "address": "289c",
+      "name": "FUN_ram_289c",
+      "body_bytes": 20,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "28b0",
+      "name": "stepDiveFrameCounter",
+      "body_bytes": 11,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "28bb",
+      "name": "mountOrKillFrogOnTwoPairFigure",
+      "body_bytes": 75,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "12d0"
+      ]
+    },
+    {
+      "address": "2906",
+      "name": "enqueueLaneScrollSyncedCommand",
+      "body_bytes": 23,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018"
+      ]
+    },
+    {
+      "address": "291d",
+      "name": "animateTwoPairFigure",
+      "body_bytes": 76,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2970",
+      "name": "driveSpriteObjectCluster",
+      "body_bytes": 73,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "2b83",
+        "29b9"
+      ]
+    },
+    {
+      "address": "29b9",
+      "name": "dispatchSpriteObjectArmsA",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "29f9",
+        "2b58",
+        "2a6a",
+        "29c9",
+        "2af3"
+      ]
+    },
+    {
+      "address": "29c9",
+      "name": "animateSpriteObjectFrame",
+      "body_bytes": 48,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "29f9",
+      "name": "moveSpriteObjectArmA",
+      "body_bytes": 113,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2a6a",
+      "name": "spawnSpriteObjectArmA",
+      "body_bytes": 124,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0aee"
+      ]
+    },
+    {
+      "address": "2ae6",
+      "name": "raiseSpriteArmOneShotAndQueueSound",
+      "body_bytes": 13,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0018"
+      ]
+    },
+    {
+      "address": "2af3",
+      "name": "placeSpriteObjectSlotAndRetire",
+      "body_bytes": 101,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "2ae6"
+      ]
+    },
+    {
+      "address": "2b58",
+      "name": "flagSpriteObjectFrogHit",
+      "body_bytes": 43,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2b83",
+      "name": "updateSpriteObject",
+      "body_bytes": 16,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "2bab",
+        "2ca8",
+        "2b93",
+        "2c13",
+        "2bfb"
+      ]
+    },
+    {
+      "address": "2b93",
+      "name": "writeSpriteObjectSlotX",
+      "body_bytes": 24,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2bab",
+      "name": "steerSpriteObjectTowardTarget",
+      "body_bytes": 80,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2bfb",
+      "name": "writeSpriteObjectSlotAttr",
+      "body_bytes": 24,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2c13",
+      "name": "spawnSpriteObject",
+      "body_bytes": 149,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0aee"
+      ]
+    },
+    {
+      "address": "2ca8",
+      "name": "flagSpriteObjectFrogHitAhead",
+      "body_bytes": 46,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2cf0",
+      "name": "scanCoinInputAndCredit",
+      "body_bytes": 66,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0794"
+      ]
+    },
+    {
+      "address": "2d23",
+      "name": "dispatch_2d23",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d25",
+      "name": "dispatch_2d25",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d27",
+      "name": "dispatch_2d27",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d29",
+      "name": "dispatch_2d29",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d3a",
+      "name": "dispatch_2d3a",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d3c",
+      "name": "dispatch_2d3c",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d3e",
+      "name": "dispatch_2d3e",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d40",
+      "name": "dispatch_2d40",
+      "body_bytes": 2,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d49",
+      "name": "FUN_ram_2d49",
+      "body_bytes": 4,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d51",
+      "name": "FUN_ram_2d51",
+      "body_bytes": 4,
+      "decompiled": true,
+      "error": "",
+      "callees": []
+    },
+    {
+      "address": "2d55",
+      "name": "FUN_ram_2d55",
+      "body_bytes": 51,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0db9",
+        "0b67"
+      ]
+    },
+    {
+      "address": "2d88",
+      "name": "renderMode2IntroScreen",
+      "body_bytes": 65,
+      "decompiled": true,
+      "error": "",
+      "callees": [
+        "0766",
+        "0028",
+        "0ba9"
+      ]
+    }
+  ],
+  "seeds": [
+    {
+      "address": "0000",
+      "name": "seatStackAndEnterColdBoot",
+      "containing_function": "0000",
+      "instruction": true
+    },
+    {
+      "address": "0018",
+      "name": "enqueueSoundCommand",
+      "containing_function": "0018",
+      "instruction": true
+    },
+    {
+      "address": "0028",
+      "name": "copyRunUpTileColumn",
+      "containing_function": "0028",
+      "instruction": true
+    },
+    {
+      "address": "0038",
+      "name": "clearTilemapToTile16",
+      "containing_function": "0038",
+      "instruction": true
+    },
+    {
+      "address": "0066",
+      "name": "serviceVblankNmi",
+      "containing_function": "0066",
+      "instruction": true
+    },
+    {
+      "address": "011c",
+      "name": "dispatch_011c",
+      "containing_function": "011c",
+      "instruction": true
+    },
+    {
+      "address": "0235",
+      "name": "dispatch_0235",
+      "containing_function": "0235",
+      "instruction": true
+    },
+    {
+      "address": "0292",
+      "name": "tickFrogRespawnDelay",
+      "containing_function": "0292",
+      "instruction": true
+    },
+    {
+      "address": "02a3",
+      "name": "initColdBootAndEnterMainLoop",
+      "containing_function": "02a3",
+      "instruction": true
+    },
+    {
+      "address": "0341",
+      "name": "drainForegroundThenYieldEachVblank",
+      "containing_function": "0341",
+      "instruction": true
+    },
+    {
+      "address": "0368",
+      "name": "endForegroundPassAtPaceTail",
+      "containing_function": "0368",
+      "instruction": true
+    },
+    {
+      "address": "040b",
+      "name": "setUpBoardOrContinueLife",
+      "containing_function": "040b",
+      "instruction": true
+    },
+    {
+      "address": "0457",
+      "name": "beginNextLifeOrIntro",
+      "containing_function": "0457",
+      "instruction": true
+    },
+    {
+      "address": "048f",
+      "name": "runIntroTimerThenInitGame",
+      "containing_function": "048f",
+      "instruction": true
+    },
+    {
+      "address": "04f3",
+      "name": "setUpPlayerTwoContinue",
+      "containing_function": "04f3",
+      "instruction": true
+    },
+    {
+      "address": "0534",
+      "name": "clearPlayerOneHomeBayGates",
+      "containing_function": "0534",
+      "instruction": true
+    },
+    {
+      "address": "0547",
+      "name": "coldStartClearSlotGates",
+      "containing_function": "0547",
+      "instruction": true
+    },
+    {
+      "address": "0557",
+      "name": "coldStartClearAltSlotGates",
+      "containing_function": "0557",
+      "instruction": true
+    },
+    {
+      "address": "0567",
+      "name": "coldStartClearPlayRamAndSetMode",
+      "containing_function": "0567",
+      "instruction": true
+    },
+    {
+      "address": "05d3",
+      "name": "armBoardCompleteReveal",
+      "containing_function": "05d3",
+      "instruction": true
+    },
+    {
+      "address": "05f0",
+      "name": "advanceBoardForeground",
+      "containing_function": "05f0",
+      "instruction": true
+    },
+    {
+      "address": "0629",
+      "name": "clearAndSeedScoreField",
+      "containing_function": "0629",
+      "instruction": true
+    },
+    {
+      "address": "064b",
+      "name": "clearObjectBlocksAndMirrorToObjRam",
+      "containing_function": "064b",
+      "instruction": true
+    },
+    {
+      "address": "0670",
+      "name": "fillAllHomeSlotsAndAwardLife",
+      "containing_function": "0670",
+      "instruction": true
+    },
+    {
+      "address": "0695",
+      "name": "fillTwoByTwoTileBlock",
+      "containing_function": "0695",
+      "instruction": true
+    },
+    {
+      "address": "06a2",
+      "name": "stampHomeBayFrogByColumn",
+      "containing_function": "06a2",
+      "instruction": true
+    },
+    {
+      "address": "06ee",
+      "name": "swapInActivePlayerPages",
+      "containing_function": "06ee",
+      "instruction": true
+    },
+    {
+      "address": "0726",
+      "name": "swapOutActivePlayerPages",
+      "containing_function": "0726",
+      "instruction": true
+    },
+    {
+      "address": "0766",
+      "name": "fillTilemapBlock28x32",
+      "containing_function": "0766",
+      "instruction": true
+    },
+    {
+      "address": "0779",
+      "name": "fillTenCellRun",
+      "containing_function": "0779",
+      "instruction": true
+    },
+    {
+      "address": "0781",
+      "name": "fillTilemapBlock22x32",
+      "containing_function": "0781",
+      "instruction": true
+    },
+    {
+      "address": "0794",
+      "name": "issueSoundCommand",
+      "containing_function": "0794",
+      "instruction": true
+    },
+    {
+      "address": "07ac",
+      "name": "dequeueSoundCommand",
+      "containing_function": "07ac",
+      "instruction": true
+    },
+    {
+      "address": "07c1",
+      "name": "raiseActivePlayerStartFlag",
+      "containing_function": "07c1",
+      "instruction": true
+    },
+    {
+      "address": "07ce",
+      "name": "raiseTwoPlayerStartFlag",
+      "containing_function": "07ce",
+      "instruction": true
+    },
+    {
+      "address": "07d9",
+      "name": "clearSoundQueue",
+      "containing_function": "07d9",
+      "instruction": true
+    },
+    {
+      "address": "07e6",
+      "name": "clearActivePlayerWorkRam",
+      "containing_function": "07e6",
+      "instruction": true
+    },
+    {
+      "address": "07eb",
+      "name": "forceClearPlayerWorkRam",
+      "containing_function": "07eb",
+      "instruction": true
+    },
+    {
+      "address": "0804",
+      "name": "activateFrogObject",
+      "containing_function": "0804",
+      "instruction": true
+    },
+    {
+      "address": "0822",
+      "name": "handOffToOtherPlayer",
+      "containing_function": "0822",
+      "instruction": true
+    },
+    {
+      "address": "085b",
+      "name": "blitEndStripAndSetHold",
+      "containing_function": "085b",
+      "instruction": true
+    },
+    {
+      "address": "0870",
+      "name": "driveScoreDisplayCountdown",
+      "containing_function": "0870",
+      "instruction": true
+    },
+    {
+      "address": "08c5",
+      "name": "driveScoreDisplayCountdown",
+      "containing_function": "08c5",
+      "instruction": true
+    },
+    {
+      "address": "08e0",
+      "name": "addScoreAndAwardExtraLife",
+      "containing_function": "08e0",
+      "instruction": true
+    },
+    {
+      "address": "0942",
+      "name": "renderFrogSceneAndTickTimer",
+      "containing_function": "0942",
+      "instruction": true
+    },
+    {
+      "address": "09a6",
+      "name": "dispatch_09a6",
+      "containing_function": "09a6",
+      "instruction": true
+    },
+    {
+      "address": "09aa",
+      "name": "resetFrogObject",
+      "containing_function": "09aa",
+      "instruction": true
+    },
+    {
+      "address": "09db",
+      "name": "renderFilledHomeSlots",
+      "containing_function": "09db",
+      "instruction": true
+    },
+    {
+      "address": "0a16",
+      "name": "renderTimeBar",
+      "containing_function": "0a16",
+      "instruction": true
+    },
+    {
+      "address": "0a48",
+      "name": "renderLivesRow",
+      "containing_function": "0a48",
+      "instruction": true
+    },
+    {
+      "address": "0a5f",
+      "name": "awardExtraLife",
+      "containing_function": "0a5f",
+      "instruction": true
+    },
+    {
+      "address": "0a84",
+      "name": "insertHighScoreEntry",
+      "containing_function": "0a84",
+      "instruction": true
+    },
+    {
+      "address": "0aba",
+      "name": "initDisplayFieldOnce",
+      "containing_function": "0aba",
+      "instruction": true
+    },
+    {
+      "address": "0aee",
+      "name": "nextSpawnRandomByte",
+      "containing_function": "0aee",
+      "instruction": true
+    },
+    {
+      "address": "0b0a",
+      "name": "initNewGameScoreAndTimers",
+      "containing_function": "0b0a",
+      "instruction": true
+    },
+    {
+      "address": "0b1f",
+      "name": "renderScoreHeader",
+      "containing_function": "0b1f",
+      "instruction": true
+    },
+    {
+      "address": "0b67",
+      "name": "renderCreditLine",
+      "containing_function": "0b67",
+      "instruction": true
+    },
+    {
+      "address": "0b95",
+      "name": "writeScoreField",
+      "containing_function": "0b95",
+      "instruction": true
+    },
+    {
+      "address": "0b9b",
+      "name": "writePackedBcdWord",
+      "containing_function": "0b9b",
+      "instruction": true
+    },
+    {
+      "address": "0ba0",
+      "name": "writePackedBcdByte",
+      "containing_function": "0ba0",
+      "instruction": true
+    },
+    {
+      "address": "0ba9",
+      "name": "writeScoreDigitStepUp",
+      "containing_function": "0ba9",
+      "instruction": true
+    },
+    {
+      "address": "0bb3",
+      "name": "renderMode3ScoreRankingScreen",
+      "containing_function": "0bb3",
+      "instruction": true
+    },
+    {
+      "address": "0c17",
+      "name": "blitMode3FinalStrip",
+      "containing_function": "0c17",
+      "instruction": true
+    },
+    {
+      "address": "0c3d",
+      "name": "placeScoreRankMarkers",
+      "containing_function": "0c3d",
+      "instruction": true
+    },
+    {
+      "address": "0c4a",
+      "name": "stampRankMarkerIfPlaced",
+      "containing_function": "0c4a",
+      "instruction": true
+    },
+    {
+      "address": "0c51",
+      "name": "dispatch_0c51",
+      "containing_function": "0c51",
+      "instruction": true
+    },
+    {
+      "address": "0c6d",
+      "name": "renderMode4PointTablePhase",
+      "containing_function": "0c6d",
+      "instruction": true
+    },
+    {
+      "address": "0c8a",
+      "name": "dispatch_0c8a",
+      "containing_function": "0c8a",
+      "instruction": true
+    },
+    {
+      "address": "0cc0",
+      "name": "dispatch_0cc0",
+      "containing_function": "0cc0",
+      "instruction": true
+    },
+    {
+      "address": "0cc6",
+      "name": "dispatch_0cc6",
+      "containing_function": "0cc6",
+      "instruction": true
+    },
+    {
+      "address": "0ceb",
+      "name": "dispatch_0ceb",
+      "containing_function": "0ceb",
+      "instruction": true
+    },
+    {
+      "address": "0d11",
+      "name": "dispatchGameModeFrame",
+      "containing_function": "0d11",
+      "instruction": true
+    },
+    {
+      "address": "0d35",
+      "name": "dispatch_0d35",
+      "containing_function": "0d35",
+      "instruction": true
+    },
+    {
+      "address": "0d4c",
+      "name": "initInPlayBoardOnce",
+      "containing_function": "0d4c",
+      "instruction": true
+    },
+    {
+      "address": "0db9",
+      "name": "blitPlayerSelectPrompt",
+      "containing_function": "0db9",
+      "instruction": true
+    },
+    {
+      "address": "0de0",
+      "name": "stampAttractDemoCell",
+      "containing_function": "0de0",
+      "instruction": true
+    },
+    {
+      "address": "0e0d",
+      "name": "dispatch_0e0d",
+      "containing_function": "0e0d",
+      "instruction": true
+    },
+    {
+      "address": "0e17",
+      "name": "dispatch_0e17",
+      "containing_function": "0e17",
+      "instruction": true
+    },
+    {
+      "address": "0e21",
+      "name": "dispatch_0e21",
+      "containing_function": "0e21",
+      "instruction": true
+    },
+    {
+      "address": "0e2b",
+      "name": "dispatch_0e2b",
+      "containing_function": "0e2b",
+      "instruction": true
+    },
+    {
+      "address": "0e35",
+      "name": "dispatch_0e35",
+      "containing_function": "0e35",
+      "instruction": true
+    },
+    {
+      "address": "0e3f",
+      "name": "dispatch_0e3f",
+      "containing_function": "0e3f",
+      "instruction": true
+    },
+    {
+      "address": "0e49",
+      "name": "dispatch_0e49",
+      "containing_function": "0e49",
+      "instruction": true
+    },
+    {
+      "address": "0e74",
+      "name": "setAttractIdleMode",
+      "containing_function": "0e74",
+      "instruction": true
+    },
+    {
+      "address": "0e7a",
+      "name": "driveAttractDemoSequencer",
+      "containing_function": "0e7a",
+      "instruction": true
+    },
+    {
+      "address": "0ec3",
+      "name": "dispatch_0ec3",
+      "containing_function": "0ec3",
+      "instruction": true
+    },
+    {
+      "address": "0ec5",
+      "name": "dispatch_0ec5",
+      "containing_function": "0ec5",
+      "instruction": true
+    },
+    {
+      "address": "0ec7",
+      "name": "dispatch_0ec7",
+      "containing_function": "0ec7",
+      "instruction": true
+    },
+    {
+      "address": "0ec9",
+      "name": "dispatch_0ec9",
+      "containing_function": "0ec9",
+      "instruction": true
+    },
+    {
+      "address": "0ecb",
+      "name": "dispatch_0ecb",
+      "containing_function": "0ecb",
+      "instruction": true
+    },
+    {
+      "address": "0ecd",
+      "name": "dispatch_0ecd",
+      "containing_function": "0ecd",
+      "instruction": true
+    },
+    {
+      "address": "0ecf",
+      "name": "dispatch_0ecf",
+      "containing_function": "0ecf",
+      "instruction": true
+    },
+    {
+      "address": "0f59",
+      "name": "blitGameOverLine",
+      "containing_function": "0f59",
+      "instruction": true
+    },
+    {
+      "address": "0f69",
+      "name": "packScoreRankPair",
+      "containing_function": "0f69",
+      "instruction": true
+    },
+    {
+      "address": "0f8c",
+      "name": "blitFrogAnimColumnOnTrigger",
+      "containing_function": "0f8c",
+      "instruction": true
+    },
+    {
+      "address": "0faf",
+      "name": "dispatchFrogAnimationArm",
+      "containing_function": "0faf",
+      "instruction": true
+    },
+    {
+      "address": "0fd4",
+      "name": "renderFrogAnimArm0",
+      "containing_function": "0fd4",
+      "instruction": true
+    },
+    {
+      "address": "0ff1",
+      "name": "renderFrogAnimTileColumns",
+      "containing_function": "0ff1",
+      "instruction": true
+    },
+    {
+      "address": "1029",
+      "name": "advanceFrogAnimIndexAndRedispatch",
+      "containing_function": "1029",
+      "instruction": true
+    },
+    {
+      "address": "1048",
+      "name": "spinWatchdogSettleDelay",
+      "containing_function": "1048",
+      "instruction": true
+    },
+    {
+      "address": "1058",
+      "name": "renderFrogAnimArm1",
+      "containing_function": "1058",
+      "instruction": true
+    },
+    {
+      "address": "107b",
+      "name": "renderFrogAnimArm2",
+      "containing_function": "107b",
+      "instruction": true
+    },
+    {
+      "address": "109b",
+      "name": "renderFrogAnimArm3",
+      "containing_function": "109b",
+      "instruction": true
+    },
+    {
+      "address": "10bb",
+      "name": "renderFrogAnimArm4",
+      "containing_function": "10bb",
+      "instruction": true
+    },
+    {
+      "address": "10db",
+      "name": "dispatch_10db",
+      "containing_function": "10db",
+      "instruction": true
+    },
+    {
+      "address": "10f8",
+      "name": "renderFrogAnimArm6",
+      "containing_function": "10f8",
+      "instruction": true
+    },
+    {
+      "address": "1118",
+      "name": "renderFrogAnimArm7",
+      "containing_function": "1118",
+      "instruction": true
+    },
+    {
+      "address": "1138",
+      "name": "renderFrogAnimArm8",
+      "containing_function": "1138",
+      "instruction": true
+    },
+    {
+      "address": "1158",
+      "name": "renderFrogAnimArm9",
+      "containing_function": "1158",
+      "instruction": true
+    },
+    {
+      "address": "1178",
+      "name": "renderFrogAnimArm10",
+      "containing_function": "1178",
+      "instruction": true
+    },
+    {
+      "address": "1198",
+      "name": "computeVramColumnIndex",
+      "containing_function": "1198",
+      "instruction": true
+    },
+    {
+      "address": "11bf",
+      "name": "dispatchFrogMoveAgainstLanes",
+      "containing_function": "11bf",
+      "instruction": true
+    },
+    {
+      "address": "1209",
+      "name": "dispatch_1209",
+      "containing_function": "1209",
+      "instruction": true
+    },
+    {
+      "address": "120c",
+      "name": "dispatch_120c",
+      "containing_function": "120c",
+      "instruction": true
+    },
+    {
+      "address": "120f",
+      "name": "dispatch_120f",
+      "containing_function": "120f",
+      "instruction": true
+    },
+    {
+      "address": "1212",
+      "name": "dispatch_1212",
+      "containing_function": "1212",
+      "instruction": true
+    },
+    {
+      "address": "121a",
+      "name": "dispatch_121a",
+      "containing_function": "121a",
+      "instruction": true
+    },
+    {
+      "address": "1222",
+      "name": "dispatch_1222",
+      "containing_function": "1222",
+      "instruction": true
+    },
+    {
+      "address": "122a",
+      "name": "dispatch_122a",
+      "containing_function": "122a",
+      "instruction": true
+    },
+    {
+      "address": "1232",
+      "name": "dispatch_1232",
+      "containing_function": "1232",
+      "instruction": true
+    },
+    {
+      "address": "123a",
+      "name": "dispatch_123a",
+      "containing_function": "123a",
+      "instruction": true
+    },
+    {
+      "address": "1242",
+      "name": "dispatch_1242",
+      "containing_function": "1242",
+      "instruction": true
+    },
+    {
+      "address": "124a",
+      "name": "dispatch_124a",
+      "containing_function": "124a",
+      "instruction": true
+    },
+    {
+      "address": "1252",
+      "name": "dispatch_1252",
+      "containing_function": "1252",
+      "instruction": true
+    },
+    {
+      "address": "125a",
+      "name": "dispatch_125a",
+      "containing_function": "125a",
+      "instruction": true
+    },
+    {
+      "address": "1262",
+      "name": "dispatch_1262",
+      "containing_function": "1262",
+      "instruction": true
+    },
+    {
+      "address": "126a",
+      "name": "dispatch_126a",
+      "containing_function": "126a",
+      "instruction": true
+    },
+    {
+      "address": "126d",
+      "name": "dispatch_126d",
+      "containing_function": "126d",
+      "instruction": true
+    },
+    {
+      "address": "12d0",
+      "name": "dispatchFrogMoveAgainstLanes",
+      "containing_function": "12d0",
+      "instruction": true
+    },
+    {
+      "address": "12e4",
+      "name": "resolveFrogMoveAgainstLanes",
+      "containing_function": "12e4",
+      "instruction": true
+    },
+    {
+      "address": "132b",
+      "name": "dispatch_132b",
+      "containing_function": "132b",
+      "instruction": true
+    },
+    {
+      "address": "132e",
+      "name": "dispatch_132e",
+      "containing_function": "132e",
+      "instruction": true
+    },
+    {
+      "address": "1331",
+      "name": "dispatch_1331",
+      "containing_function": "1331",
+      "instruction": true
+    },
+    {
+      "address": "1334",
+      "name": "dispatch_1334",
+      "containing_function": "1334",
+      "instruction": true
+    },
+    {
+      "address": "133c",
+      "name": "dispatch_133c",
+      "containing_function": "133c",
+      "instruction": true
+    },
+    {
+      "address": "1344",
+      "name": "dispatch_1344",
+      "containing_function": "1344",
+      "instruction": true
+    },
+    {
+      "address": "134c",
+      "name": "dispatch_134c",
+      "containing_function": "134c",
+      "instruction": true
+    },
+    {
+      "address": "1354",
+      "name": "dispatch_1354",
+      "containing_function": "1354",
+      "instruction": true
+    },
+    {
+      "address": "135c",
+      "name": "dispatch_135c",
+      "containing_function": "135c",
+      "instruction": true
+    },
+    {
+      "address": "1364",
+      "name": "dispatch_1364",
+      "containing_function": "1364",
+      "instruction": true
+    },
+    {
+      "address": "136c",
+      "name": "dispatch_136c",
+      "containing_function": "136c",
+      "instruction": true
+    },
+    {
+      "address": "1374",
+      "name": "dispatch_1374",
+      "containing_function": "1374",
+      "instruction": true
+    },
+    {
+      "address": "137c",
+      "name": "dispatch_137c",
+      "containing_function": "137c",
+      "instruction": true
+    },
+    {
+      "address": "1384",
+      "name": "dispatch_1384",
+      "containing_function": "1384",
+      "instruction": true
+    },
+    {
+      "address": "138c",
+      "name": "dispatch_138c",
+      "containing_function": "138c",
+      "instruction": true
+    },
+    {
+      "address": "14b7",
+      "name": "moveLaneObjectsAndCarryFrog",
+      "containing_function": "14b7",
+      "instruction": true
+    },
+    {
+      "address": "14dd",
+      "name": "dispatch_14dd",
+      "containing_function": "14dd",
+      "instruction": true
+    },
+    {
+      "address": "14ee",
+      "name": "dispatch_14ee",
+      "containing_function": "14ee",
+      "instruction": true
+    },
+    {
+      "address": "14ff",
+      "name": "dispatch_14ff",
+      "containing_function": "14ff",
+      "instruction": true
+    },
+    {
+      "address": "1510",
+      "name": "dispatch_1510",
+      "containing_function": "1510",
+      "instruction": true
+    },
+    {
+      "address": "1521",
+      "name": "dispatch_1521",
+      "containing_function": "1521",
+      "instruction": true
+    },
+    {
+      "address": "1532",
+      "name": "dispatch_1532",
+      "containing_function": "1532",
+      "instruction": true
+    },
+    {
+      "address": "1543",
+      "name": "dispatch_1543",
+      "containing_function": "1543",
+      "instruction": true
+    },
+    {
+      "address": "1554",
+      "name": "dispatch_1554",
+      "containing_function": "1554",
+      "instruction": true
+    },
+    {
+      "address": "1565",
+      "name": "dispatch_1565",
+      "containing_function": "1565",
+      "instruction": true
+    },
+    {
+      "address": "1576",
+      "name": "dispatch_1576",
+      "containing_function": "1576",
+      "instruction": true
+    },
+    {
+      "address": "1587",
+      "name": "dispatch_1587",
+      "containing_function": "1587",
+      "instruction": true
+    },
+    {
+      "address": "16f8",
+      "name": "driveFrogDeathAnimation",
+      "containing_function": "16f8",
+      "instruction": true
+    },
+    {
+      "address": "1802",
+      "name": "advanceAnimationFrameBuffer",
+      "containing_function": "1802",
+      "instruction": true
+    },
+    {
+      "address": "1952",
+      "name": "renderFrogAndArmObjects",
+      "containing_function": "1952",
+      "instruction": true
+    },
+    {
+      "address": "19e2",
+      "name": "blitFourTileGroupColumn",
+      "containing_function": "19e2",
+      "instruction": true
+    },
+    {
+      "address": "1a02",
+      "name": "seedObjectAnimationState",
+      "containing_function": "1a02",
+      "instruction": true
+    },
+    {
+      "address": "1a55",
+      "name": "orchestrateCollisionsAndFrogInput",
+      "containing_function": "1a55",
+      "instruction": true
+    },
+    {
+      "address": "1acb",
+      "name": "scanFrogInputAndDispatchHop",
+      "containing_function": "1acb",
+      "instruction": true
+    },
+    {
+      "address": "1b8b",
+      "name": "animateFrogHop",
+      "containing_function": "1b8b",
+      "instruction": true
+    },
+    {
+      "address": "1bba",
+      "name": "animateFrogHop",
+      "containing_function": "1bba",
+      "instruction": true
+    },
+    {
+      "address": "1be4",
+      "name": "animateFrogHop",
+      "containing_function": "1be4",
+      "instruction": true
+    },
+    {
+      "address": "1c0d",
+      "name": "animateFrogHop",
+      "containing_function": "1c0d",
+      "instruction": true
+    },
+    {
+      "address": "1c41",
+      "name": "animateFrogHop",
+      "containing_function": "1c41",
+      "instruction": true
+    },
+    {
+      "address": "1c76",
+      "name": "animateFrogHop",
+      "containing_function": "1c76",
+      "instruction": true
+    },
+    {
+      "address": "1ca0",
+      "name": "animateFrogHop",
+      "containing_function": "1ca0",
+      "instruction": true
+    },
+    {
+      "address": "1cd5",
+      "name": "animateFrogHop",
+      "containing_function": "1cd5",
+      "instruction": true
+    },
+    {
+      "address": "1cff",
+      "name": "selectHomeBayGoalHandler",
+      "containing_function": "1cff",
+      "instruction": true
+    },
+    {
+      "address": "1d77",
+      "name": "holdFrogMissedHomeBay",
+      "containing_function": "1d77",
+      "instruction": true
+    },
+    {
+      "address": "1d87",
+      "name": "awardHomeBayGoal",
+      "containing_function": "1d87",
+      "instruction": true
+    },
+    {
+      "address": "1dd8",
+      "name": "awardHomeBayGoal",
+      "containing_function": "1dd8",
+      "instruction": true
+    },
+    {
+      "address": "1e29",
+      "name": "awardHomeBayGoal",
+      "containing_function": "1e29",
+      "instruction": true
+    },
+    {
+      "address": "1e7a",
+      "name": "awardHomeBayGoal",
+      "containing_function": "1e7a",
+      "instruction": true
+    },
+    {
+      "address": "1ecb",
+      "name": "awardHomeBayGoal",
+      "containing_function": "1ecb",
+      "instruction": true
+    },
+    {
+      "address": "1f1c",
+      "name": "stampHomeGoalAndResetFrog",
+      "containing_function": "1f1c",
+      "instruction": true
+    },
+    {
+      "address": "1fc7",
+      "name": "tickGatedCountdown",
+      "containing_function": "1fc7",
+      "instruction": true
+    },
+    {
+      "address": "1fd6",
+      "name": "scoreFrogRowProgress",
+      "containing_function": "1fd6",
+      "instruction": true
+    },
+    {
+      "address": "2005",
+      "name": "advanceScrollLaneObjects",
+      "containing_function": "2005",
+      "instruction": true
+    },
+    {
+      "address": "20cc",
+      "name": "blitScrollTileGrid",
+      "containing_function": "20cc",
+      "instruction": true
+    },
+    {
+      "address": "20fb",
+      "name": "stampScrollRevealColumn",
+      "containing_function": "20fb",
+      "instruction": true
+    },
+    {
+      "address": "219c",
+      "name": "blitScrollBand",
+      "containing_function": "219c",
+      "instruction": true
+    },
+    {
+      "address": "223d",
+      "name": "loadActivePlayerLaneParams",
+      "containing_function": "223d",
+      "instruction": true
+    },
+    {
+      "address": "230f",
+      "name": "setUpPlayStartOnce",
+      "containing_function": "230f",
+      "instruction": true
+    },
+    {
+      "address": "2338",
+      "name": "dispatch_2338",
+      "containing_function": "2338",
+      "instruction": true
+    },
+    {
+      "address": "2341",
+      "name": "driveInPlayFrameUpdate",
+      "containing_function": "2341",
+      "instruction": true
+    },
+    {
+      "address": "236d",
+      "name": "driveAttractDemoFrogHop",
+      "containing_function": "236d",
+      "instruction": true
+    },
+    {
+      "address": "23b7",
+      "name": "advanceAttractDemoFrogHop",
+      "containing_function": "23b7",
+      "instruction": true
+    },
+    {
+      "address": "23eb",
+      "name": "advanceHomeBaySlotCursor",
+      "containing_function": "23eb",
+      "instruction": true
+    },
+    {
+      "address": "23fa",
+      "name": "stampHomeBayFly",
+      "containing_function": "23fa",
+      "instruction": true
+    },
+    {
+      "address": "2496",
+      "name": "stampHomeBayGatorEmerging",
+      "containing_function": "2496",
+      "instruction": true
+    },
+    {
+      "address": "2532",
+      "name": "stampHomeBayGatorFull",
+      "containing_function": "2532",
+      "instruction": true
+    },
+    {
+      "address": "25ce",
+      "name": "stampHomeBaySlot",
+      "containing_function": "25ce",
+      "instruction": true
+    },
+    {
+      "address": "269a",
+      "name": "clearFourByteCounterBlock",
+      "containing_function": "269a",
+      "instruction": true
+    },
+    {
+      "address": "26a6",
+      "name": "animateFlyEatCollision",
+      "containing_function": "26a6",
+      "instruction": true
+    },
+    {
+      "address": "272f",
+      "name": "driveFlyPatrol",
+      "containing_function": "272f",
+      "instruction": true
+    },
+    {
+      "address": "27b3",
+      "name": "clearLatchedCollision",
+      "containing_function": "27b3",
+      "instruction": true
+    },
+    {
+      "address": "27bc",
+      "name": "clearCollisionSpriteBlock",
+      "containing_function": "27bc",
+      "instruction": true
+    },
+    {
+      "address": "27cb",
+      "name": "armHomeGoalSprite",
+      "containing_function": "27cb",
+      "instruction": true
+    },
+    {
+      "address": "27de",
+      "name": "clearFlySpriteBlock",
+      "containing_function": "27de",
+      "instruction": true
+    },
+    {
+      "address": "27ea",
+      "name": "driveDiveAnimByLevel",
+      "containing_function": "27ea",
+      "instruction": true
+    },
+    {
+      "address": "27fe",
+      "name": "stepDiveSurfaceTimer",
+      "containing_function": "27fe",
+      "instruction": true
+    },
+    {
+      "address": "281b",
+      "name": "copyDiveAnimFrame",
+      "containing_function": "281b",
+      "instruction": true
+    },
+    {
+      "address": "2856",
+      "name": "clearTwoPlayerFrameCells",
+      "containing_function": "2856",
+      "instruction": true
+    },
+    {
+      "address": "286d",
+      "name": "selectDiveVariantFrame",
+      "containing_function": "286d",
+      "instruction": true
+    },
+    {
+      "address": "2874",
+      "name": "armDiveHighPhase",
+      "containing_function": "2874",
+      "instruction": true
+    },
+    {
+      "address": "287e",
+      "name": "armTwoPairFigureFrame",
+      "containing_function": "287e",
+      "instruction": true
+    },
+    {
+      "address": "288c",
+      "name": "resetDiveSurfaceCounter",
+      "containing_function": "288c",
+      "instruction": true
+    },
+    {
+      "address": "28b0",
+      "name": "stepDiveFrameCounter",
+      "containing_function": "28b0",
+      "instruction": true
+    },
+    {
+      "address": "28bb",
+      "name": "mountOrKillFrogOnTwoPairFigure",
+      "containing_function": "28bb",
+      "instruction": true
+    },
+    {
+      "address": "2906",
+      "name": "enqueueLaneScrollSyncedCommand",
+      "containing_function": "2906",
+      "instruction": true
+    },
+    {
+      "address": "291d",
+      "name": "animateTwoPairFigure",
+      "containing_function": "291d",
+      "instruction": true
+    },
+    {
+      "address": "2970",
+      "name": "driveSpriteObjectCluster",
+      "containing_function": "2970",
+      "instruction": true
+    },
+    {
+      "address": "29b9",
+      "name": "dispatchSpriteObjectArmsA",
+      "containing_function": "29b9",
+      "instruction": true
+    },
+    {
+      "address": "29c9",
+      "name": "animateSpriteObjectFrame",
+      "containing_function": "29c9",
+      "instruction": true
+    },
+    {
+      "address": "29f9",
+      "name": "moveSpriteObjectArmA",
+      "containing_function": "29f9",
+      "instruction": true
+    },
+    {
+      "address": "2a6a",
+      "name": "spawnSpriteObjectArmA",
+      "containing_function": "2a6a",
+      "instruction": true
+    },
+    {
+      "address": "2ae6",
+      "name": "raiseSpriteArmOneShotAndQueueSound",
+      "containing_function": "2ae6",
+      "instruction": true
+    },
+    {
+      "address": "2af3",
+      "name": "placeSpriteObjectSlotAndRetire",
+      "containing_function": "2af3",
+      "instruction": true
+    },
+    {
+      "address": "2b58",
+      "name": "flagSpriteObjectFrogHit",
+      "containing_function": "2b58",
+      "instruction": true
+    },
+    {
+      "address": "2b83",
+      "name": "updateSpriteObject",
+      "containing_function": "2b83",
+      "instruction": true
+    },
+    {
+      "address": "2b93",
+      "name": "writeSpriteObjectSlotX",
+      "containing_function": "2b93",
+      "instruction": true
+    },
+    {
+      "address": "2bab",
+      "name": "steerSpriteObjectTowardTarget",
+      "containing_function": "2bab",
+      "instruction": true
+    },
+    {
+      "address": "2bfb",
+      "name": "writeSpriteObjectSlotAttr",
+      "containing_function": "2bfb",
+      "instruction": true
+    },
+    {
+      "address": "2c13",
+      "name": "spawnSpriteObject",
+      "containing_function": "2c13",
+      "instruction": true
+    },
+    {
+      "address": "2ca8",
+      "name": "flagSpriteObjectFrogHitAhead",
+      "containing_function": "2ca8",
+      "instruction": true
+    },
+    {
+      "address": "2cf0",
+      "name": "scanCoinInputAndCredit",
+      "containing_function": "2cf0",
+      "instruction": true
+    },
+    {
+      "address": "2d23",
+      "name": "dispatch_2d23",
+      "containing_function": "2d23",
+      "instruction": true
+    },
+    {
+      "address": "2d25",
+      "name": "dispatch_2d25",
+      "containing_function": "2d25",
+      "instruction": true
+    },
+    {
+      "address": "2d27",
+      "name": "dispatch_2d27",
+      "containing_function": "2d27",
+      "instruction": true
+    },
+    {
+      "address": "2d29",
+      "name": "dispatch_2d29",
+      "containing_function": "2d29",
+      "instruction": true
+    },
+    {
+      "address": "2d3a",
+      "name": "dispatch_2d3a",
+      "containing_function": "2d3a",
+      "instruction": true
+    },
+    {
+      "address": "2d3c",
+      "name": "dispatch_2d3c",
+      "containing_function": "2d3c",
+      "instruction": true
+    },
+    {
+      "address": "2d3e",
+      "name": "dispatch_2d3e",
+      "containing_function": "2d3e",
+      "instruction": true
+    },
+    {
+      "address": "2d40",
+      "name": "dispatch_2d40",
+      "containing_function": "2d40",
+      "instruction": true
+    },
+    {
+      "address": "2d88",
+      "name": "renderMode2IntroScreen",
+      "containing_function": "2d88",
+      "instruction": true
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "frogger-remake-tools",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "prepare:rom": "python tools/prepare_rom.py",
+    "generate": "python tools/recompile.py",
+    "test": "node --test --test-concurrency=2 tests/*.test.js vendor/arcade-js/games/frogger/test/*.test.js vendor/arcade-js/games/frogger/idiomatic/test/*.test.js vendor/arcade-js/boards/frogger/test/*.test.js",
+    "audit": "node tools/audit.mjs"
+  },
+  "devDependencies": {}
+}

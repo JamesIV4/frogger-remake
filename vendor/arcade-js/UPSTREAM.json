@@ -1,0 +1,2643 @@
+{
+  "repository": "https://github.com/qarl/arcade-js",
+  "commit": "9387bbe817befacc235cd8f9f4dd56c652172481",
+  "license": "GPL-3.0-only",
+  "files": [
+    {
+      "path": "core/audio.js",
+      "sha256": "3f0fe6bc5a70094051faae9008827234a61f617f2bb42e0ba1326ab66ec87d96"
+    },
+    {
+      "path": "core/bcd.js",
+      "sha256": "6923a97255b837bad740ad086ce63d1a2b4601282faf0e0f7da000b1d38a666a"
+    },
+    {
+      "path": "core/bridge-reseat.js",
+      "sha256": "1e86974505f1a2f240ec00dd02c06459285c0c3977e8b3fc1d8f6e723ed79bc3"
+    },
+    {
+      "path": "core/entropy-pin.js",
+      "sha256": "f08408c918fbf24a9757acfe1ed47172ebfa4b673cb05b8d862c2ca7625a907d"
+    },
+    {
+      "path": "core/equivalence.js",
+      "sha256": "4cfd2bf8463b2432d7b3d40855392f91bf2a4f1e9c6fb2c86a07c94775274501"
+    },
+    {
+      "path": "core/frame-stepped.js",
+      "sha256": "c55d1349cffea8fafa40635c1303189d38255adfd3e24d66a5a86ad3dcdf6e66"
+    },
+    {
+      "path": "core/int.js",
+      "sha256": "8a2625d11412a0a11dc8a372b58529badaf0e83f40cbed8c0e859815c39b6d45"
+    },
+    {
+      "path": "core/mem-views.js",
+      "sha256": "1de9b5994a806f08c1c59e102081a6f4dba8ceed2cb6fe5f85be109e886f9c9d"
+    },
+    {
+      "path": "core/cpu/6502.js",
+      "sha256": "2f93365e00cfc8c853845ca62b16767cd7c9470388be032fe1ad31d6ca4c108c"
+    },
+    {
+      "path": "core/cpu/8080.js",
+      "sha256": "3501e1365b1f2bb11ca0c2c70d637b0dfc5a26ff7a5e79111b88ea64d1dd060d"
+    },
+    {
+      "path": "core/cpu/z80.js",
+      "sha256": "20c50893e1e36eaec8a6f2337840b808e4323786e6c482e36cbf3f62cfe8a730"
+    },
+    {
+      "path": "core/test/audio.test.js",
+      "sha256": "90a547626ffae97067001a8a20603d09ab349dfc95d8be4af5787e3bac31a509"
+    },
+    {
+      "path": "core/test/entropy-pin.test.js",
+      "sha256": "68d7488774b55f2febfd91d7d1cab28a1b0341ab071ed45415c99a7aa749d7f9"
+    },
+    {
+      "path": "core/test/int.test.js",
+      "sha256": "3ccc5ece278d4009ac9dc875b5986cf49c209f2d629b451a20450c7dda4f56e8"
+    },
+    {
+      "path": "core/cpu/test/6502.test.js",
+      "sha256": "01120a4c11c3736d395ed7a9415f26ee41ebd8be5e404aee65972d3f5d41c682"
+    },
+    {
+      "path": "core/cpu/test/8080.test.js",
+      "sha256": "067db8776da17ad2ca9e151ac95a2e42d7951ebbe1607df111783abff300d6e0"
+    },
+    {
+      "path": "core/cpu/test/z80.test.js",
+      "sha256": "e76d99bd8976c67a2d8c4ea749797fe58afec3ea0b6ddff0dcae58f4d265ad2d"
+    },
+    {
+      "path": "boards/frogger/hardware.json",
+      "sha256": "7b2f664b115c57525b7c5fbb41dd69bf7d6a429819d261b9180470860d7c2e44"
+    },
+    {
+      "path": "boards/frogger/io.js",
+      "sha256": "4327bc12a4c064d9b3465c6dd8239507f24b5b51e0ee7f4bc0a54c9910371c1d"
+    },
+    {
+      "path": "boards/frogger/memory.js",
+      "sha256": "f4adf2e968cfe9be1a2f6e087cbbec189c7d8d96f3b64a542640196abcb985a7"
+    },
+    {
+      "path": "boards/frogger/video.js",
+      "sha256": "398d40fb3738e1f2b33146a7c75e38fcbdd015767a4673fb14256c28eed7ab1b"
+    },
+    {
+      "path": "boards/frogger/test/board.test.js",
+      "sha256": "c3b4419cb3bed1327c41b3d12ccb126a723432693e25a0b718e11e547ac3bd58"
+    },
+    {
+      "path": "boards/frogger/test/video.test.js",
+      "sha256": "4ae7b6cd1dbf27617380395b5a976d33f732e2f6b44562ff9ea8e99eb027c21c"
+    },
+    {
+      "path": "games/frogger/entrypoints.json",
+      "sha256": "d4bdb9d4928e9d827cb7d70aab53a3c0b97a72907e50365dc227df587513f044"
+    },
+    {
+      "path": "games/frogger/machine.js",
+      "sha256": "5e2634d0b7b8fea2947c740ba42eec1dd9415f2b28821f0bf7b111c62247f24e"
+    },
+    {
+      "path": "games/frogger/manifest.js",
+      "sha256": "070491a1565b30a60030ca0ad5a1e6872a0ddb150e57451b8bbc200f0cc905eb"
+    },
+    {
+      "path": "games/frogger/routines.js",
+      "sha256": "eca4b51a224add57122fe1c41a43dbacd169035326d84cbc2913d1acca712e83"
+    },
+    {
+      "path": "games/frogger/audio/sounds.js",
+      "sha256": "54b712f0898bca4cf63dd276753b0bc118ca05acafa2f81f61912be1ce8bc694"
+    },
+    {
+      "path": "games/frogger/idiomatic/activateFrogObject.js",
+      "sha256": "cbcca97ff377bceaf4eefee1f8fdbccb299e63269994dcabdf2bd64b22a6a730"
+    },
+    {
+      "path": "games/frogger/idiomatic/addScoreAndAwardExtraLife.js",
+      "sha256": "9290f57b8e898ac19aa106e54e9ef091f8c4eb534d532abefcd38c49743d9b50"
+    },
+    {
+      "path": "games/frogger/idiomatic/advanceAnimationFrameBuffer.js",
+      "sha256": "1f9f486c3c36edbad5732d976c4858bd9ce10c56e8c3e859255067e37f441fe3"
+    },
+    {
+      "path": "games/frogger/idiomatic/advanceAttractDemoFrogHop.js",
+      "sha256": "b2cbb06ea3233684b20b83b555d6eab6d3f6d5ca5476548f379516d99fe9240b"
+    },
+    {
+      "path": "games/frogger/idiomatic/advanceBoardForeground.js",
+      "sha256": "b8b03555e3c87372de1beac1d547df31b64d4e58565b98ac1fef921aac233f3d"
+    },
+    {
+      "path": "games/frogger/idiomatic/advanceFrogAnimIndexAndRedispatch.js",
+      "sha256": "a745babf1ddbafc1b60ffabc9bc393dd656ec5f28d4121910fcaf29a70cae8e6"
+    },
+    {
+      "path": "games/frogger/idiomatic/advanceHomeBaySlotCursor.js",
+      "sha256": "c05c16f0fbfee85526eb10a63559b60c0551578401b9f8a462364482835bf771"
+    },
+    {
+      "path": "games/frogger/idiomatic/advanceScrollLaneObjects.js",
+      "sha256": "a9c5cad36afeb7991f5f609fc86a725b3d4114b55ade4b15488f5fe792af58ab"
+    },
+    {
+      "path": "games/frogger/idiomatic/animateFlyEatCollision.js",
+      "sha256": "26cd26d585e6256975e88d78d41e7cb8b447d5ab246a20cf6de01b3b20adc719"
+    },
+    {
+      "path": "games/frogger/idiomatic/animateFrogHop.js",
+      "sha256": "cfe9674605ce92277e851b71d8bac579d6cc60c3ee683ffb0f960bfbd64a0fec"
+    },
+    {
+      "path": "games/frogger/idiomatic/animateSpriteObjectFrame.js",
+      "sha256": "862fbff23bbc84bb1ef16917e50652095d0d88f1252dedad8f44eb98efa3434e"
+    },
+    {
+      "path": "games/frogger/idiomatic/animateTwoPairFigure.js",
+      "sha256": "d8d5b48ce856d0f0d6198bebf0730a55873355bb1feefaa5121231ef2f8b2a54"
+    },
+    {
+      "path": "games/frogger/idiomatic/armBoardCompleteReveal.js",
+      "sha256": "86efd6e634bdbe2a79e9b88c6308c1ecb8e347d9858c4b6d7cfa55bad7657e9d"
+    },
+    {
+      "path": "games/frogger/idiomatic/armDiveHighPhase.js",
+      "sha256": "8162794bb33666a3b08955adbf3d91c896f1c5ab62463a3c7957dd327e7f7baf"
+    },
+    {
+      "path": "games/frogger/idiomatic/armHomeGoalSprite.js",
+      "sha256": "dd91ca3af6484e070f2a9a393a5c3ec92dea7b5ca95dc071f3cfd11aac5288f8"
+    },
+    {
+      "path": "games/frogger/idiomatic/armTwoPairFigureFrame.js",
+      "sha256": "d8bed316a632625aeeaabdf99569f345482426ab8c7951d2d614aa0deb2b96ab"
+    },
+    {
+      "path": "games/frogger/idiomatic/awardBonusPoints.js",
+      "sha256": "9e28fc650d4ecc4c653503060f2c96522201a3cd6fde32767e2b6a2e46b3189d"
+    },
+    {
+      "path": "games/frogger/idiomatic/awardExtraLife.js",
+      "sha256": "17f5616022a65917375a2dd42d1a50b2a76a64d719bff392187527a842ddae19"
+    },
+    {
+      "path": "games/frogger/idiomatic/awardHomeBayGoal.js",
+      "sha256": "f09619a8017715ce0ad314fd40957abfcb5a7c7a9cf4602c5d4c60278b758bc3"
+    },
+    {
+      "path": "games/frogger/idiomatic/beginNextLifeOrIntro.js",
+      "sha256": "365c3f89631b9093ff6c697d823f66d17e5cb1515f009d2baf7c57a5c3571cdc"
+    },
+    {
+      "path": "games/frogger/idiomatic/blitEndStripAndSetHold.js",
+      "sha256": "53f1bd180e32544cfded791572b7f080f2d4b446504869ca61adbf5e92ee10f3"
+    },
+    {
+      "path": "games/frogger/idiomatic/blitFourTileGroupColumn.js",
+      "sha256": "d561aa924e10c469e645fb11a22ba3ff117c5cd002ab2851f349e619b1ca0234"
+    },
+    {
+      "path": "games/frogger/idiomatic/blitFrogAnimColumnOnTrigger.js",
+      "sha256": "c37d10e334d0f5faa3145446a1913978ae6096dedc6d65e37e604b4d8cc44cbe"
+    },
+    {
+      "path": "games/frogger/idiomatic/blitGameOverLine.js",
+      "sha256": "a5db9b79361284e63cfb0dacb93634098ee341414aae53551528d6ff9d241841"
+    },
+    {
+      "path": "games/frogger/idiomatic/blitMode3FinalStrip.js",
+      "sha256": "b47b5e66b8d514dd69b35427374ce18eb9ce90de5884fd47a60eec7d0cd145f0"
+    },
+    {
+      "path": "games/frogger/idiomatic/blitPlayerSelectPrompt.js",
+      "sha256": "3fba82a26077aa9a0c43a40e090c18bd91733693de3d8838adb5cd36354aceb1"
+    },
+    {
+      "path": "games/frogger/idiomatic/blitScrollBand.js",
+      "sha256": "ba266b193f77556707988aa463ce1984827597d064d3839b11f732c0fd2c75a9"
+    },
+    {
+      "path": "games/frogger/idiomatic/blitScrollTileGrid.js",
+      "sha256": "a4656e6bcbe4d40b2ab37fc943ca5562855f9d59cde21bf1456dd8a94f87fc95"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearActivePlayerWorkRam.js",
+      "sha256": "992f2d5086748868d76ded458129818904e87604a2f0be0101f853230b7054ac"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearAndSeedScoreField.js",
+      "sha256": "a37e2493af4e8c7e7b40058d3cc1accea52255c6571142feafbb2ce886e6b2b0"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearCollisionSpriteBlock.js",
+      "sha256": "d642c7a831a1cc1e6b9a445c12f110383ee4f80d53e8e72437c80e423d84feaf"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearFlySpriteBlock.js",
+      "sha256": "1ec8c00d10c90dd8176e73dd59dfcf790025d18f7006b3306eb7191e20ccead5"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearFourByteCounterBlock.js",
+      "sha256": "676ece9d551b21ba63934a0f154352823683a8e80dd98a9dbe62fc848d79bfcf"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearLatchedCollision.js",
+      "sha256": "acfd80388e92fb3bf0cc93c950fda1425abf51ac2fbd285dc37e33a88c898cc1"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearObjectBlocksAndMirrorToObjRam.js",
+      "sha256": "99e82acb4df4b06ca0a4e3fcc9c38fb8c589bb22285e934c5e34bdd319ac8c96"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearPlayerOneHomeBayGates.js",
+      "sha256": "905d89376aa2d934acc127fac34a9d73ca6e31334c86110632d5dcc8d03e6154"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearSoundQueue.js",
+      "sha256": "4dfe6d85098af77216fe3462b3e2aebcf40107c0c4435004151c05f49c89d1d7"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearTilemapToTile16.js",
+      "sha256": "d35098550ea887d95af37b72d2c51bd34506f583ba8520c43b5154e10c8ff6fc"
+    },
+    {
+      "path": "games/frogger/idiomatic/clearTwoPlayerFrameCells.js",
+      "sha256": "95defa62af779fcc300abff28d5e5574de7cf32072d216d262be213fc53a9e92"
+    },
+    {
+      "path": "games/frogger/idiomatic/coldStartClearAltSlotGates.js",
+      "sha256": "68220558884037198d224f5756a4df6b5a676d2df1b04cba009b99a1a5880c60"
+    },
+    {
+      "path": "games/frogger/idiomatic/coldStartClearPlayRamAndSetMode.js",
+      "sha256": "4e6d3b573e43e07c22d08f1fe4f86e35da298edc0d83ab8cceaa47fd2b5b57f8"
+    },
+    {
+      "path": "games/frogger/idiomatic/coldStartClearSlotGates.js",
+      "sha256": "77c4da551aa2e6c752c2d6119e2a50d459bab891860471086a8040935cb788a6"
+    },
+    {
+      "path": "games/frogger/idiomatic/computeVramColumnIndex.js",
+      "sha256": "5cbaad7e4325759aba49cc583f18d97b990046ed208b8269c452019575752da9"
+    },
+    {
+      "path": "games/frogger/idiomatic/copyDiveAnimFrame.js",
+      "sha256": "093b17fc3fc055e2bda769f0e255e5bf5233c205c7a635840a77e3a196d879f4"
+    },
+    {
+      "path": "games/frogger/idiomatic/copyRunUpTileColumn.js",
+      "sha256": "6ecd47c1561ec4c472575a8f7af6b921ba39d770f0669f53f9a3a35d9fe8db36"
+    },
+    {
+      "path": "games/frogger/idiomatic/dequeueSoundCommand.js",
+      "sha256": "4ea8298da6e97e8c794f1fc8cc9b6ea563fadc0584916c1b34260ccd9af8f666"
+    },
+    {
+      "path": "games/frogger/idiomatic/dispatchFrogAnimationArm.js",
+      "sha256": "9540a22a59469033c68fdc20c1db4391cc07f380eaaaca9a767ea5e673063a16"
+    },
+    {
+      "path": "games/frogger/idiomatic/dispatchFrogMoveAgainstLanes.js",
+      "sha256": "5229d6c3744581a94530427d07bade0c3c18be24a9e76afe5659fb79097d7c1c"
+    },
+    {
+      "path": "games/frogger/idiomatic/dispatchGameModeFrame.js",
+      "sha256": "afdfad9a02f4bbb6823ebb2c996066e3d02238c555bba875eb47ac3e61209256"
+    },
+    {
+      "path": "games/frogger/idiomatic/dispatchSpriteObjectArmsA.js",
+      "sha256": "d68992b755f44983fb220045e8cc8aa463da724ac5f8f19a18f95ce467d0d760"
+    },
+    {
+      "path": "games/frogger/idiomatic/drainForegroundThenYieldEachVblank.js",
+      "sha256": "c55c6bf522a295d62ddfd2646edb29c08b33c8d04907da779094b5f6bc3d434f"
+    },
+    {
+      "path": "games/frogger/idiomatic/driveAttractDemoFrogHop.js",
+      "sha256": "a90f90338c69aed143b5eafafd3c8e615d1c630d32ca000a568d09f87d27ba68"
+    },
+    {
+      "path": "games/frogger/idiomatic/driveAttractDemoSequencer.js",
+      "sha256": "a43024e126028017d64b7aeddf9af1a76f2af58785560f5040f6902a48ff169a"
+    },
+    {
+      "path": "games/frogger/idiomatic/driveDiveAnimByLevel.js",
+      "sha256": "43afe3eed6163fc148aaaa609d3257b0ea37168d4f4450a88c46a7f2a9a9de8e"
+    },
+    {
+      "path": "games/frogger/idiomatic/driveFlyPatrol.js",
+      "sha256": "41b0c3182285d119bb10362d3f46ff4dae3f236cc63982402a6bb0403231482b"
+    },
+    {
+      "path": "games/frogger/idiomatic/driveFrogDeathAnimation.js",
+      "sha256": "56667e42a0f4476e0f40630e99d3407f60970b6ff61b8700cc91e2769104a7f7"
+    },
+    {
+      "path": "games/frogger/idiomatic/driveInPlayFrameUpdate.js",
+      "sha256": "f259e1edf3832820a66a74c8086242d55b3edb719aadb379487023a2451a54cf"
+    },
+    {
+      "path": "games/frogger/idiomatic/driveScoreDisplayCountdown.js",
+      "sha256": "266c0f74535b50bb3baa4e51a947379cbeb5c3c2e4b3fe30e82c2b73b2313d9c"
+    },
+    {
+      "path": "games/frogger/idiomatic/driveSpriteObjectCluster.js",
+      "sha256": "dfd84af445f944e3c5d7f90613ea69c12edfc9f5b2541d70b18e155f2c141768"
+    },
+    {
+      "path": "games/frogger/idiomatic/endForegroundPassAtPaceTail.js",
+      "sha256": "911998608ac535d7dc2e8b3d0e444e85f61b91b1e4bcfd6d0e93897c33719fb3"
+    },
+    {
+      "path": "games/frogger/idiomatic/enqueueLaneScrollSyncedCommand.js",
+      "sha256": "5cfbaf414cc1773c0fa55c36351aeac4b53819d2382bdeed7cc7ff6ea07eb2f6"
+    },
+    {
+      "path": "games/frogger/idiomatic/enqueueSoundCommand.js",
+      "sha256": "e696840cfd1fea1f429838821aa05807d19e9c463e347b01fa3609e0e52241fc"
+    },
+    {
+      "path": "games/frogger/idiomatic/fillAllHomeSlotsAndAwardLife.js",
+      "sha256": "7c25d9b3b7a7f724b0be8b212ad460ed6cdca83a46a87a5c6a8b8542b6ee90b1"
+    },
+    {
+      "path": "games/frogger/idiomatic/fillTenCellRun.js",
+      "sha256": "a2a1b216dd5d2d3e666bd106f2f9abc3004c64c23f79a33c8148a5ccb152aece"
+    },
+    {
+      "path": "games/frogger/idiomatic/fillTilemapBlock22x32.js",
+      "sha256": "e1dbf7437c8b6bddbfceb8f96044290d3f7a286e0dba846524be173fdfed3410"
+    },
+    {
+      "path": "games/frogger/idiomatic/fillTilemapBlock28x32.js",
+      "sha256": "7d56d416927abbc875892367755fc2e28fd000fa52f0d3414ff680978517734d"
+    },
+    {
+      "path": "games/frogger/idiomatic/fillTwoByTwoTileBlock.js",
+      "sha256": "dd6d10cb928eceb8688b70e6d489d40319b6e6f792b5ab7487a028e516c77c24"
+    },
+    {
+      "path": "games/frogger/idiomatic/flagSpriteObjectFrogHit.js",
+      "sha256": "126ea2f0d72fbd9cc92e771a45f4ffd08a9e88da5cf41810ee4a52c4c82f5f59"
+    },
+    {
+      "path": "games/frogger/idiomatic/flagSpriteObjectFrogHitAhead.js",
+      "sha256": "e90744afca344548b78efd4b952ef5a2f327e740992255cd9f3fcb3bc52c9414"
+    },
+    {
+      "path": "games/frogger/idiomatic/forceClearPlayerWorkRam.js",
+      "sha256": "dee95cef71fd8ddd96730cdd1cf0699d4ffa7b2b5ef98974051dce1a3bdede93"
+    },
+    {
+      "path": "games/frogger/idiomatic/handOffToOtherPlayer.js",
+      "sha256": "e39f3c98e25b0fa06d7d2669e54e2713d3c956fac669400cb40c4a3b525ac731"
+    },
+    {
+      "path": "games/frogger/idiomatic/holdFrogMissedHomeBay.js",
+      "sha256": "8f25c8460740fcc3531f68232dd1f673081ad858c906f6d621a653f28ac3ccf4"
+    },
+    {
+      "path": "games/frogger/idiomatic/initColdBootAndEnterMainLoop.js",
+      "sha256": "77c38acd7a847ff70b7215fe620373c919f6fac43b2d1351d22675aa708ea80a"
+    },
+    {
+      "path": "games/frogger/idiomatic/initDisplayFieldOnce.js",
+      "sha256": "73571baeda737adf5fb3eb8c4f02d8ee7d7a35faae0e0a288e16e9fd255f62f5"
+    },
+    {
+      "path": "games/frogger/idiomatic/initInPlayBoardOnce.js",
+      "sha256": "d2799eaf46f6828d824109b1e1900fa6fd5e0408aad8c246f773d6672166d0b7"
+    },
+    {
+      "path": "games/frogger/idiomatic/initNewGameScoreAndTimers.js",
+      "sha256": "339ed5de115f8a0a82419163e9ca12c8f94751aaf7747e757cbc22b26dfaa3c9"
+    },
+    {
+      "path": "games/frogger/idiomatic/insertHighScoreEntry.js",
+      "sha256": "45bcd7fef42f3eb6e9c57c1c44271110fde6513f067d6e40e1e13f1e8d24e5a3"
+    },
+    {
+      "path": "games/frogger/idiomatic/issueSoundCommand.js",
+      "sha256": "495c84333b1704059b367ce89f4174453d854ff97dbf7254d051a5729191494c"
+    },
+    {
+      "path": "games/frogger/idiomatic/loadActivePlayerLaneParams.js",
+      "sha256": "fa91df95d5d25019f7b5f2495a18f3bc8aea084ff39e02c3ef1f78d558d92730"
+    },
+    {
+      "path": "games/frogger/idiomatic/mountOrKillFrogOnTwoPairFigure.js",
+      "sha256": "cf16d92dfd8088bf297fc7b66e3dd0ebdaf91b8f294fe4daeaf090eef56394cb"
+    },
+    {
+      "path": "games/frogger/idiomatic/moveLaneObjectsAndCarryFrog.js",
+      "sha256": "13889f716441625c3604bd95248a4b5c59849aee7aa9e05709da13f70cc5ec61"
+    },
+    {
+      "path": "games/frogger/idiomatic/moveSpriteObjectArmA.js",
+      "sha256": "c8773d1e4b529f6e765edd15e94ccaf9dfb36859aeaeaa256764d35089e1aafd"
+    },
+    {
+      "path": "games/frogger/idiomatic/names.js",
+      "sha256": "4d3282e28d13b7abfe7cdeb646a258682cfb76b4b85376de01bbed201f94a234"
+    },
+    {
+      "path": "games/frogger/idiomatic/nextSpawnRandomByte.js",
+      "sha256": "4a8093f5096f4162b1476998d36f7000de9a1cc3a1a5ac781d0ec8716176f361"
+    },
+    {
+      "path": "games/frogger/idiomatic/orchestrateCollisionsAndFrogInput.js",
+      "sha256": "bbf2bc54fedcc2fbb93fcc8de8e0eadf2078d12563f01da03f866718b96801a5"
+    },
+    {
+      "path": "games/frogger/idiomatic/packScoreRankPair.js",
+      "sha256": "bd6b13035fdabde2dc5f3137814dc51e79e737d293cb8cfaf239dcc690272a64"
+    },
+    {
+      "path": "games/frogger/idiomatic/placeScoreRankMarkers.js",
+      "sha256": "d1d66cdf4aaa5b2c93e79dd17a6e7b5b9d6430c119962467c25eb259bbb175aa"
+    },
+    {
+      "path": "games/frogger/idiomatic/placeSpriteObjectSlotAndRetire.js",
+      "sha256": "64e1d53f584b47f1515c3d7edf39217b2075992061e62929b83678c038e51b8e"
+    },
+    {
+      "path": "games/frogger/idiomatic/raiseActivePlayerStartFlag.js",
+      "sha256": "7fd4b5226605fde89b212eafc70b260d1b5ef0818573f5e4e833d5093ba660fa"
+    },
+    {
+      "path": "games/frogger/idiomatic/raiseSpriteArmOneShotAndQueueSound.js",
+      "sha256": "98715abe54864c8db76aba4b19e2433bb17754dd2cacfa449e6688cd1d28de0c"
+    },
+    {
+      "path": "games/frogger/idiomatic/raiseTwoPlayerStartFlag.js",
+      "sha256": "1d25eefca05f538f560277d8db8332bcbf48f5c422d0dbf92207594e075e05ef"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderCreditLine.js",
+      "sha256": "98421e2044c1b7587690d19c0209dc19ac83a3eabe522e7d6c5e71846f07ca21"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFilledHomeSlots.js",
+      "sha256": "e55bf95eebf6151f8ca1c90dc6381ea3d83a2fd149b87e15a810b98b9e106b00"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAndArmObjects.js",
+      "sha256": "8b9530a25d7a395c663d85a1150b7b49d8ad1d1a7c829c0058f1626cddfab2a6"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm0.js",
+      "sha256": "3178073f1198b1a5ff96e9448f3023fb651f4b35a872b04385963274b0d1de41"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm1.js",
+      "sha256": "f9ff1fb8d2e1c94a9ed2d4c086325536d7066b7360dfe97c8ffaa2423d215012"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm10.js",
+      "sha256": "7f331308b8e67a99efdeab6e66364db0ea344a7eaf92c74a4cf1745c97ab7bbe"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm2.js",
+      "sha256": "cb822b1914c6045214687f2eccf26c58a7fb0258d26453a687ae536e04388a73"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm3.js",
+      "sha256": "ee0aefa0535d77afd94404c85e277fa821c36514f33e2a7e094fd3a3c692b2f3"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm4.js",
+      "sha256": "e86e5466110860c4d2587c5eed8e5147e8e4e7e8b4a1bf02125d3008933cb329"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm6.js",
+      "sha256": "7598fa73dede413ad69223cc807c62f6c38256ce297083885cf72bbf0b07cb94"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm7.js",
+      "sha256": "47e67a73d770dcae10d17af51b5fd081bc857b6c8303d959c960037cc1b68098"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm8.js",
+      "sha256": "e967d686253f9046bcf7a54e0607e0089307d1e37858177acf14ce4819608e92"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimArm9.js",
+      "sha256": "aaaed954bacf58a0327b3c6852a558ae78718430d6eeb3ceb8f52e1897934462"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogAnimTileColumns.js",
+      "sha256": "512519db4f209c2a1729385dc65da5efda7e11312aebc746af53257580ef4ba2"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderFrogSceneAndTickTimer.js",
+      "sha256": "f5f258c3c4035fe215a767c5f75a805f6af814df3ed5aa91f5312438cddacded"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderLivesRow.js",
+      "sha256": "4e14dd3713fee1e1e39a2a5b3a791889d7a3b0a492c6db236424465f4af4a90e"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderMode2IntroScreen.js",
+      "sha256": "badfc7a6796fc80a2fd681bf1a018238bd50f13d32037acf9fa296ba4fa863d7"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderMode3ScoreRankingScreen.js",
+      "sha256": "5f09a55c5f708769b9efd133f94d3f121f3f5e252a3b0164f728583a6b13837f"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderMode4PointTablePhase.js",
+      "sha256": "a1e5499f4a169b95d964e382a93fa3d06cf7436a7b46b45065470d4f96918b51"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderScoreHeader.js",
+      "sha256": "94abacfe825954c7f413589a7dececd7ae9c94121d144898329cce06584e3cfd"
+    },
+    {
+      "path": "games/frogger/idiomatic/renderTimeBar.js",
+      "sha256": "a4774766900dc269c15516c6d383434a12e33f7724ce29bb62e13adae9d7f446"
+    },
+    {
+      "path": "games/frogger/idiomatic/resetDiveSurfaceCounter.js",
+      "sha256": "ba572a9fa5521bef42f719cc0d2ba9f212747c548db161d7bcda0e005cc11878"
+    },
+    {
+      "path": "games/frogger/idiomatic/resetFrogObject.js",
+      "sha256": "62912d651e4896c9905f62612c8a7e5cb53d4963f0d5dac2d580d0abd0e6d3e0"
+    },
+    {
+      "path": "games/frogger/idiomatic/resolveFrogMoveAgainstLanes.js",
+      "sha256": "3cd144cc9c5613c7a8032987c0d8cad78e2a6e7ea761ad6fcb7f43a86a1037e5"
+    },
+    {
+      "path": "games/frogger/idiomatic/runIntroTimerThenInitGame.js",
+      "sha256": "23884b595a0cecfc8325dfd29511ed6b1a950d00ba8627f05f94bbaa84c859de"
+    },
+    {
+      "path": "games/frogger/idiomatic/scanCoinInputAndCredit.js",
+      "sha256": "4c0e901ef3a6369b577de85bcb6d755abbf257d4aa83e9852f6cff3c5f306869"
+    },
+    {
+      "path": "games/frogger/idiomatic/scanFrogInputAndDispatchHop.js",
+      "sha256": "badf84b1103e9feb5f720c3a82645fa7c481e6cb06b320a23610c1c1569d0af1"
+    },
+    {
+      "path": "games/frogger/idiomatic/scoreFrogRowProgress.js",
+      "sha256": "69f63c024ac4730e28840d566c7e07619e6d9f0045a915471ede83d17db4b192"
+    },
+    {
+      "path": "games/frogger/idiomatic/seatStackAndEnterColdBoot.js",
+      "sha256": "cb5d0bb01d4e667cd161cd4c287a99ce15d5bd7604f5c8bbc2964d1093167782"
+    },
+    {
+      "path": "games/frogger/idiomatic/seedObjectAnimationState.js",
+      "sha256": "e25bd3d5add07a39eecfc1267caaa7b4687b76fae5b789b8a75f3ce819ce80da"
+    },
+    {
+      "path": "games/frogger/idiomatic/selectDiveVariantFrame.js",
+      "sha256": "f170e8e5dbfdec55921e1f7409d717e854716cd23a20c7b7f82b1b3c7739d898"
+    },
+    {
+      "path": "games/frogger/idiomatic/selectHomeBayGoalHandler.js",
+      "sha256": "adeec0af44d61acbcbc36b0482fe0913d6649407e42f273bdace4f34b2ebe767"
+    },
+    {
+      "path": "games/frogger/idiomatic/serviceVblankNmi.js",
+      "sha256": "9b6181e0bfd2178d95cda016d23b5f957b632c62e04e60f7640f7833254afc17"
+    },
+    {
+      "path": "games/frogger/idiomatic/setAttractIdleMode.js",
+      "sha256": "8296d2ed886137e0685e2c47eb69b9b5593cbd314a094f00dffc588946630975"
+    },
+    {
+      "path": "games/frogger/idiomatic/setUpBoardOrContinueLife.js",
+      "sha256": "c6d13c616b5e13a082908cac3ea68c41c5b2da1bc2f40bd9f6f21bdc9fe838f8"
+    },
+    {
+      "path": "games/frogger/idiomatic/setUpPlayerTwoContinue.js",
+      "sha256": "5388b8bf5f11c844e8be60dd715923444649f6a5cfbc98f9f01f950fdd82293a"
+    },
+    {
+      "path": "games/frogger/idiomatic/setUpPlayStartOnce.js",
+      "sha256": "045d6b58838b607d211f0d0e06684ae9e5e40c53ca0a1211c736843fb2f02761"
+    },
+    {
+      "path": "games/frogger/idiomatic/spawnSpriteObject.js",
+      "sha256": "260dd267c92bde641cf6d46217bc98dd691a28281c566346b6b5bcd695942b65"
+    },
+    {
+      "path": "games/frogger/idiomatic/spawnSpriteObjectArmA.js",
+      "sha256": "5c0d03ba4aa028d229b9b88df21bc864f02caa0a233a69d10cc2c69b1c1c406e"
+    },
+    {
+      "path": "games/frogger/idiomatic/spinWatchdogSettleDelay.js",
+      "sha256": "0d5936f07570066d1c8404acf57e9cb9b95ea0713f6e13fe449de4b8dd107a57"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampAttractDemoCell.js",
+      "sha256": "88df1750402c84423fac68deb72c1ceb2ef21ed7532707c0b34818e0163a76a9"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampHomeBayFly.js",
+      "sha256": "7f69bfa65234f0b388ee3a4019f85adb4248deee5dededfdcee37a8659b6ddd1"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampHomeBayFrogByColumn.js",
+      "sha256": "7ea7ed87179c2fbf636d512b3d5267ae043d43cd19a7ebe5aa7bc12b91718e6e"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampHomeBayGatorEmerging.js",
+      "sha256": "206b1694fed204a7924104f338964ab72a24808bd946ef125304ce54fd31e632"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampHomeBayGatorFull.js",
+      "sha256": "cef21740f50bc301a52926fad9fc9c05829ce5c1749ed31ad8375b3b2e3756b3"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampHomeBaySlot.js",
+      "sha256": "834a832e6789177fa85c1b39d34ee60e1a04712ebb7a6fe281db8180dbbb624a"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampHomeGoalAndResetFrog.js",
+      "sha256": "409e737f430f02f362596a4737b174b336337fb99c126c54b27881c458d5794e"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampRankMarkerIfPlaced.js",
+      "sha256": "22d1ae99132357f147d828c1f5aebfe81089937edda26d58b4d98603c40c69d0"
+    },
+    {
+      "path": "games/frogger/idiomatic/stampScrollRevealColumn.js",
+      "sha256": "7efa112b8166f9d3f23dc192e1020f1252e3bdb1fbf3af97ac90582ea53923d3"
+    },
+    {
+      "path": "games/frogger/idiomatic/steerSpriteObjectTowardTarget.js",
+      "sha256": "cac79dc27ca2deb6ada4b1911c9fe62a3d14ac1591e464a1988a470c9ce5737a"
+    },
+    {
+      "path": "games/frogger/idiomatic/stepDiveFrameCounter.js",
+      "sha256": "89393481ac40276c7c6582fc959e9cfc0f11f98222f84adba49c63633486e040"
+    },
+    {
+      "path": "games/frogger/idiomatic/stepDiveSurfaceTimer.js",
+      "sha256": "b1a2934878bc7044d11d3125e4ca6fbed6bcae659da7a4f28b3f56ccb84f993b"
+    },
+    {
+      "path": "games/frogger/idiomatic/swapInActivePlayerPages.js",
+      "sha256": "9e970ff6f440e8333147499b883bb5a8a0183f08d229fd82b8773df37ee5f8ef"
+    },
+    {
+      "path": "games/frogger/idiomatic/swapOutActivePlayerPages.js",
+      "sha256": "bc2956880bb7effe3c6b633e27b7d3d96b6d7d0f8662cfb2f09d56ee4748ed0a"
+    },
+    {
+      "path": "games/frogger/idiomatic/tickAttractCellFrameClock.js",
+      "sha256": "55ad8f28c8cd280fbb1078fca0cf694c44f49537c28da1ddbcc5d3c1de1e4ca8"
+    },
+    {
+      "path": "games/frogger/idiomatic/tickFrogRespawnDelay.js",
+      "sha256": "feb2c3e9d012ee07801dbcfb6e6685b90f76ab4b7cbfcf1b3c9e8021f6de9c46"
+    },
+    {
+      "path": "games/frogger/idiomatic/tickGatedCountdown.js",
+      "sha256": "28fe10f1bccb8dab08b8c0a8a30d68c0d317f319871c75631c4d1f946a387d0c"
+    },
+    {
+      "path": "games/frogger/idiomatic/updateSpriteObject.js",
+      "sha256": "be84545aaaed60425d1aec377837cf32f7921cc4802b1a2c2b455caab7ca7da6"
+    },
+    {
+      "path": "games/frogger/idiomatic/writePackedBcdByte.js",
+      "sha256": "6bd8aa9e81728245809a1b5cebb4e861294bf8d3a60af4d92ea603c1516f8428"
+    },
+    {
+      "path": "games/frogger/idiomatic/writePackedBcdWord.js",
+      "sha256": "96367348cf2b9134ab8f70584224b634e369df3a7a2192476b828be5a2b64152"
+    },
+    {
+      "path": "games/frogger/idiomatic/writeScoreDigitStepUp.js",
+      "sha256": "1552c58cff5db0fef2165af4eec3e5be8a325737b5e6c780c024710eba944ca6"
+    },
+    {
+      "path": "games/frogger/idiomatic/writeScoreField.js",
+      "sha256": "404146800cad6243ee90a17de90cbfc3c4d2311dcda0ada7bc14f54f2ad240f8"
+    },
+    {
+      "path": "games/frogger/idiomatic/writeSpriteObjectSlotAttr.js",
+      "sha256": "6f0bf71f4689c5f705a7e01f958ffe1838748d7b72e2f23f269abba2b1e44867"
+    },
+    {
+      "path": "games/frogger/idiomatic/writeSpriteObjectSlotX.js",
+      "sha256": "4e7c4b28049986f3120dbee32da0f806958e03fa9e8080563b6eaf4a7b350adf"
+    },
+    {
+      "path": "games/frogger/tapes/coin_start_hop.json",
+      "sha256": "1aba807849f3da4643cfcc13aebfb47b3301297fe7332a4e6479416eb0717ed8"
+    },
+    {
+      "path": "games/frogger/tapes/coin_start_hop.lua",
+      "sha256": "b34ac44d23005ecfd2af5dc47f832d3bfaf2697c2ca75b2d4cd2eead3b83c938"
+    },
+    {
+      "path": "games/frogger/tapes/timer_expiry.lua",
+      "sha256": "3a2f855a02994c881ebcddedc4877448b6a367bcf663d2b1d7ab532dd1049673"
+    },
+    {
+      "path": "games/frogger/test/audio-map.test.js",
+      "sha256": "8a2f44dc61920bc04c370e1d0bd59e938ffe590185491eb754d59250472c644b"
+    },
+    {
+      "path": "games/frogger/test/audio-wiring.test.js",
+      "sha256": "634bf8a7a8ac0b28c86443a875d6b3a21a89375c33ab6789eeadccc1022570b8"
+    },
+    {
+      "path": "games/frogger/test/idiomatic.test.js",
+      "sha256": "731f5e0c577336d38dfb875d6ff8b63242c1ea0ab616f1c5430391e4b1ff7727"
+    },
+    {
+      "path": "games/frogger/test/registry-sync.test.js",
+      "sha256": "3348ce3e2d5b5eabc8f7444a41d5253286d370259b3a49dff67b8ea786b84feb"
+    },
+    {
+      "path": "games/frogger/test/vs-oracle-gameplay.test.js",
+      "sha256": "051527a23fe8e4042a5ba23de2f6de31f6cb62859cebdead395e52c3806e45ba"
+    },
+    {
+      "path": "games/frogger/tools/build-rom.mjs",
+      "sha256": "676f9dac84b4e690c30ce5e744bb01ad48afdef4d9447c05eb312932e703e632"
+    },
+    {
+      "path": "games/frogger/tools/mechanics_suite.py",
+      "sha256": "52ef81e685043d03805bc62f8668be0d976e3ac4dfca6a457304e2729769e483"
+    },
+    {
+      "path": "games/frogger/tools/mech_compare.mjs",
+      "sha256": "e2a5f6ec2c3c6584a0386dede246fd53a155b841eb915e7efda16a615eddabbc"
+    },
+    {
+      "path": "games/frogger/tools/pixel_suite.py",
+      "sha256": "356116da9e5007ffa61586861a43ce5e15335f5214e7c072f545af5e729d2d34"
+    },
+    {
+      "path": "games/frogger/tools/record_samples.py",
+      "sha256": "46b6f6e3e2aa1b0d6b07e6009a012859a4d13a46c4289027ab4e740ab700f847"
+    },
+    {
+      "path": "games/frogger/tools/render.js",
+      "sha256": "a3c3bab85dd4974da1ca3a6beedc33982b708eee223016555afb71912cf473a6"
+    },
+    {
+      "path": "games/frogger/translated/loc_0000.js",
+      "sha256": "ce10bf264e70456e73773a6780fa7c393a6a59bac3fb4fee47badf11dce9fda0"
+    },
+    {
+      "path": "games/frogger/translated/loc_0018.js",
+      "sha256": "4bd68cac959cbbb29e8a6d81b35e33e3e4f4a37c04ad6e432a3bbdeb13711cc7"
+    },
+    {
+      "path": "games/frogger/translated/loc_0028.js",
+      "sha256": "80e40fd15f2f75636c0d8d564e4ebc0c4c8cace7272882a9675837d48741e902"
+    },
+    {
+      "path": "games/frogger/translated/loc_0038.js",
+      "sha256": "d86c6135627a24f293a069b8c0b0dea89b3f31f52f0adf68825457ba00b78997"
+    },
+    {
+      "path": "games/frogger/translated/loc_0066.js",
+      "sha256": "67faaf8a881dc3264b934125e88105ff390adde1f8e7d760522b5c7a4a11949d"
+    },
+    {
+      "path": "games/frogger/translated/loc_0292.js",
+      "sha256": "8190af72b5da5748bbef55d31501ba4c3596da5d8b671e8be51279ed9b87e676"
+    },
+    {
+      "path": "games/frogger/translated/loc_02a3.js",
+      "sha256": "bb3a2ca2159f55e6a212a00b8ae1f73a93a655c7dc6cc388ebc88b37f9e5b985"
+    },
+    {
+      "path": "games/frogger/translated/loc_0341.js",
+      "sha256": "d900687d0ac2f47786b281bf15d458041e74d9ca188679cfda1ace883eb4694e"
+    },
+    {
+      "path": "games/frogger/translated/loc_040b.js",
+      "sha256": "4bf254a430826c96477eafb1905209ce613f0b08a41d7e1c08777b2e555df03e"
+    },
+    {
+      "path": "games/frogger/translated/loc_0457.js",
+      "sha256": "c37a318fb4f5df884f74bf15ab5a926c78369537452087d66744f80b7d597e99"
+    },
+    {
+      "path": "games/frogger/translated/loc_048f.js",
+      "sha256": "d732a2c6ef89a3f40f76b44bcd596f57712c1b8db72dd10bf199da244c3f604a"
+    },
+    {
+      "path": "games/frogger/translated/loc_04f3.js",
+      "sha256": "89cc97347dc266a052774e33c9cb9c9e8f47254f93479225187a368e18420136"
+    },
+    {
+      "path": "games/frogger/translated/loc_0534.js",
+      "sha256": "b5f61cae90f3650bad079f9963b6c114184dea5ae27dcecae3bb96f4573eb3c6"
+    },
+    {
+      "path": "games/frogger/translated/loc_0547.js",
+      "sha256": "c8b3f691ae6c276f2e2afe6a497a7810ec068a05e1af838de0c023992832140d"
+    },
+    {
+      "path": "games/frogger/translated/loc_05d3.js",
+      "sha256": "2a7aaa353eb20d819402d7e6a72a02ef1009049b04d0ad1c97a83bc66a66a2b5"
+    },
+    {
+      "path": "games/frogger/translated/loc_05f0.js",
+      "sha256": "d7afd69c91b66b88683d9d4a467c85eb184c7131cb779ec3ea1ebd092a0d9087"
+    },
+    {
+      "path": "games/frogger/translated/loc_0629.js",
+      "sha256": "7a9edc0f047da28a9e6e6a5b2f2c0369bb653456f15eaca8a4be0bfa0c57c61d"
+    },
+    {
+      "path": "games/frogger/translated/loc_064b.js",
+      "sha256": "57fe74a7d24e500d6860094552a1a720f336eb4ad2206291ca878336c4656ba1"
+    },
+    {
+      "path": "games/frogger/translated/loc_0670.js",
+      "sha256": "5056f3c6a1fb24734da117b48f582e9b2e9d63e94f972a4fde7730f3b3d979a8"
+    },
+    {
+      "path": "games/frogger/translated/loc_0695.js",
+      "sha256": "08b8edadf2b1bc761dde6a1d2996da5ad57a750f2a6f04402f9e46803ead05bd"
+    },
+    {
+      "path": "games/frogger/translated/loc_06a2.js",
+      "sha256": "f605e013bc48ea2a0c8f488a88676e1b199749e0ba34446d60ed00dc6da962f0"
+    },
+    {
+      "path": "games/frogger/translated/loc_06ee.js",
+      "sha256": "f51e2aa81f27ea3474fb1fb1ad7348b85719a0943d451fb21bb2459243f55d84"
+    },
+    {
+      "path": "games/frogger/translated/loc_0726.js",
+      "sha256": "1e12859ba5ff0b79c5bbc19e91947389031d8200603a0ff3cef769675234faee"
+    },
+    {
+      "path": "games/frogger/translated/loc_0766.js",
+      "sha256": "d4287e2087de776ab9974cc3517375803223908e3e4fbe5d6273b0dde2969fcb"
+    },
+    {
+      "path": "games/frogger/translated/loc_0779.js",
+      "sha256": "7ab0827e9e892a3052543c84ab8d2d2e69fdafbb75eb09c0f568b72c6628cef6"
+    },
+    {
+      "path": "games/frogger/translated/loc_0781.js",
+      "sha256": "c08be55f0112283444a169755c3a8f6fedf3f887582db9cd5d16f257b155d529"
+    },
+    {
+      "path": "games/frogger/translated/loc_0794.js",
+      "sha256": "ff162e58a271891fe39e7cc9e77de28321afe02e0dc9513644b0ee0cf53da59c"
+    },
+    {
+      "path": "games/frogger/translated/loc_07ac.js",
+      "sha256": "a6634b493f711c95947f6e6ae2627374a9a1e0db45a37f4a876341c0a606d0a7"
+    },
+    {
+      "path": "games/frogger/translated/loc_07c1.js",
+      "sha256": "9414375f0563237d07fd4dc75820a2f00bcfd53c3185d9d4112381a83c9e47ed"
+    },
+    {
+      "path": "games/frogger/translated/loc_07ce.js",
+      "sha256": "83acc7566ee9f37f25d052347a70a8590321227b295b9002969008df5225bf06"
+    },
+    {
+      "path": "games/frogger/translated/loc_07d9.js",
+      "sha256": "c661812751a2b4963b7d297473a02340aab2fe271d7d0c964373425072cd709c"
+    },
+    {
+      "path": "games/frogger/translated/loc_07e6.js",
+      "sha256": "536db8842ac0edbe01f397cf4a926e46a7f53accbbfebf39b829ac820a12dea8"
+    },
+    {
+      "path": "games/frogger/translated/loc_0804.js",
+      "sha256": "999fbb77cbb9bfcc4ff88f407034c5895fb0e509d597c601ddaf867c6186359f"
+    },
+    {
+      "path": "games/frogger/translated/loc_0822.js",
+      "sha256": "7cdbe169bf5f4157cd7ebaaf53adfeb308194281ef9a90d8b482b09c7278a8d2"
+    },
+    {
+      "path": "games/frogger/translated/loc_085b.js",
+      "sha256": "94bdd3f8649191a65a1a46226f48b0caf9df3afdf37bfefa283e2055d9c33095"
+    },
+    {
+      "path": "games/frogger/translated/loc_0870.js",
+      "sha256": "c4af2120852cfeaa94762e91d41b6f47233c3a1c41bcb0a64504e94d404ff0e5"
+    },
+    {
+      "path": "games/frogger/translated/loc_08e0.js",
+      "sha256": "f4b14ae1c6d28d299f32520e1dc4bd9ee18722dd81142ad0bb0c41776ce4ec6f"
+    },
+    {
+      "path": "games/frogger/translated/loc_0942.js",
+      "sha256": "a85aeb6b3b29ed1ca5ced57db1ef6c026b933ad1968c85e5c4b4e0e860074758"
+    },
+    {
+      "path": "games/frogger/translated/loc_09aa.js",
+      "sha256": "7d608464c16d1aa1d9f88d1463936687e3c476eeb10780e86e549816b109fd0a"
+    },
+    {
+      "path": "games/frogger/translated/loc_09db.js",
+      "sha256": "6e4583a87e019b1dba57f6e891b3d94aae0e35db1c122d992f07387158d4ada9"
+    },
+    {
+      "path": "games/frogger/translated/loc_0a16.js",
+      "sha256": "bc4e5fdfa1e97dc140af58678567229a1b85b6e4b306a547a67c1aa326eca044"
+    },
+    {
+      "path": "games/frogger/translated/loc_0a48.js",
+      "sha256": "a7f0b6f5b1b1dcefb13f8950bec963e4d1a490c93c732337958b65968e2a416d"
+    },
+    {
+      "path": "games/frogger/translated/loc_0a5f.js",
+      "sha256": "30ef9c4acdd0e9f3a7914d5f23dc5b7c4e63e614d74321530214b2d78b775e79"
+    },
+    {
+      "path": "games/frogger/translated/loc_0a84.js",
+      "sha256": "00b58d6805940c0c9d4e01a41a9ab50bb1b6e8922a4c69f5d4e7ca88dc32453e"
+    },
+    {
+      "path": "games/frogger/translated/loc_0aba.js",
+      "sha256": "428cb3112ae33d86a6983c5595c766fb7035d0367b2771b8b8aae6946cf0e016"
+    },
+    {
+      "path": "games/frogger/translated/loc_0aee.js",
+      "sha256": "cba01b2bd8650938739fdde7be42a3fe74ef80ef5bd9171b91402dc4e619040b"
+    },
+    {
+      "path": "games/frogger/translated/loc_0b0a.js",
+      "sha256": "52b7d28db268776f3cf9c89c22b609663f4695bb5d8adcd353426bb8b073c650"
+    },
+    {
+      "path": "games/frogger/translated/loc_0b1f.js",
+      "sha256": "9d5d499c4124b2f3f77f736394192dfe271eca2cdada84ade0f7dec4b5ce48c9"
+    },
+    {
+      "path": "games/frogger/translated/loc_0b67.js",
+      "sha256": "9e94505d8c7ef2ac5249651c1f9083646bc9e6500e6164e985c86ee3d0fc3fb5"
+    },
+    {
+      "path": "games/frogger/translated/loc_0b95.js",
+      "sha256": "3e1516a2ff79265551812411fd8e252b3ba16849a6d83e79c33a59a8d6401da8"
+    },
+    {
+      "path": "games/frogger/translated/loc_0b9b.js",
+      "sha256": "0b616e0c4091f8970712d711f144c3db81719ae366d3fb81c8bce4b57c9fe4fa"
+    },
+    {
+      "path": "games/frogger/translated/loc_0ba0.js",
+      "sha256": "232c0930f77dbac08ea57e742867083335aebe4c37c26bef718e3ad6e1fc8004"
+    },
+    {
+      "path": "games/frogger/translated/loc_0ba9.js",
+      "sha256": "15875658f97f1622abaf4cca2b3bfcd14d6907f7cda40d4ea44f5a2c11820003"
+    },
+    {
+      "path": "games/frogger/translated/loc_0bb3.js",
+      "sha256": "4f3f83144a9aa5c11dc80bec979205866c87a0198d3ad389ef1ce7111137a5bb"
+    },
+    {
+      "path": "games/frogger/translated/loc_0c3d.js",
+      "sha256": "706731d27236f97cb5cd13746a64cacac57de5d14811b9bb508388939d7357fa"
+    },
+    {
+      "path": "games/frogger/translated/loc_0c4a.js",
+      "sha256": "8510a65023a6aa72d071f05c35e6a8b7c706138bae3242d39d951c9d07c073bc"
+    },
+    {
+      "path": "games/frogger/translated/loc_0c6d.js",
+      "sha256": "b15c1354dc0f0f0bc7eee0a54d06fe6a80dd6b7d8ca4a321116ec719275c2d95"
+    },
+    {
+      "path": "games/frogger/translated/loc_0d11.js",
+      "sha256": "e2dd027b644cca2475b41647431d3360412e34774a69a7b84e92c88bf7dd7c01"
+    },
+    {
+      "path": "games/frogger/translated/loc_0d4c.js",
+      "sha256": "fae8e14a5ea162cb9d110f74666fbf4308c0050aa9c3184126ae28149bf01887"
+    },
+    {
+      "path": "games/frogger/translated/loc_0db9.js",
+      "sha256": "929a4ab0d9dca1b0ca66f047fc865e245cbfd802b86a36cf4c126b2eac33addc"
+    },
+    {
+      "path": "games/frogger/translated/loc_0de0.js",
+      "sha256": "766d5859b46e7b795f786d3e6d990c47c1586e0fc3f3278490d93239540106ed"
+    },
+    {
+      "path": "games/frogger/translated/loc_0e74.js",
+      "sha256": "d4f03f466ee8592bfaba0d1e78f005756d579249e82adb660d54d0b3d12752c0"
+    },
+    {
+      "path": "games/frogger/translated/loc_0e7a.js",
+      "sha256": "9b5e4db59918c10a24b79a9e2a6ac02f9815726e8863126c53a45d57197af567"
+    },
+    {
+      "path": "games/frogger/translated/loc_0f3e.js",
+      "sha256": "b89cdfc2c69de886f8b479f1561185d5835824c824a745876d5b25018cc52aeb"
+    },
+    {
+      "path": "games/frogger/translated/loc_0f59.js",
+      "sha256": "70dddd8f38c98b27a25de146cac606e601e7e8ce4ab1e054a7988df12c9e10ff"
+    },
+    {
+      "path": "games/frogger/translated/loc_0f69.js",
+      "sha256": "fcfe993a4ec44e5239bc63815f9d65edf3e23d0ee735cd27fcbf9c8449d0f3b1"
+    },
+    {
+      "path": "games/frogger/translated/loc_0f8c.js",
+      "sha256": "1991e5902fcf78685652e5a1c5e34fd376747851cc372dc8297a40831fe4b408"
+    },
+    {
+      "path": "games/frogger/translated/loc_0faf.js",
+      "sha256": "88e9fb2bd3bd8041d591b079db1d9bea5619ab41424ab80d4751457028331ee5"
+    },
+    {
+      "path": "games/frogger/translated/loc_0fd4.js",
+      "sha256": "59158a65480bd048f164dfcf63f27bba3c0e7ed8e837acea1cd6e0ea2df1f179"
+    },
+    {
+      "path": "games/frogger/translated/loc_1048.js",
+      "sha256": "1ba6d16546da707c3b70357abf36da79c7a8cbfcd001e406ef46530c0404b529"
+    },
+    {
+      "path": "games/frogger/translated/loc_1058.js",
+      "sha256": "1676764bb46c147d9a0e0701e0a9decb856d11ec99365d63787a0df0605bf47a"
+    },
+    {
+      "path": "games/frogger/translated/loc_10f8.js",
+      "sha256": "7c6f9b9a2fee73a8e8da650d54f4fe91b65f3c835e2b2a3958febd3b00ecd096"
+    },
+    {
+      "path": "games/frogger/translated/loc_1198.js",
+      "sha256": "e89f325242699d5204a0dd37f8099e73bd2508855ef2a7e1505d39f69cde1f06"
+    },
+    {
+      "path": "games/frogger/translated/loc_11bf.js",
+      "sha256": "7837edf4002f5889d83b23bca24deb0c911e46cc1681a4795473048676770ea2"
+    },
+    {
+      "path": "games/frogger/translated/loc_12e4.js",
+      "sha256": "e5c375671d20d3b2c7f7a24eb643d9fa5d5643e464d0b3d21340b3f65cb69168"
+    },
+    {
+      "path": "games/frogger/translated/loc_14b7.js",
+      "sha256": "228fb989fc4964763aa99ffc386f496fe21b82ea8268c7057ea35bf580f06b21"
+    },
+    {
+      "path": "games/frogger/translated/loc_14dd.js",
+      "sha256": "d3eacccd3fa419096c08353ea8d975162eef931aed67ac2e534d07d550cecdfd"
+    },
+    {
+      "path": "games/frogger/translated/loc_1598.js",
+      "sha256": "f1b9d681920677c56cf85a5b5638367effc7cbdb2d90fa47b1fc49c86efa78ba"
+    },
+    {
+      "path": "games/frogger/translated/loc_163e.js",
+      "sha256": "627d9e079a66ab378d5281abb88f78f40ddc5a1a6373fd2c20aaeb28ed815c24"
+    },
+    {
+      "path": "games/frogger/translated/loc_16f8.js",
+      "sha256": "f8a624ee61ce995278251512b37ead8083322ed0bc2b7548eca1e133e4c05177"
+    },
+    {
+      "path": "games/frogger/translated/loc_1802.js",
+      "sha256": "28f069e4565d819381be66a689223fba56abf5bb53708b0e775a298fe8c389e0"
+    },
+    {
+      "path": "games/frogger/translated/loc_1952.js",
+      "sha256": "f03e878f05935ff9204a0b3389f22cb082b0d1769b3ae1c349e4b75b3019df9c"
+    },
+    {
+      "path": "games/frogger/translated/loc_19e2.js",
+      "sha256": "4e8febf4b92e3704850f88c49443e7007cd774c782f3b837a3483f7c8011e0a7"
+    },
+    {
+      "path": "games/frogger/translated/loc_1a02.js",
+      "sha256": "c9bbf6d920f6807b634a279bfe48d1426b813511a6c2e358f01d043024ff5892"
+    },
+    {
+      "path": "games/frogger/translated/loc_1a55.js",
+      "sha256": "1447a56b832d0f55551efd963a1b043e60479135844fd65e49e2ce945a9278c4"
+    },
+    {
+      "path": "games/frogger/translated/loc_1acb.js",
+      "sha256": "f966f53c9f0a21bbe34f2bb927ab3cb6992286d8ffd37a3a6e0d905df9e04048"
+    },
+    {
+      "path": "games/frogger/translated/loc_1b8b.js",
+      "sha256": "6639a57b0b5544ae4e53369970ab69f805a3718ea82383a1024d0e642bf67356"
+    },
+    {
+      "path": "games/frogger/translated/loc_1c41.js",
+      "sha256": "31e1b06fab54a0f2fe6da862c0afa5a58c0803f41b798d6e95f9ca368319e73f"
+    },
+    {
+      "path": "games/frogger/translated/loc_1cff.js",
+      "sha256": "a1969f1ace11e8d456dcc23015572a0f8bc414ab6138967b88017700fc984f66"
+    },
+    {
+      "path": "games/frogger/translated/loc_1d77.js",
+      "sha256": "c232abbbaaa0fce83b46909bcc0ab794991358c1a3e0c7f906e8c04167317c35"
+    },
+    {
+      "path": "games/frogger/translated/loc_1dd8.js",
+      "sha256": "1016df02eed69b368439222689a35d3115743a42d7f1129c62d9b8c94345a70c"
+    },
+    {
+      "path": "games/frogger/translated/loc_1e7a.js",
+      "sha256": "e263273018b18854c76340938f019c3ede5d84f183fd32eb479a85cf0ab58cdc"
+    },
+    {
+      "path": "games/frogger/translated/loc_1f1c.js",
+      "sha256": "4aff9e3832376ef05c9d249bc8884c726fd5619c7e988ae404588782143aaa2c"
+    },
+    {
+      "path": "games/frogger/translated/loc_1fc7.js",
+      "sha256": "0749a44981356605778dc7f213b543b249e3ea80c8287e4b36d38a9ab81a4637"
+    },
+    {
+      "path": "games/frogger/translated/loc_1fd6.js",
+      "sha256": "f29215c7edda5d2497d4ed4b4e4ff2387f5c6fa1a68092d5c5a98dd1aef39b7e"
+    },
+    {
+      "path": "games/frogger/translated/loc_2005.js",
+      "sha256": "0716643c08fbd5755809d3d3cc4e9e832954e948f2a903eec7c965c8c8e78e9d"
+    },
+    {
+      "path": "games/frogger/translated/loc_20cc.js",
+      "sha256": "9fc8b6efc46242e8f632418d1e97e205517d36c90fa15aef428609251e8bdacb"
+    },
+    {
+      "path": "games/frogger/translated/loc_20fb.js",
+      "sha256": "cb9f94ebb2efee0f848963b6a1fe9fb1d93041c35f412c03ac3f040088987506"
+    },
+    {
+      "path": "games/frogger/translated/loc_219c.js",
+      "sha256": "749c8a8a527112fd7caff80db57467e61848793cc44c2e59ad234de966a16356"
+    },
+    {
+      "path": "games/frogger/translated/loc_223d.js",
+      "sha256": "769898f59a5dfc8c7803b06fa5013c11d177c187a6d94f5c91393ad93dfa6c77"
+    },
+    {
+      "path": "games/frogger/translated/loc_230f.js",
+      "sha256": "b51e37780ae3210128d11abcb699729ea5af5e7a7b1debdc52f3f8678ea6011e"
+    },
+    {
+      "path": "games/frogger/translated/loc_2341.js",
+      "sha256": "c36ad25111d3a03b388997015b98dd3172c587fda8d041fb8e0248bcd7780a79"
+    },
+    {
+      "path": "games/frogger/translated/loc_236d.js",
+      "sha256": "5d5fe17f8aa411800f26476e19d773e9042cef4821a7fb24c5de3163adca8da5"
+    },
+    {
+      "path": "games/frogger/translated/loc_23b7.js",
+      "sha256": "7429b23509530c9950ceb6fc401a7dc8a6763cd3b87aebbddccf8ba4275f66e9"
+    },
+    {
+      "path": "games/frogger/translated/loc_23eb.js",
+      "sha256": "3cb4d28aa73f45b2bdcff69a6a3e95025ebacdc23ef8fbfc5bf9edf5e9f4419a"
+    },
+    {
+      "path": "games/frogger/translated/loc_23fa.js",
+      "sha256": "d3a5166d22798fd82af35b5d7ad0c5006eb7e15e23520acf21ccbaa2e6ab9776"
+    },
+    {
+      "path": "games/frogger/translated/loc_2496.js",
+      "sha256": "5a40c26c394c2bdbf6a03b9e9adade3ce507a9a43afa523dca985219cd2165eb"
+    },
+    {
+      "path": "games/frogger/translated/loc_2532.js",
+      "sha256": "27ca698935ba5b30c37fb04275727745f48390facd9451101114c3b22ef48c4f"
+    },
+    {
+      "path": "games/frogger/translated/loc_25ce.js",
+      "sha256": "e75be778769d0049682d0a918480476965b25cb3d081ecac9cb0743c9efbc53e"
+    },
+    {
+      "path": "games/frogger/translated/loc_2673.js",
+      "sha256": "381a271e6a2c52604f903b2a9fa09ece2c9a9bd225b9b23060a4ea76423c4bb2"
+    },
+    {
+      "path": "games/frogger/translated/loc_269a.js",
+      "sha256": "08ee888f1e37c80e03c20554781f4244014118c6f5b8c36616b64a8ec9fd5cac"
+    },
+    {
+      "path": "games/frogger/translated/loc_26a6.js",
+      "sha256": "985e9c0ce72c8288b189bb612fa95526ce8ec7f968a346140ffb8c86add050e2"
+    },
+    {
+      "path": "games/frogger/translated/loc_272f.js",
+      "sha256": "4212c755822c539a4454d6141b1bac67aa4d077ee73668119bb1f923f04bc14d"
+    },
+    {
+      "path": "games/frogger/translated/loc_27b3.js",
+      "sha256": "3427370887a016495b870959b2d210fd74939f2369c6538db2271ad3a16bc575"
+    },
+    {
+      "path": "games/frogger/translated/loc_27cb.js",
+      "sha256": "d67a8493facd9c6ca4f7e787d21ca346314ad56ac32cc392880e3cb58a1e4ac6"
+    },
+    {
+      "path": "games/frogger/translated/loc_27ea.js",
+      "sha256": "9ab4b6be1a2c348e2a91aecb7ec2d649f0f2d2861c79937ad9a328951391b1a1"
+    },
+    {
+      "path": "games/frogger/translated/loc_2856.js",
+      "sha256": "1212fb8dd5505c8cb2a0405ea5859da0a88ba047a36fa840bd1e7125dd3b84b8"
+    },
+    {
+      "path": "games/frogger/translated/loc_287e.js",
+      "sha256": "82468069b5070532f2cb117e659d5ac1bebe32cc88913cb2478faca158067f9a"
+    },
+    {
+      "path": "games/frogger/translated/loc_28bb.js",
+      "sha256": "c7fd9561f595a933d0a34c6c537114610f02008a8c09ba0a42361fb2dac713dc"
+    },
+    {
+      "path": "games/frogger/translated/loc_2906.js",
+      "sha256": "5914c1dfcb12c827b57d351eba939248ab2b8e21aacf1a5d55023c415cec7f4d"
+    },
+    {
+      "path": "games/frogger/translated/loc_291d.js",
+      "sha256": "7a001a9f079131f776acfde6e7db94566aaf581c68ebaa568b8c682d1564c02d"
+    },
+    {
+      "path": "games/frogger/translated/loc_2970.js",
+      "sha256": "c6bd5322e507295d67d2aa5631848a861fb8b19e343b3f0db5fb0499cfd7ca62"
+    },
+    {
+      "path": "games/frogger/translated/loc_29b9.js",
+      "sha256": "e7d4851fe50de2902564241e6a794ea48196e5c4c830c6056135322252668123"
+    },
+    {
+      "path": "games/frogger/translated/loc_29c9.js",
+      "sha256": "a42591232754e3eda16f80674eae5500f708a1ad7b76ea713bd6767d642ee80e"
+    },
+    {
+      "path": "games/frogger/translated/loc_29f9.js",
+      "sha256": "cfee96886a2b0f67a50937aeb1c518d1b184b4f6af6bc238d2ccb3b29eddd10e"
+    },
+    {
+      "path": "games/frogger/translated/loc_2a6a.js",
+      "sha256": "e036e7d419a13e13e2eca049364379ce56bcdb355fec3e64e0a29ae4c2c7debf"
+    },
+    {
+      "path": "games/frogger/translated/loc_2af3.js",
+      "sha256": "18cf93e59e7f061a60285dfaed40f11d26953e1cc601a8827b98e78cf012d328"
+    },
+    {
+      "path": "games/frogger/translated/loc_2b58.js",
+      "sha256": "0d2439e552b0205c83b1cd8e3dcfdafe7b15be0b71128a3b12542a9ed6576324"
+    },
+    {
+      "path": "games/frogger/translated/loc_2b83.js",
+      "sha256": "f826eb37ec0a7337962c8d52921e0b3f56167f2aa8e8aa4229af38785f357bd3"
+    },
+    {
+      "path": "games/frogger/translated/loc_2b93.js",
+      "sha256": "60e3758e19559b30ab4058c1f269033dfd2bd5300c41fbb91a673aa3195c4897"
+    },
+    {
+      "path": "games/frogger/translated/loc_2bab.js",
+      "sha256": "9c804a300e28e1eacd1664ab185ca60bb70e5a7bc3ee58db13151d573bf1b076"
+    },
+    {
+      "path": "games/frogger/translated/loc_2bfb.js",
+      "sha256": "e44201e21020a46aab68fa472ba19f9c3004d8551e4f2bd0727fcd50dfc53eca"
+    },
+    {
+      "path": "games/frogger/translated/loc_2c13.js",
+      "sha256": "8a3aea2e862710ce773cfed2b4182a5ba1bc5b11758294de273225912ce1d296"
+    },
+    {
+      "path": "games/frogger/translated/loc_2ca8.js",
+      "sha256": "7b3c73d62df28a0e09e10c0fff1339f3c0a834df840256a7ac8f87ccb14642aa"
+    },
+    {
+      "path": "games/frogger/translated/loc_2cf0.js",
+      "sha256": "c333b2efdd6fa17ebcc5c33b46dc8183912484f26acd4e85cbabae90f59d231c"
+    },
+    {
+      "path": "games/frogger/translated/loc_2d88.js",
+      "sha256": "77681ab04ae7830b0e45da21813bee5b190e6dc423d8271deba6589a533061a9"
+    },
+    {
+      "path": "games/frogger/translated/_registry.generated.js",
+      "sha256": "f4a177861f97db6862f94114af7c43f3cbb568f8f30b2e15db93ef2f4dc9c33e"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0000.test.js",
+      "sha256": "3dbcf37306e54c52f26f4c7fac107b77b33dcf32b197c6d4bbc71fbcc80c8146"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0018.test.js",
+      "sha256": "4b5c7833ee246d2aa19c4f6478cd2e132048465623072c7a92c431564f14f553"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0028.test.js",
+      "sha256": "6f66fe7571b3f31264611384349a919f65a1fa426560948338f7e34f1af335e1"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0038.test.js",
+      "sha256": "6b8f6885395abba08e130988621577ab18ad2b5c2fdb9bf0f6534a598d80dd30"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0066.test.js",
+      "sha256": "06dfa1080d71c15060e2376f5098c7590eaf4d5d4775e91ea60c535ccc2d2d0b"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0292.test.js",
+      "sha256": "3e4ef4f03b99a819b16a4f021a3263554cb546e909ee9d831dd6e9ea901d8fc6"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_02a3.test.js",
+      "sha256": "909f9e9c088353dce9d3330325527a45fb464b130965cfbace946e6584e0a003"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0341.test.js",
+      "sha256": "fff7a0382a781cbfb186b6b511b13f2e209c58bb5ce077b07e94b240712ceb53"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_040b.test.js",
+      "sha256": "366dfe549c078a304bdb0c3545b102553dff30ae49bf3d2347ff04fb077124d2"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0457.test.js",
+      "sha256": "682cce92a9b14c267466b51f8c1f781d85800717bd05f5354dfe2ad5de9ceba6"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_048f.test.js",
+      "sha256": "6e4c882302d605359ecf77f6d9966d03ad72ac3f1ac00ab3edf13389e9a12ac6"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_04f3.test.js",
+      "sha256": "45d694ed7479f824a70b062fad5431e58c455395625a22caec853ca95c247577"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0534.test.js",
+      "sha256": "23373b4b9bac8b395befe54bccc522cad0af32d003d36802b05060aa61870c21"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0547.test.js",
+      "sha256": "a43c6bb4c84b2de37b818edc9f8a27f789f53ece5f56e93371d62be246abc816"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_05d3.test.js",
+      "sha256": "5cc478b9f21c801b1a3c7cad78fe1187d048b530fafe13a2c5c19a50316ed373"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_05f0.test.js",
+      "sha256": "7a03a7d00572bf356378694283f949fa307e7220d871589d66d0c08a76c120f6"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0629.test.js",
+      "sha256": "853a6ac76885cd658c4530a2879dfcd688fa67c03b45a8a9256468e61dc62c66"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_064b.test.js",
+      "sha256": "487a1b5637bb118d031e7db6f639063bffb3dd5051601a502625cf78bcdfe0bf"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0670.test.js",
+      "sha256": "4b23d863234210302d2ffe85fb0f8839c13ab007af116a5e01c4bf5ee36e9443"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0695.test.js",
+      "sha256": "454811be287591edb41cb7f5359317e7540256472fb555e24518615f80b21e5a"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_06a2.test.js",
+      "sha256": "b6a8ba6983b9b9ddf7a7c7e57f4e93f0188c7831fb4ebffdfe882473d3c4261a"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_06ee.test.js",
+      "sha256": "68d745f33425b2d01308ad3c0ebc0b943d488650eeec4a30c3f4e698e9a0b93a"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0726.test.js",
+      "sha256": "5d54f53fc9783886815609da356d5ce27f6d3c8932860f52887b2fd5fb956db8"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0766.test.js",
+      "sha256": "6a10d245809270862da6ed4296ea89ac8fb90a9007e9c87d51128901d509ebc8"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0779.test.js",
+      "sha256": "be0e7e95d2a0aed7f346cb546b048670259b3fadccc789399b170c7f257516e1"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0781.test.js",
+      "sha256": "a6758696b79e144c616e3672318abb64160f2e20d456610595c28ba69576a538"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0794.test.js",
+      "sha256": "61cab5e7601ecc118bb20c7f77c5826db36e50871c079917dbfc6088dbedaf5b"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_07ac.test.js",
+      "sha256": "1d34709b5c1e16ee017d8699c42c9c608e53f70d308f2f89408107334bbf0ade"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_07c1.test.js",
+      "sha256": "3f1a5d8575c99b45364fd10eb3332313da843f6385ce00cdee411dfecba3f642"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_07ce.test.js",
+      "sha256": "8670b3f458ac0593dcb528fe95d47a752e41b8656f3fa172098599c37c961b81"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_07d9.test.js",
+      "sha256": "a73a1d96ace2ea27f53bd381e5b37244eac6cd69917eba05c4f80d89e0249891"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_07e6.test.js",
+      "sha256": "01152c0bacbf11e946048a2b18b20548ae4f00db5f493405de97de0e02ea882c"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0804.test.js",
+      "sha256": "ac87e4802d013bb9529ef4e2d1b161294c57a66ad9fb41d80673cea667e59888"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0822.test.js",
+      "sha256": "83d53ebb1cb241fe4e37e41ce37aae6c5e14814c4f4207390cf3b73e94b91f8f"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_085b.test.js",
+      "sha256": "83d8a8d59b3d79f38d44dfcbc34bccce2a1888883ee5c81e997465af571f1058"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0870.test.js",
+      "sha256": "dd52cc568d9362cdbf76113013056648c465998073a2630ce474793264a98c50"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_08e0.test.js",
+      "sha256": "c397c199c901bf0fa9b2ecaa34a98baf01bb69cb64f1b727b0242a192d73c6cf"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0942.test.js",
+      "sha256": "50ea7e73b6c9a25d874a97cbb2bb0479d501844e0ac7caf6cede427d5bafa3a3"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_09aa.test.js",
+      "sha256": "f1e99502fc637a3a4ac83c9ef9546eff535050019a59977ffb4a585702f29250"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_09db.test.js",
+      "sha256": "577cce0f81dcdea7bdae720b0e9ccbca8b68f9e24b147a0850f6d21ef0e307a9"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0a16.test.js",
+      "sha256": "5e4fa00f8292002e1e2443a47d06a9fcfb47eadf86e8ae918651591f55c35a56"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0a48.test.js",
+      "sha256": "b08977e714a61968d660ee9555910e0190d3c8ebc25269669a0767f54348af22"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0a5f.test.js",
+      "sha256": "46ba238412f2c432901feaccac10d3f3c54bd60196b85f03f0843ae6394e28d7"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0a84.test.js",
+      "sha256": "89b1730781dd49f8a7b53b7b5d86ee786b7537b09a03f6b73def4061cfa2e00b"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0aba.test.js",
+      "sha256": "adfc4d413223798317d9241bf4eaacc41448aca7c5c563a1b9bc551fd27b822c"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0aee.test.js",
+      "sha256": "961dd59f42fe09440bae5831434339df172defb107f41c55fac226e186fd7664"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0b0a.test.js",
+      "sha256": "a2bdd93d754d03c3addc1ae4c67cb24dc88cc2e9b8018af060624acfe1ea86eb"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0b1f.test.js",
+      "sha256": "63e0d10772cd955d68fcc472efdc6270dd0a68e037810cf41510d855194f82ca"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0b67.test.js",
+      "sha256": "0dd67cb9742f28ab91d507bba5e37c0af0073f704798f632883383608d134abc"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0b95.test.js",
+      "sha256": "7fb9547717fa1cdac091b7c2c256bd11bd659e77c510fbdad9719e74e44faf78"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0b9b.test.js",
+      "sha256": "402b1da8f0005b871164f754eee456bf1e3fbc6797f6a5bf7be79518812b698e"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0ba0.test.js",
+      "sha256": "c3d41dee85c49d1ca5fc012ed56c35f202964b12142afa1513e4168ac46d37f3"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0ba9.test.js",
+      "sha256": "9b5f02e11bfce043c66c04b9937efb0bbc93b058a480cbfc31a6a7762476c677"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0bb3.test.js",
+      "sha256": "cf41fe2a1f0dc85bdec91946b2d3603eb80d4ee23bd0b21dfad5ea2302bf9e59"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0c3d.test.js",
+      "sha256": "f6ada43ba189e14b8afbcba5a3aee8c5fa76217c9a874f963dbaaac0841e1a89"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0c4a.test.js",
+      "sha256": "3c2c380d50333c305d8697ee103b2f5d924ace64c3099eb58a1e533c03b9e5b7"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0c6d.test.js",
+      "sha256": "6290d1cdd42f23858468b06f8399c52f6f5f948fee4e4a5ffbe1acd238e1ce74"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0d11.test.js",
+      "sha256": "bdabf68bec75f8aafd67427bfffbbb1fa7d4f065035421bacb9879985fcce6ec"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0d4c.test.js",
+      "sha256": "49d6373e10e2d0b6d2c9acef1ef86eda4a4a118085ff9b1f52b336668505b17d"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0db9.test.js",
+      "sha256": "05e26ec4b4d16456d5bda105645b06ce4eff621c660e9dc0b0fec475da906536"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0de0.test.js",
+      "sha256": "93abdbcd9593d4a902fe1a8e5d88bbf17393fd28cce52e2599a448a2fdff70c8"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0e74.test.js",
+      "sha256": "a094697db7d3c2a23195225677a75c5c66c49f9cc0ef530bad16dee1981a618b"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0e7a.test.js",
+      "sha256": "823ed44f6dc0e96657059bfb27dc94265b8185c321c3983158225de762b00e28"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0f3e.test.js",
+      "sha256": "12a419f46fd2dd96c1cf3a2d2f0b9f8b9eb34e93a320096bfd3c9e1e4017b24c"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0f59.test.js",
+      "sha256": "b1b05c4e9b486f9a57c6bc0376308b71c23c74925dd76f3addf3699c564a74d2"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0f69.test.js",
+      "sha256": "20b500b147e38fb0fb46044b4bda4b6a4cdd2e025796b4752cd6f240cec237d8"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0f8c.test.js",
+      "sha256": "50d2a4fcea82e3c8e3347dc47f27c92b31ab74cd8731d3e7dd77391ed4367cdb"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0faf.test.js",
+      "sha256": "1b3f7c3049fd72c60fe8ee7c4cab7111d8a6f52002fb8df5b54f178eb8889069"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_0fd4.test.js",
+      "sha256": "7c41498ac79ff1471407b528023c2c93ce42be2e548c4809142ef3e16f924cda"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1048.test.js",
+      "sha256": "7afebf63c2b2a5a4578501d9e051cf6f234fcceedd9beef71db52d9f35884230"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1058.test.js",
+      "sha256": "afe0229e559f943de58590e0fa1326ce20a3fd9026a2282d1f4378a9cefc2fe7"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_10f8.test.js",
+      "sha256": "6abfcdbf40f41114a93dd376e69171e1abc6a7cff01e54395ab24dfb36e9d45e"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1198.test.js",
+      "sha256": "885ab1f336b5b9879560f6b8cd90550d46578e81d96a2bbb89c99a7bf83a86fd"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_11bf.test.js",
+      "sha256": "b395ea121b44cef2b766124e7c4ff6660c677a447402e28854c96e5f6cb50a1a"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_12e4.test.js",
+      "sha256": "eb1f4d327e35feb871a51f75f800721c6e4219a73b34aba1e253b2fa2bfe5b50"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_14b7.test.js",
+      "sha256": "8fb066fd4de0d14db82e2ce4a09cb0253920712dcd7741d715b4d8842c8dffc5"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_14dd.test.js",
+      "sha256": "7c19c4d04cc5d0e7acf1c9f83679ae34bcbaa1734d377a71daaa50ab0bb22ce5"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1598.test.js",
+      "sha256": "702451246186b80c641eef23614a20e49c594cd9903feedf1c5f21f906321b9e"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_163e.test.js",
+      "sha256": "a167f838d04df0ed2692e39790f42b42fe78846b148ec6f3b768e44174fd5318"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_16f8.test.js",
+      "sha256": "c28f6133bde8a5aa0ef1cbced9f5f9b10e41d415df5de86c6b71a9afbb792ab0"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1802.test.js",
+      "sha256": "d143c673ae9533ecb064651714e7eabd730c6874c43773bbaa833bb911ea3935"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1952.test.js",
+      "sha256": "6539e8217edf31d66abd6139c4e05a669ef815fc91c1c60320b1ec05172d6d12"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_19e2.test.js",
+      "sha256": "b474a0310b3c2a4d5ad8abe1f0377fa67fff41f8b73e1ab01cd28a7ad00a5052"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1a02.test.js",
+      "sha256": "95a17a48a33f4d56da85fb65cd8b2ad120aa25e8cc37ab792d64459794f528a6"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1a55.test.js",
+      "sha256": "21b109f648572e98634b55472e1ee7b37c5aa4a024b2ab93bcbeb662005c82a3"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1acb.test.js",
+      "sha256": "54208478c16ddc0f8b13c352489360f27e2c09c047e5f63af0cf3f0807728705"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1b8b.test.js",
+      "sha256": "f4758e2d17bda5e07a2de53e209653d62d1fe1d0b5ab34d5629914ce378e4519"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1c41.test.js",
+      "sha256": "d74973877b671caf3a13abaddc93ca7b43513def57d193d99bb5925e4fc0455f"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1cff.test.js",
+      "sha256": "5c7b1320ac4820a1f14b4a9dc1762397e1ae3360b26e26e7999d1a6623d14e7b"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1d77.test.js",
+      "sha256": "ce3bb32bf96072a25f697a95ef1163a266f7271b19f3a0756645fac737ecefbf"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1dd8.test.js",
+      "sha256": "6ce0364e701d67d0bed32b65e76e4c2d16e5fd6a1a13b6df591b887ed6327002"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1e7a.test.js",
+      "sha256": "101ad4c17e792115e4d99d9d7f0219bec8d92fa2c37f15f753992cbc3999f0ee"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1f1c.test.js",
+      "sha256": "804813b72c9fff31228048b59e7d89f37dec00d160dab6cddb332ac55381fb17"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1fc7.test.js",
+      "sha256": "ead1ab58c11934b083f217b7ef658f25c783f608eb470ae2abe65e1bc099e3bb"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_1fd6.test.js",
+      "sha256": "5f7753a93aeed1f78825154e4dd3861f3dde70adcb57fd1753b52b04805ad260"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2005.test.js",
+      "sha256": "f45421cb34c5b04104539dfb1d185460b0a19b9a4830016d85c47b70cd7c25ab"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_20cc.test.js",
+      "sha256": "1262ec7db26f3deb87cd1fd12eddeb8b936f89164a4d96aff0fb3154d30bad92"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_20fb.test.js",
+      "sha256": "1b9209054f3a5372141b6cbaca3d36c4cfb868ddabfa4f03544a95e0253d350a"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_219c.test.js",
+      "sha256": "e183906ae5e0ed19d02c872523be5f2bce799e3a8c00a84c16efe10697eaf091"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_223d.test.js",
+      "sha256": "910e4d0101ab54cf589be5237248a525a26269b7768acf4a3cf513ccf1170138"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_230f.test.js",
+      "sha256": "99d7389602b5bbc361a83d9ff1ab6a8314b30f0f9eeb0dbae7820e451453da4f"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2341.test.js",
+      "sha256": "bc8f7bd75a8a320e5d21837efe068ac7dc7b89e6a0dd7d95f911c240efc8eb85"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_236d.test.js",
+      "sha256": "89cb002b312290233213c176b6cfea6a9dd9c1a34db62c3d70f7fca6a5dffb4f"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_23b7.test.js",
+      "sha256": "88951e1cc7613a401e867e80face6da9915abc7942d7ec4f93fd58c49f69c576"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_23eb.test.js",
+      "sha256": "580f7efa26bbdad506dd688cdcd6a841bf980952841023b12aa8d1a0e2e6615e"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_23fa.test.js",
+      "sha256": "f5b32957559d532cfb0c1c514472101ecb5add283d271154531a23ef532c0145"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2496.test.js",
+      "sha256": "dc62a09cfc37c4aaead8375b12cff0c45b345397cb6313ddbd334f1089db8c7c"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2532.test.js",
+      "sha256": "074caa4ca43ac26d4b947b94790d2bd900fdac49099b097615390526f492618f"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_25ce.test.js",
+      "sha256": "ccdb9b66fee698693cd3a24189a110ed40559257c836dc6d6d245325c9820c1f"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2673.test.js",
+      "sha256": "14076212369b8415c14d686a04c5a4dd43796c622b52b2c9a5f8090f3cf7e429"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_269a.test.js",
+      "sha256": "3a40ae5c48ab693029b410513a730bd1931ae776716dae06feaa8efc68d25a46"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_26a6.test.js",
+      "sha256": "e3653af38bbec9d57efc8cb725b070a5f1d72f515181a8e77b3061a7f8547648"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_272f.test.js",
+      "sha256": "eebe99672c7b37c55fac53f9588e7ee7742050135cce52e809e560369a259030"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_27b3.test.js",
+      "sha256": "c68115d4c081722af5eca72a070eb550608e9f07388ea936f8b6124c1b931576"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_27cb.test.js",
+      "sha256": "c048fc43b082a3e5c0be2b36a9f6c0245e75dbcde7b5c52f6a773b02bc0999c5"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_27ea.test.js",
+      "sha256": "6437644ece9056dcb6f31dca092c77ec95bd73673ad088daf82fecdeb20a6581"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2856.test.js",
+      "sha256": "5503549dace086f9e1e9a095d917b8a87f3986e8f5b3e09eb05868ef7b77a193"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_287e.test.js",
+      "sha256": "800689728155bfdc8d5b35e06bf4828c38e4386d2f8346c94c1893952dccd66a"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_28bb.test.js",
+      "sha256": "24ab7312fa6fde5a6a0f90a003b92ec922108958f24e2796ae208650105a59f6"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2906.test.js",
+      "sha256": "c37f404b6ce8b33fa8a98a7004657db829889e0a0c2df47f76e7c75fcbc3f113"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_291d.test.js",
+      "sha256": "8eeed652501c317e313265a0afc4fc734e55196f6a77e335996bd1df48679211"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2970.test.js",
+      "sha256": "2015cf7de88faf1ac64d90cac98673dd3120ea0792cb072a248f463272d9b566"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_29b9.test.js",
+      "sha256": "137319cdab390eb54e9df279528e5a58618dda6dee4a3239a16ca5096d07f0f7"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_29c9.test.js",
+      "sha256": "935b59fa3e6127a5829de0be1faf7c5f5007ebd70a049781b96c5f07f2e340bc"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_29f9.test.js",
+      "sha256": "9d515cea0d2a14a7ff8d523650a69fba2cea459b00052bda8447c5f647ef9427"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2a6a.test.js",
+      "sha256": "4f0cc30ca1ad8dbd070141383fb4dab837f4fd0ca674478e5f7dbb5ca1b6ac61"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2af3.test.js",
+      "sha256": "56c4a9bda94fcd3a9ec68cbcf8119dfe2dc35c441a9df9d7210fea094f6655d3"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2b58.test.js",
+      "sha256": "4a896283e9671d3d4754079d8df722f35973389ce169ee8c24d00669161a4537"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2b83.test.js",
+      "sha256": "fd6dbed8f04f9dddcc20a700b1c8a992c61b5e67a26dc3fb31e7cdb3a9cfbf7a"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2b93.test.js",
+      "sha256": "6f546f626457556622803b2d03bfa40982b704e211ed10a3be89a9a9efc46b10"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2bab.test.js",
+      "sha256": "31adbece9e092baf22970566bcd2156ee8137a26ad96a021b8d8502b9d34f2b2"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2bfb.test.js",
+      "sha256": "a6a18e6e639a34099e6e5e0cadbc556466ce6ebcede1ec10dd8188ff1f4853f0"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2c13.test.js",
+      "sha256": "18a3cdd5dec75502e7a8a5cddd5b8414fb476af033609869b4fe62d508a45c71"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2ca8.test.js",
+      "sha256": "a9fbc915a7b7e1f6e94964416725365a520ffae7b4b2204a4d227a1f4099afde"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2cf0.test.js",
+      "sha256": "01a589764c5383fbf100e7c3a0a4f9acbae4921cc8271a9d650711dc12b9874d"
+    },
+    {
+      "path": "games/frogger/translated/test/loc_2d88.test.js",
+      "sha256": "4adc29a97ed8fd0455c03fae2f75d1acb3043fc63f74fde912bb5cfb711cf148"
+    },
+    {
+      "path": "games/frogger/tools/lua/dump_at_pc.lua",
+      "sha256": "09be7563cef78af6a49ec0696002987f2a1b8ba03b8fe2923af5ac8f6f17cfb5"
+    },
+    {
+      "path": "games/frogger/tools/lua/dump_state.lua",
+      "sha256": "073054917b7abfff3e43bf5be8ed4a5d7d1d5153fa2794ef9777ca11043f4a8e"
+    },
+    {
+      "path": "games/frogger/tools/lua/dump_writes.lua",
+      "sha256": "b0bdbb20a754322d1bf4d2076d345fefc993c2bd68d48a7b079a5b991893ef6a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0000.test.js",
+      "sha256": "8cc74a5159ba07fef5e77484a2210e9888d74b4664a6c34e4005258dbed137a8"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0018.test.js",
+      "sha256": "fc4ee3ceacdeed128da36e178f18506d042096bd5a49a78671bc86e4ef29d101"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0028.test.js",
+      "sha256": "0a395020172cb44eef6c33d357a153817d41d8f16448cf53cc0571f24a5e8dcf"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0038.test.js",
+      "sha256": "7694366c6997c81ccb0f02c58870eed5a62607830a2933bb047fd1988f060e2a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0066.test.js",
+      "sha256": "83d501450e3e6a0610cbf9956ee957241e2dd29a8fe073d56d911cb139261f19"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0292.test.js",
+      "sha256": "ea5d729af066644b7292d47e5847b9b65223f40d7b6254bd83035e9eafa11c16"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-02a3.test.js",
+      "sha256": "5cedc46e615db43190001cfc7ab6906b963a8e20239a07fa56bfb1cccb901a68"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-040b.test.js",
+      "sha256": "1fe464246a4d0fb38c22f4c20380b60f26825152c6946084a96ecbe26e2ad3cc"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0457.test.js",
+      "sha256": "7bcf84be767df3231df8d7f46592e31a35d148fa48480e938183b5a625bb9714"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-048f.test.js",
+      "sha256": "12d3b738390f7cea31d6c24ac332317e697be8a338c3bd1193c7f94d92590289"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-04f3.test.js",
+      "sha256": "6ef38faf0e767fe4dbe690bf6504a1c3a9d3d7662ab0938fcb4d9ea11091267d"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0534.test.js",
+      "sha256": "979b06e2dc745b25b621da040906dfbe6704a098d5ad3377d4119238b49786f1"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0547.test.js",
+      "sha256": "672c915f057d22a50bcb43e3776be4353e406da829074589dadc5bc943fc972e"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0557.test.js",
+      "sha256": "d5bda965708676d13b4198cb71918a2834ac391bf544c74f15ad65450b7c7d6b"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0567.test.js",
+      "sha256": "9a9a2ef261e46a314e55a8891f5996fd0130cdf0d7a141f8e86e7a900a906940"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-05d3.test.js",
+      "sha256": "1e4ccf0475f3b948f4a57654cf173cf1d2151a8b5ead20ba18d6264a2a2222c6"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-05f0.test.js",
+      "sha256": "93b18d13c27cdb0fecbee8552b29c2ebf59423a154c6c38d7e88caa63bce6c74"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0629.test.js",
+      "sha256": "e50536f267ac6d1ab4321c6f331f6144796fa8a10ca4806350346306dd77ea7d"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-064b.test.js",
+      "sha256": "2e84c85e354d7ee77f56da4c4f5abe46eff4a6c84af77c47ca3de8b427ad6b31"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0670.test.js",
+      "sha256": "7d7568d1e36e080cc1ea716c0882be2349060da2117c7e9949462be09b6905a5"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0695.test.js",
+      "sha256": "302bf126e425a35fc16085108e62f8ea3e3be88852b022139e2e84b7f7df36e1"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-06a2.test.js",
+      "sha256": "8fe7969dfc227cacf1d53a206d64e42d0e4e374ea5706bc24ac0d4be8d1f2099"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-06ee.test.js",
+      "sha256": "6c3a862ad474e6e7b47fef8d9ea350434f0ee815a4bb5956201a600ee619d934"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0726.test.js",
+      "sha256": "7f1cc8419b7efe1745baf3d9b1a14464f888976ffdeeffc055a3ca3e01ad8c73"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0766.test.js",
+      "sha256": "94f870f352f946441e4a41ae8f1e84166b36a5f69225faaad5dd13455f1dfd59"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0779.test.js",
+      "sha256": "66ac8566f340baf4895b41443137d646b47ce598a1f1b1ec124d25b863d9b7b6"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0781.test.js",
+      "sha256": "3dab7a87d6f842de0f68c7b1ce35cc544faca7cfe92a2ac5129d7f0c3f9929dd"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0794.test.js",
+      "sha256": "a8b210daab9000e0625158daed7884b46858d90aad7363b72ade332074826026"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-07ac.test.js",
+      "sha256": "61b0f2c38312610e553bcead936a57606d4fd305f98decee517ddb178e924928"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-07c1.test.js",
+      "sha256": "417f420a2b2a6fa2b78bf7578522ca915bf277fb04e229efce94f60b1cc5aa8e"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-07ce.test.js",
+      "sha256": "5064c6f449a0926f30c36aaada7b3415a9235a3065f796d12e4ed12d468cf5d7"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-07d9.test.js",
+      "sha256": "082cff2eec192dfa9ed78d7981c8bd41228fc8378b242398ef4ac5b775bec576"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-07e6.test.js",
+      "sha256": "c678e563c66569d038c3b6d487735d54910500bcfda2a829762c3b5c4c648cf0"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-07eb.test.js",
+      "sha256": "9a104e7f4ea75325f43a93c2ad366f74abe09eca95d9be89cd17680c7289064a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0804.test.js",
+      "sha256": "ae721ea7b9d8db7c479e2253d3e2b95b5707e199ddaf5f27b87ae3e0ac69e3cc"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0822.test.js",
+      "sha256": "cd68d5c33c97c137ba3f2235aeaadf320c1fcf817ca5aecd72b57ca50763ed69"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-085b.test.js",
+      "sha256": "bf52a30f53088ecaf50a00c0f68e26a6ae938b3f6b8ffefa57c1c12d106bb8dc"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0870.test.js",
+      "sha256": "cea8565c5552615c125297d4f10b44c1f423be6a7f9e424bdc65b63b3e314fc8"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-08c5.test.js",
+      "sha256": "0b31254e6618f24cf7e18b804804d21e3b9cf426cbf89f687f83ab818b1c0f3c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-08e0.test.js",
+      "sha256": "d6748377228a864dd22ba369927e24d46888311502c213cea96f59f7313d206c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0942.test.js",
+      "sha256": "0f11215dc6ca2e05e5aca7b55854eab0efe0005769cca050540ded8277131e68"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-09aa.test.js",
+      "sha256": "2bdcd5d4f4ccd002e5f1c65cf7412d8541af46e6f17820a4d04a19a5e1aa9cdc"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-09db.test.js",
+      "sha256": "263c82ddb58374b21b8021705a411eddc028cc529a0b60807e89b0f286a90360"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0a16.test.js",
+      "sha256": "c1a8cd5b4717eb50c4975499e4424ecbadf4dddfeb2c4fc4dc72c05a238eecc2"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0a48.test.js",
+      "sha256": "6d60ec3eaed48b74f28faf0e901fc185ad9ce060a0d9670bf2fb96de99307522"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0a5f.test.js",
+      "sha256": "4339f578f16ed36458730a3985802b4a98bb15e6cfaaec334a165ee47a77db5c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0a84.test.js",
+      "sha256": "5a6e1886bfb1cd95e585682434f06f5da2e8bd70b0b4bef65e278eae40a9d293"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0aba.test.js",
+      "sha256": "a2a1de5838128220bc9f8a1e88abb6f9e7eba950bf7e6ea1f95c870d57edd6e5"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0aee.test.js",
+      "sha256": "e21f6670f417743cbf488b8ad4876a766922929b82f5a58ca8aebec7e319c9e7"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0b0a.test.js",
+      "sha256": "90e6e981d1f598c066f98f44200dccf6bba73ecca5aaa0ffb93f0e57295c252c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0b1f.test.js",
+      "sha256": "4d8759248876f957c95d83e8a1fe3704c97d8a3854dec7c3afcc59eb2fb033d9"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0b67.test.js",
+      "sha256": "8cb32a37d876d71ff031864b30fbf921a84e409994012684f9008f127fa5b5a5"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0b95.test.js",
+      "sha256": "5da459810745f99f014ba9762e1e777ae299bd127e858e582a9aa53931ac0b76"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0b9b.test.js",
+      "sha256": "a725b50de8825100ac91b61e9a5e174aa8f2f3d97d5a79259e5826e69706b796"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0ba0.test.js",
+      "sha256": "e57d1169dc50f4b17acb8a0444ca2e75bd9bfb563750d2f18c719f3d9a4e192a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0ba9.test.js",
+      "sha256": "eb0f22fc6192b0bba320546b8a4af8c5aa8956e598934663c4776e2c24442fe2"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0bb3.test.js",
+      "sha256": "3dffe00887b64bff1b9844c06d0b9d673726e8c36413cf760af18aca3d075914"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0c17.test.js",
+      "sha256": "58c15ea00a27c5cc869d611fd97e3aebe54c25447c8c53a3d7a83c32c13e6cf6"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0c3d.test.js",
+      "sha256": "fb8e27a2316b168f208b782a2faeeac6e4e17279e71cd25dcc89501468825ed3"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0c4a.test.js",
+      "sha256": "abed16f749df2df253a6e458fd2b6a30eca609ac38feabbe227c82d1f193c17c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0c6d.test.js",
+      "sha256": "49068315604c25ac822d759b4405a558a3d24cc0906828a52ee62f03e72af7cc"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0d11.test.js",
+      "sha256": "13eb3e03b75919673c855c20036a71853778bfd502c8f4766f924e0168553034"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0d4c.test.js",
+      "sha256": "7c931ed864b1d4302b9a5c1dae3e8b1548d96d6fb51e22aefafd05bd89fc1d96"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0db9.test.js",
+      "sha256": "98c1a99694374983594c3c314299a08895de696507321895b61ec684ffb869de"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0de0.test.js",
+      "sha256": "acf28387e842248bc8fe55f20b3a66b0946fb6cc26799d3fe6bf9769255a5d77"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0e74.test.js",
+      "sha256": "6fd8988362ce1cafdf7a11b8eba899da71c7ce3b4e43f5b74567a95f64898d9a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0e7a.test.js",
+      "sha256": "d037a39d982eb65772bead142858b102d74a45efab1ed1120fc76997ef6a23f7"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0f3e.test.js",
+      "sha256": "2b4f802146e4020d35601faaaf3b33e0e41146d46f7be426e82ec4b2506cb38c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0f59.test.js",
+      "sha256": "864bd9a70d6c1f5d3bd1b02c34ca1ae746b42f817245cb2f7bd6db56fd82aaa7"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0f69.test.js",
+      "sha256": "883dd26698b955d352f6543f6d6541e23cc884bea6658f3b3fb9d9481156bf53"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0f8c.test.js",
+      "sha256": "d118b1e7437554e450d757ac1b3710744ee4429b7043d72897e6d15b907b4318"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0faf.test.js",
+      "sha256": "bd1d8bc6cf42700ca96eddac36fe2fc16f709c2668fac4321810713ffdacfe62"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0fd4.test.js",
+      "sha256": "39320c73236856cccca3fba8ecb5a95defb1afed5d94a8b35fa3cc4d9185b380"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-0ff1.test.js",
+      "sha256": "3819303fca4b268ebe3e2f32380f647dc2c12553d1f1593763f7edd39fad3022"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1048.test.js",
+      "sha256": "b2a6d208912df92bd76903387642acb201a03de7106068a851e6d6a5a50488e4"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1058.test.js",
+      "sha256": "4c58b28c9d367d1fdb029925f5a612645206bdc9ad3b280766b9ce112e3fcdda"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-107b.test.js",
+      "sha256": "ee0ac0077951446d4d19e3c60bdc0e1e24dc93289273906ec3b497ce430cdec0"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-109b.test.js",
+      "sha256": "504a3d7b629fed784f8bb1f7f0a7b8196bf293e88b29c6a4393db1878073eca6"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-10bb.test.js",
+      "sha256": "fc890b512966c5941453f51d62377481d6d2d4788b20ce6fb15db1453df2ed15"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-10f8.test.js",
+      "sha256": "1c87af1a70e37ced7a89b22669d05470e674e96587362b18df29061f3f80b3a8"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1118.test.js",
+      "sha256": "028e71730ff5dc895a254c2a16f7240374683a9e5c3abf421389a6b0b6f7918f"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1138.test.js",
+      "sha256": "59dc915c49f57cdf547f1d0a234b6ca13d10cfe849124a992f64e1b6aa85f6a5"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1158.test.js",
+      "sha256": "3fad82ade56aaa3edf376c66f82492e642175d4c26d59f00116aeb7d280a65eb"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1178.test.js",
+      "sha256": "4af2109f5c01e690b1e877a2e51ebb654d631f40508f44be690fc61d4f524125"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1198.test.js",
+      "sha256": "24440a91923760398781256e658ac60d767faac1283fbed1c5d5f321570cdb8d"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-11bf.test.js",
+      "sha256": "d8b126ccd6d1e0f8c6d54abeafb20e670090092aeed526ed6da8519cd010f6ed"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-12d0.test.js",
+      "sha256": "6ab83716f3af382e60012ffb527e8763a37a660ce599d6cd183efb98e8de210f"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-12e4.test.js",
+      "sha256": "0eaf025a011be0dbdc63f39f49578fdde6c68864afc22849cadbb84c6f4e8e0c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-14b7.test.js",
+      "sha256": "e6102c291fd6195f2eee6f1fbcd0cc230ef94b38ab8e1b87b7f82464593068db"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-16f8.test.js",
+      "sha256": "f14433bc6f619678cc00b248d20b26fc356413cdcc45cfdd7e98912f9b8d5410"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1802.test.js",
+      "sha256": "1f325470cfe72ad3b31b1b44ec7d169825ad449374a9892673635419f3a1576f"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1952.test.js",
+      "sha256": "acbb5cd83a538e9365de8b0cd1d348c0c539ca02f4c34cafa8e251871ef36e1a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-19e2.test.js",
+      "sha256": "0c2f31819c7ab1222a8c14c9b0127cb1f019157b30c6327b635633f3eb727d46"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1a02.test.js",
+      "sha256": "25b3e2f4f48fbea48647f678bf56ebb93316823b7c1b12fdc60d156972354826"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1a55.test.js",
+      "sha256": "da861c74c079f80e80b5ca936dca2bef99068d441f1c9f2bbe6fc188195eb91c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1acb.test.js",
+      "sha256": "d79e9840d71920d17b5d3017721dbb9104e9cb6fc85774ff1ef98a2a461470ed"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1b8b.test.js",
+      "sha256": "1328921dc881869c788a22ba2a080c3641fe0c1b89e57b81fa3844425c539730"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1bba.test.js",
+      "sha256": "a3f29452dcf38220cb2130b0dada0fd8ddc83f1afccad795ff3374eea95d398c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1be4.test.js",
+      "sha256": "eb93403d002cc6b6d13961a7d7044100b99e998fc5290d736e2377144ce8bf15"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1c0d.test.js",
+      "sha256": "2637e5504e6b8d9ddc8fb5635d65fea84fc709431b31c7a734ade3a301abf30d"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1c41.test.js",
+      "sha256": "9e463ff499ab3f9e615d40a7c9f5a1e3dbc94e9472b99e5f781dc7bdc024e7e3"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1c76.test.js",
+      "sha256": "69c01e7f1cff3f585101a783c1da4633561b5458846ce8dd38f460435cf70b02"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1ca0.test.js",
+      "sha256": "fb0d997a1a9a6e052a956710eab3c876566e48478379502a8ceb5580471bdb51"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1cd5.test.js",
+      "sha256": "c9dc69a53305ebcc980c6102ed7494bbdf482ebc7c387c913211b81175811f27"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1cff.test.js",
+      "sha256": "e7745a127fc79f88fe1027b4737e08414ec09c1d14a3d27098b8b3cf87a43d62"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1d77.test.js",
+      "sha256": "0bac60d4814f25716980858fe39152e9429a5d03ef2138b9ee02a599bb655e0a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1d87.test.js",
+      "sha256": "7cd3e189a306f5ab6ac6c8da0e0d566b476c4d9a9c0f75275d33490130f56e65"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1dd8.test.js",
+      "sha256": "7886420d1d42cf9fe71a993039f31ca0bd4037f01dc499236ae58da12b3e5b11"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1e29.test.js",
+      "sha256": "8017ee749ab7d78f6e4e3dcd6652e17be9af2f1871f89fd094e88e5f8c5f8b71"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1e7a.test.js",
+      "sha256": "6b9b01695b1bec13c03ca3b9b444140ca967e73bc5ff25316993e2b9bae4553b"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1ecb.test.js",
+      "sha256": "4981665f29930c2c0eef45013772803fd99acad1aa0cc7cdcd453ca3bf493ef4"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1f1c.test.js",
+      "sha256": "bf4ad575c64a16c3e0ae1ce25ad73d300f607af89b0180619dfb16e4f12ef102"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1fc7.test.js",
+      "sha256": "68976ac1e7b803b2cb96d1a53b0211e304c230dcd2dc95e8947b7fb62f3c42ec"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-1fd6.test.js",
+      "sha256": "71687719086858bf0278ba93cdb6b30e0abb1100fbce6086fb816eb98048c269"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2005.test.js",
+      "sha256": "c8510663fbc04d775cd2c3a2902819243e9c4881f7e8323b366dc00de190de27"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-20cc.test.js",
+      "sha256": "24aaab2e8a2a376d99a40b8b1911b4196d0a96b872d51e187254a5e611921018"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-20fb.test.js",
+      "sha256": "2cc009c0528176a1e61e7444cae1dc4fc7cbefac6bc5d12071d49c80d594928b"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-219c.test.js",
+      "sha256": "2199ff95e529de4e8c177f6e8e95b5222f2d5318cb5701bcb40777bae429e676"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-223d.test.js",
+      "sha256": "a81553e0dcdf361f77d76b735371e6e8e7b80d139c0dccdc10f195bf4ddab201"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-230f.test.js",
+      "sha256": "e54d347b69b16042541cc32acb9bcd2b2cfc7a2370b159ce056984dbaff18c04"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2341.test.js",
+      "sha256": "c02b6c71392fbe4ade30422512ce3f1ed9da62c2bb0e34c4b9dd1e3103ebd5e0"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-236d.test.js",
+      "sha256": "bca9bc1f08b4c3fca4acdcd0cd4c954f0a8fa76c9ad014b62526e7f758061b4c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-23b7.test.js",
+      "sha256": "56c6b7f8831fbcceefe4afca43888726772b26c43b923b7786a04375832a894d"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-23eb.test.js",
+      "sha256": "ee86136eb2118dbfeb845796213c96c674ebc38fea3544ff828fd51a8fe4bfb7"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-23fa.test.js",
+      "sha256": "4adbdb3313b7da90a267fe1899420e1a77f248af7b90a1c87a623704b2fd1069"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2496.test.js",
+      "sha256": "ca678f8e7671c7755d986e8d0370e4f26d42f24eb5a062a4839aba46db4ab385"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2532.test.js",
+      "sha256": "bdab53a124ae1e810f4f1cd0c8da61ec5c1e4e919dace411112da1286ec19763"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-25ce.test.js",
+      "sha256": "9bd92706c9bf7f63db2e5958dc7c78ef6f2f1d5ac4e0da90d9f7ab65e4857f71"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2673.test.js",
+      "sha256": "60169c3418e5e2dd8436cdfd7e3e68dc5b81a422e440de56257039b4391c1c12"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-269a.test.js",
+      "sha256": "6d88df569824d6b97645d81602e495b3a31d301478278bb74ce3a434cf1fea57"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-26a6.test.js",
+      "sha256": "293e6f6b604f13600db969b2ff09f84039407fca8659fb68df08b72cb743bfd6"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-272f.test.js",
+      "sha256": "265f55b20e8522056e75efee3daeadc7a0fb01b1770c8417a338cf0657743287"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-27b3.test.js",
+      "sha256": "e3b93fb78367e45ba42a1de866166efebbc6cc27d9ff0251303fd689dce9d0fb"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-27bc.test.js",
+      "sha256": "c3d6f5e04be3c4dd533a4d4481136ddc7e37714ca6d6921fdfdd42e9b7acf79b"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-27cb.test.js",
+      "sha256": "5e8f440db0d90d5090b946c15a1510c0ed83c7193983493fd22b1ce40f20fea4"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-27de.test.js",
+      "sha256": "f034ffd3f60c95b6747338090dfdf36f43483dbac9529fddc0fced4aa3c1e2f1"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-27ea.test.js",
+      "sha256": "33b97bcb297ef89fccdfe08f24e4412c6ab0439d7f40b1ba4c78b1db6cd007f1"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-27fe.test.js",
+      "sha256": "a2b3cfaf5c7b973f9d8b4f248acff7cb85b7f6ebe17d819c22f70143e7aeb393"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-281b.test.js",
+      "sha256": "9a6233bbda0c82f70d0d156c518b7693b30b668832c9d567d2afe3b452ecb79a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2856.test.js",
+      "sha256": "5d69d8d53bff3e39c43f8b9ca8c4396afc3f902c1ee5c77ecf70930c998635d0"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-286d.test.js",
+      "sha256": "5f077cdd47936fe44adfcf569cae60489a2d98b9f67d19cf70b6de7b665be726"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2874.test.js",
+      "sha256": "e4fab4dfe1cb1bee9ad4352eb69d9553b3ee7f3d829d6af6f50b5309f9b3ea7e"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-287e.test.js",
+      "sha256": "95f40fe607da6af179721cf6f31172da607f67ecfe3b0765bc5112093b75a421"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-288c.test.js",
+      "sha256": "98584ae43f066d2402c231202ddcfb9d4f97607a27b1d3c12558b61d10fcb9ef"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-28b0.test.js",
+      "sha256": "12b8b311a9d848f2c76497e8755bfb690670726bc17e927a38d752aa47f21307"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-28bb.test.js",
+      "sha256": "aea69ff491aa15e372b31b63fd9fcba96e48ca65144b066c32d4b3846b38db3c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2906.test.js",
+      "sha256": "2704d61cf5adda136b237c86a8f3628734f7f1b322c4112381ff24f89ee1553d"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-291d.test.js",
+      "sha256": "418499e0353070238c2e22568830e3d709e1bb3e6cda6e65d28092fb4f4ce99a"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2970.test.js",
+      "sha256": "c1519645bd9df583c1670cec4b90f168b879871861816c55ec0b905dc56faf43"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-29b9.test.js",
+      "sha256": "5d3d2c988a00b0cf3910fca4974c3d86c2d2d49529430038d0a9d2d67738f2c2"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-29c9.test.js",
+      "sha256": "4788c70a84d1c77a9a2a97ceca8f39e895597c5aaeed4546555fd7e26eac94c0"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-29f9.test.js",
+      "sha256": "41ebdab52b67ba6d086925d7133d886582d493097a2defcda4f5432fe74ec989"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2a6a.test.js",
+      "sha256": "a3ee10ba7d79f9690dbc30e62c18312799bbabae119cbcc3d31afbf6ee23abdc"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2ae6.test.js",
+      "sha256": "0a47e2b84695ba9da3eeafab15b4efaa0df1654039c5e231d59d726040d9e300"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2af3.test.js",
+      "sha256": "e2a7253f0eaaa283f47854edbddc221ec6ed571044bf11eb81763e32c8bccb00"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2b58.test.js",
+      "sha256": "f7f3c18908814a0818767e1dc6a5a8bb1b060a6f916804ef33aae91d3d2f14a0"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2b83.test.js",
+      "sha256": "2c8e92f232acbf1d64ae8cf7b836b592ddcaec28735d67b73d46c0e1059eab60"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2b93.test.js",
+      "sha256": "81517e7e5cb86068a22dfc3c2683a4676102d37938fbd65f1bd5c1f201952821"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2bab.test.js",
+      "sha256": "fe1a5bee51774f1c56aad2cdf1c797ba6a8b4e20ca1d8af2f09a3a3b6739b840"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2bfb.test.js",
+      "sha256": "25fec91d4e1cd19f341c35faecd1888415b918473a84069a8f62eb67cb1f551b"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2c13.test.js",
+      "sha256": "a497fc30a7c5af85a5e922dff3850c7f2d854fe46ebd43805381833f37cbf24b"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2ca8.test.js",
+      "sha256": "ec6592b0a3b213f9305eac1c5541952f196c01a256bce6e51c84332f26771dbe"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2cf0.test.js",
+      "sha256": "c5314df00af59f803ef2e119b9ebe5492e3a73a1c6942804ef9f397066071e52"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/equivalence-2d88.test.js",
+      "sha256": "d59ce9c0328721dfa9d1a9162ca8d234bc57b0a19785a25301bfeb445dba904c"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/_bootSetup.js",
+      "sha256": "fec77714768f4d8437b1eea44c62ff24195bf3007e686238af3147449eee57b5"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/_frogHop.js",
+      "sha256": "c81f87003d21319d67e822c6ec4a78849009a024e5afc7ed38c7f0e25c084b6d"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/_harness.js",
+      "sha256": "0e8a4d9191e0825962f7376668d85f54f14c65452d37ccbf843e77a4c98e3860"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/_spineDispatch.js",
+      "sha256": "6bd570acd9b4512ae7f4524f634dd4a4477d4bedd6bcbc4be113263fbc4516df"
+    },
+    {
+      "path": "games/frogger/idiomatic/test/_spineSetup.js",
+      "sha256": "6ca4596aa9bf33d97adc0746159e88ff09485537289b0b79517998c13e0f7b02"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809"
+    },
+    {
+      "path": "package.json",
+      "sha256": "f244acb62ca7abadae57527f680ba00d8bc7ca7388b4205b4e8e733ae37af3bf"
+    },
+    {
+      "path": "tools/gen-registry.mjs",
+      "sha256": "98d380f5873f506b50c4fc5e33e51f7c7ef4546665d9b9fcd8d2be20e7adbfd5"
+    },
+    {
+      "path": "tools/emit-core.js",
+      "sha256": "4d56bc3fb7a58533c2e6efe0118ffe4ec1909016455a62699045ec0e3df0aac3"
+    },
+    {
+      "path": "tools/z80_decode.py",
+      "sha256": "56368ee5773e7aac7da8b45c8e20ce66e5a1ba5e4868d75a169323a25361cdb8"
+    },
+    {
+      "path": "tools/trace.py",
+      "sha256": "7148b2a53b274130a8aaa09a774d4ea49270ae41a73fe4877775a33e44619543"
+    },
+    {
+      "path": "tools/stepcheck.py",
+      "sha256": "f670d57941bdea7a0b9360ad88a3960ad7ea70aec9d046ebf85d705b548f7f94"
+    },
+    {
+      "path": "tools/hardware.py",
+      "sha256": "a870643aafde98ff05aab9f1f36da975b4215042a40a18ce9ac25a9c8eff4704"
+    },
+    {
+      "path": "tools/mame_golden.py",
+      "sha256": "fb501c78af4fd24d1346f3c3416e1809f3b9d97806e69244dbfa39cccb46b179"
+    },
+    {
+      "path": "tools/scope.py",
+      "sha256": "df8e896305a688b7fabf8530ce31661019b9f2b0914de6202bac9a2b9290de96"
+    },
+    {
+      "path": "tools/frameio.py",
+      "sha256": "d4c6fe4962006ffee2e77a0443d0055684d322e5fe55a59913648e22ba553eb5"
+    },
+    {
+      "path": "tools/stateio.py",
+      "sha256": "1e1ec176974549f6e9f4f27ff5d7d48f465f3883460b68e9eb66351bf1f32292"
+    },
+    {
+      "path": "tools/writeio.py",
+      "sha256": "dc524ee18173d4eaec1b5c77cf44d074703e6aaa42434b2fc89c7ccf0d585a9c"
+    },
+    {
+      "path": "tools/pixel_gate.py",
+      "sha256": "dc337382ebd601faff3f1c11ad1de90fdb2876cbbbba1f22c2d9780296eafec8"
+    },
+    {
+      "path": "tools/framediff.py",
+      "sha256": "a24280b7dfbbfaec3ff44d564cb7d1365af17e12eabd7e6f308a15ba7f42dd7f"
+    },
+    {
+      "path": "tools/statediff.py",
+      "sha256": "7771121e25cf00f2aa8fc6006e3b22e527f771075e0cf5ca46847c8a76f60427"
+    },
+    {
+      "path": "tools/writediff.py",
+      "sha256": "61552a302dddd7b31d9d6be6eee429917e586e2e78fd2efed0f00ba506eda3af"
+    }
+  ]
+}
