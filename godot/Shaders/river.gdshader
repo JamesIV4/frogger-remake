@@ -18,8 +18,8 @@ void fragment() {
     float wave = a * 0.65 + b * 0.35;
     float ribbons = sin(p.y * 9.0 + sin(p.x * 1.8 + clock * 0.4) * 1.8 - clock * 1.4);
     float shine = smoothstep(0.93, 1.0, ribbons) * (0.4 + 0.6 * sin(p.x * 2.3 + clock) * sin(p.x * 2.3 + clock));
-    ALBEDO = mix(vec3(0.016, 0.17, 0.32), vec3(0.025, 0.36, 0.52), wave * 0.35 + 0.5);
-    ALBEDO += vec3(0.14, 0.26, 0.28) * shine * 0.4;
+    ALBEDO = mix(vec3(0.003, 0.028, 0.40), vec3(0.005, 0.16, 0.78), wave * 0.35 + 0.5);
+    ALBEDO += vec3(0.08, 0.19, 0.34) * shine * 0.4;
     NORMAL_MAP = normalize(vec3(-0.10 * cos(p.x * 1.6 + p.y * 2.1 + clock * 1.1),
                                -0.06 * cos(p.x * 2.9 - p.y * 1.4 - clock * 0.8), 1.0)) * 0.5 + 0.5;
     ROUGHNESS = 0.26;

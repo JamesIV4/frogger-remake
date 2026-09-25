@@ -1,0 +1,242 @@
+[
+  {
+    "frame": 1,
+    "romFrame": 298,
+    "dying": true,
+    "drowning": false,
+    "deathSeconds": 0,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.02,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 4,
+    "romFrame": 301,
+    "dying": true,
+    "drowning": false,
+    "deathSeconds": 0.0495,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.02,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1.212625,
+      0.60877,
+      1.1701
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 8,
+    "romFrame": 305,
+    "dying": true,
+    "drowning": false,
+    "deathSeconds": 0.1155,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.02,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1.5,
+      0.07999998,
+      1.4
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 16,
+    "romFrame": 313,
+    "dying": true,
+    "drowning": false,
+    "deathSeconds": 0.2475,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.02,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1.5,
+      0.07999998,
+      1.4
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 32,
+    "romFrame": 329,
+    "dying": true,
+    "drowning": false,
+    "deathSeconds": 0.5115000000000001,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.02,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1.5,
+      0.07999998,
+      1.4
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 48,
+    "romFrame": 345,
+    "dying": true,
+    "drowning": false,
+    "deathSeconds": 0.7755000000000001,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.02,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1.5,
+      0.07999998,
+      1.4
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 72,
+    "romFrame": 369,
+    "dying": true,
+    "drowning": false,
+    "deathSeconds": 1.1715,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.02,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1.5,
+      0.07999998,
+      1.4
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 92,
+    "romFrame": 389,
+    "dying": true,
+    "drowning": false,
+    "deathSeconds": 1.5015,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.02,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1.5,
+      0.07999998,
+      1.4
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 41,
+    "error": "Ok"
+  }
+]

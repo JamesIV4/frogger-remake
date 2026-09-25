@@ -1,0 +1,51 @@
+{
+  "wrapping": true,
+  "deaths": [
+    {
+      "water": false,
+      "frames": 95,
+      "subcounterResets": 5,
+      "monotonic": true
+    },
+    {
+      "water": true,
+      "frames": 79,
+      "subcounterResets": 4,
+      "monotonic": true
+    }
+  ],
+  "bonuses": [
+    {
+      "bug": false,
+      "rider": false,
+      "fifth": false,
+      "events": 1
+    },
+    {
+      "bug": true,
+      "rider": false,
+      "fifth": false,
+      "events": 2
+    },
+    {
+      "bug": false,
+      "rider": true,
+      "fifth": false,
+      "events": 2
+    },
+    {
+      "bug": true,
+      "rider": true,
+      "fifth": false,
+      "events": 3
+    },
+    {
+      "bug": true,
+      "rider": true,
+      "fifth": true,
+      "events": 3
+    }
+  ],
+  "turtleMaximumStep": 0.10648438,
+  "turtleJumps": []
+}

@@ -1,0 +1,262 @@
+[
+  {
+    "frame": 1,
+    "romFrame": 298,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 4.917,
+    "carrying": true,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.42,
+    "riderY": 0.88,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 13,
+    "romFrame": 310,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 5.115,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.010889
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "Text": "TIME \u002B600"
+      }
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 25,
+    "romFrame": 322,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 5.313000000000001,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0133148
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "Text": "TIME \u002B600"
+      }
+    ],
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 50,
+    "romFrame": 347,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 5.7255,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0017436
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "Text": "TIME \u002B600"
+      }
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 95,
+    "romFrame": 392,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 6.468,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      0.98782736
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "Text": "TIME \u002B600"
+      }
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 115,
+    "romFrame": 412,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 6.798,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0013927
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "Text": "\u002B200"
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "Text": "TIME \u002B600"
+      }
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  }
+]

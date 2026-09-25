@@ -8,7 +8,7 @@ import math
 import json
 import random
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'godot/Models'
@@ -16,12 +16,14 @@ SOURCE = ROOT / 'art/source'
 REVIEW = ROOT / 'docs/evidence/models'
 for path in (OUT, SOURCE, REVIEW): path.mkdir(parents=True, exist_ok=True)
 PALETTE = {
-    'green':'70b835', 'lime':'b1d645', 'darkgreen':'347d3f', 'cream':'f1dca0',
-    'ink':'18252b','white':'fff1d0','eye':'eac342','rubber':'26353b','hub':'b8c4bc',
-    'red':'d95546','yellow':'ebbd35','pink':'ac59bb','blue':'479db8','glass':'233f57',
-    'orange':'dc7841','wood':'a86835','woodlight':'ce9552','wooddark':'714329',
-    'shell':'518c3b','shelllight':'86b349','water':'349bab','road':'35434a',
-    'grass':'548843','grasslight':'6e9c4b','grassdark':'467b42','sand':'bca674',
+    'green':'47e51b', 'lime':'b0ff39', 'darkgreen':'08732e', 'cream':'fff3bd',
+    'ink':'101b32','white':'f5f7ff','eye':'ffc72b','rubber':'101522','hub':'b9c8dd',
+    'red':'ed1237','yellow':'ffdd00','pink':'de05e8','blue':'00aafa','glass':'08265d',
+    'orange':'ff7a16','wood':'94501f','woodlight':'cc8739','wooddark':'462c23',
+    'shell':'13652e','shelllight':'419e2c','water':'0754d9','road':'171d28',
+    'grass':'1c501c','grasslight':'2b6c20','grassdark':'123913','sand':'b8a46e',
+    'hedge':'216a0a','hedgelight':'70b91c','hedgedark':'082f0d',
+    'lady':'ff269c','ladylight':'ff9acb','ladydark':'9b075f',
 }
 MATS={}
 RECORDS=[]
@@ -106,6 +108,17 @@ def frog():
             cylinder('Front toe',wrist,tip,.025,'lime',f'Arm.{side}',6)
         for y in [.0,.13,.25]:
             ball('Back spot',(sign*.12,y,.424 if y<.2 else .37),(.035,.05,.009),'darkgreen')
+    # The PS1 reference's orange dorsal marking keeps the player readable on grass.
+    mesh('Orange back stripe',[(-.038,-.06,.441),(.038,-.06,.441),(-.036,.13,.442),(.036,.13,.442),(-.02,.28,.366),(.02,.28,.366)],[(0,1,3,2),(2,3,5,4)],'orange')
+    return specs
+
+def lady_frog():
+    specs=frog()
+    swaps={'green':'lady','lime':'ladylight','darkgreen':'ladydark','orange':'white'}
+    for obj in bpy.context.scene.objects:
+        if obj.type=='MESH':
+            for slot in obj.material_slots:
+                if slot.material.name in swaps:slot.material=material(swaps[slot.material.name])
     return specs
 
 def turtle():
@@ -175,12 +188,12 @@ def otter():
 def vehicle(kind):
     specs={'Body':((0,0,.1),(0,0,.5),None)}
     long=1.85 if kind=='truck' else .94
-    color={'car':'pink','racecar':'yellow','truck':'red','dozer':'cream','sport':'red'}[kind]
+    color={'car':'pink','racecar':'red','truck':'red','dozer':'cream','sport':'blue'}[kind]
     box('Chassis',(0,0,.18),(.66,long,.20),'rubber',bevel=.035)
     if kind=='truck':
         box('Cab',(0,-.62,.41),(.72,.48,.54),color,bevel=.06)
         box('Windshield',(0,-.877,.52),(.58,.025,.2),'glass')
-        box('Cargo box',(0,.34,.52),(.76,1.3,.67),'white',bevel=.035)
+        box('Cargo box',(0,.34,.52),(.76,1.3,.67),'yellow',bevel=.035)
         box('Cargo stripe',(0,.34,.866),(.62,1.16,.012),'blue')
     elif kind=='racecar':
         box('Nose',(0,-.36,.22),(.28,.55,.16),color,bevel=.04)
@@ -239,10 +252,22 @@ def board():
         x=-6+i*3
         box('Home bay',(x,6,-.01),(1.23,1.0,.14),'sand',bevel=.05)
         box('Home back lip',(x,6.48,.08),(1.25,.10,.12),'woodlight',bevel=.03)
+    rng=random.Random(1981)
     for x in [-6.9,-4.5,-1.5,1.5,4.5,6.9]:
         w=.7 if abs(x)>6 else 1.68
-        box('Low home hedge',(x,6,.14),(w,1,.37),'grassdark',bevel=.1)
-        for dx in [-.25,0,.25]:ball('Hedge facets',(x+dx,6.12,.38),(.27,.25,.15),'grass',segments=6,rings=4)
+        box('Dense impassable hedge',(x,6,.22),(w,1,.48),'hedgedark',bevel=.10)
+        for dx in [-w*.22,w*.22]:
+            ball('Dense angular canopy',(x+dx,6.03,.51),(w*.29,.47,.40),'hedge',segments=7,rings=4)
+        # Folded spear-shaped leaves, contained inside the non-goal columns.
+        # Large pointed silhouettes read as a barrier without tall bank grass.
+        for i in range(32 if w>1 else 16):
+            lx=x+rng.uniform(-w*.43,w*.43);ly=rng.uniform(5.62,6.38)
+            tipx=max(x-w*.49,min(x+w*.49,lx+rng.uniform(-.24,.24)))
+            tipy=ly+rng.uniform(-.10,.12);height=rng.uniform(.72,1.17)
+            half=min(rng.uniform(.09,.16),w*.49-abs(lx-x))
+            verts=[(lx-half,ly,.26),(lx+half,ly,.26),(tipx,tipy,height),
+                   (lx,ly-.10,.50+(height-.72)*.35),(lx,ly+.035,.42)]
+            mesh('Pointed hedge leaf',verts,[(0,3,2),(3,1,2),(0,2,4),(4,2,1),(0,4,1,3)],'hedgelight' if i%4==0 else 'hedge')
     for x in [-7.25,7.25]:box('Side rail',(x,0,.04),(.28,13.15,.32),'wood',bevel=.05)
     box('Top rail',(0,6.65,.0),(14.8,.23,.27),'wood',bevel=.04)
     # Bottom lip is below the walkable start bank; it never cuts row 0 off.
@@ -262,11 +287,11 @@ def rig_and_clips(specs,kind):
     for obj in meshes:
         group=obj.vertex_groups.new(name=obj['rig_bone']);group.add(list(range(len(obj.data.vertices))),1,'REPLACE')
         mod=obj.modifiers.new('Deform rig','ARMATURE');mod.object=rig;obj.parent=rig
-    clips=['Idle','Hop','Death','Celebrate'] if kind=='frog' else ['Idle','Swim','Dive'] if kind=='turtle' else ['Idle','Bite'] if kind=='gator' else ['Idle','Move']
+    clips=['Idle','Hop','Squash','Drown','Celebrate'] if kind in ('frog','lady_frog') else ['Idle','Swim','Dive'] if kind=='turtle' else ['Idle','Bite'] if kind=='gator' else ['Idle','Move']
     bpy.context.scene.render.fps=60
     rig.animation_data_create()
     for clip in clips:
-        duration=10 if clip=='Hop' else 42 if clip=='Death' else 60
+        duration=10 if clip=='Hop' else 48 if clip=='Squash' else 64 if clip=='Drown' else 60
         action=bpy.data.actions.new(clip);action.use_fake_user=True;rig.animation_data.action=action
         for frame in range(duration+1):
             p=frame/duration;cycle=math.sin(p*math.tau);h=math.sin(p*math.pi)
@@ -275,7 +300,6 @@ def rig_and_clips(specs,kind):
                 if b.name=='Body':
                     b.scale=(1,1,1+.014*cycle) if clip=='Idle' else (1,1,1)
                     if clip=='Hop':b.location.y=.24*h;b.rotation_euler.x=-.16*h
-                    if clip=='Death':b.scale=(1+.35*h,1-.65*p,1+.2*h);b.rotation_euler.y=.35*p
                     if clip=='Celebrate':b.location.y=.09*(1-math.cos(p*math.tau*2))
                 if 'Thigh' in b.name:b.rotation_euler.x=(-.9*h if clip=='Hop' else .018*cycle)
                 if 'Shin' in b.name:b.rotation_euler.x=(1.5*h if clip=='Hop' else .015*cycle)
@@ -286,6 +310,27 @@ def rig_and_clips(specs,kind):
                 if b.name=='Jaw' and clip=='Bite':b.rotation_euler.x=.65*h
                 if b.name=='Tail':b.rotation_euler.z=.25*cycle
                 if 'Wheel' in b.name and clip=='Move':b.rotation_euler.y=p*math.tau*2
+                if clip=='Squash':
+                    # Impact, then HOLD the flattened pose. No bobbing/recovery loop.
+                    s=min(1,p/.14);s=s*s*(3-2*s)
+                    b.rotation_euler=(0,0,0)
+                    # Overall flattening is applied to the entire GLB root in
+                    # Godot, so every weighted part compresses together. Bone
+                    # non-uniform scale has incompatible inheritance in importers.
+                    if b.name=='Body':b.scale=(1,1,1)
+                    if b.name=='Head':b.rotation_euler.x=.18*s
+                    if 'Thigh' in b.name:b.rotation_euler.x=.38*s
+                    if 'Shin' in b.name:b.rotation_euler.x=-.38*s
+                    if 'Arm.' in b.name:b.rotation_euler.z=(.25 if b.name.endswith('L') else -.25)*s
+                if clip=='Drown':
+                    # One monotonic descent; the game samples this clip from a
+                    # continuous death clock, never the ROM's resetting subcounter.
+                    sink=p*p*(3-2*p)
+                    # Whole-character descent has one owner in presentation;
+                    # the baked rig supplies the struggling head and limb motion.
+                    if b.name=='Body':b.rotation_euler.x=.12*math.sin(p*math.pi)
+                    if 'Arm.' in b.name:b.rotation_euler.x=-.6*math.sin(p*math.tau*2)*math.sin(p*math.pi)
+                    if 'Thigh' in b.name:b.rotation_euler.x=.22*math.sin(p*math.tau*2)*math.sin(p*math.pi)
                 for channel in ['location','rotation_euler','scale']:b.keyframe_insert(channel,frame=frame,group=b.name)
         track=rig.animation_data.nla_tracks.new();track.name=clip
         strip=track.strips.new(clip,0,action);strip.action_frame_start=0;strip.action_frame_end=duration
@@ -293,6 +338,12 @@ def rig_and_clips(specs,kind):
     rig.animation_data.action=None
     for track in rig.animation_data.nla_tracks:track.mute=False
     bpy.context.scene.frame_set(0)
+    if kind in ('frog','lady_frog'):
+        socket=bpy.data.objects.new('PassengerSocket',None);bpy.context.collection.objects.link(socket)
+        socket.parent=rig;socket.parent_type='BONE';socket.parent_bone='Body'
+        bpy.context.view_layer.update();socket.matrix_world=Matrix.Translation((0,.075,.46))
+        bpy.context.view_layer.update()
+        assert (socket.matrix_world.translation-Vector((0,.075,.46))).length<.0001
     return clips
 
 def export(kind,specs):
@@ -306,7 +357,7 @@ def export(kind,specs):
     RECORDS.append({'asset':kind,'triangles':triangles,'bones':len(specs) if specs else 0,'clips':clips,
         'source':f'art/source/{kind}.blend','glb':f'godot/Models/{kind}.glb'})
 
-for kind,builder in [('frog',frog),('turtle',turtle),('gator',gator),('fly',fly),('snake',snake),('otter',otter),
+for kind,builder in [('frog',frog),('lady_frog',lady_frog),('turtle',turtle),('gator',gator),('fly',fly),('snake',snake),('otter',otter),
                      ('log',log),('car',lambda:vehicle('car')),('truck',lambda:vehicle('truck')),
                      ('racecar',lambda:vehicle('racecar')),('dozer',lambda:vehicle('dozer')),
                      ('sport',lambda:vehicle('sport')),('board',board)]:

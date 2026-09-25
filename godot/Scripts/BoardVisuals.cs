@@ -4,6 +4,42 @@ namespace FroggerRemake;
 /// Decodes presentation state from the original tile page; no independent hazard timers.
 public static class BoardVisuals
 {
+    public const float LeftEdge=8,RightEdge=232;
+    public static bool IntersectsPlayfield(float center,float halfWidth)=>center+halfWidth>=LeftEdge&&center-halfWidth<=RightEdge;
+    public static float InterpolateByte(int previous,int current,float alpha) {
+        int d=((current-previous+128)&255)-128;
+        return Math.Abs(d)>8?current:previous+d*Math.Clamp(alpha,0,1);
+    }
+    public static float SurfaceHeight(float row) {
+        if(row>=216)return Mix(.02f,.075f,(row-216)/8);
+        if(row>=136)return .02f;
+        if(row>=128)return Mix(.075f,.02f,(row-128)/8);
+        if(row>=112)return Mix(.42f,.075f,(row-112)/16);
+        if(row>=48)return .42f;
+        return Mix(.08f,.42f,(row-32)/16);
+    }
+    private static float Mix(float a,float b,float t)=>a+(b-a)*Math.Clamp(t,0,1);
+    private static float Smooth(float t){t=Math.Clamp(t,0,1);return t*t*(3-2*t);}
+    // Actual ROM phase clocks, including the pre-dive warning. Finish going
+    // under BEFORE the fatal interval; do not ease toward an already-fatal state.
+    public static float TurtleDepth(FrameState state,float x,int row,float alpha=0) {
+        if(TurtlePhase(state,x,row)==0)return 0;
+        float p=state.At(row==64?0x8110:0x8111)+(row==64?1:2)*alpha;
+        if(row==64) {
+            if(p<80)return 0;
+            if(p<128)return .12f*Smooth((p-80)/48);
+            if(p<160)return .12f+.58f*Smooth((p-128)/32);
+            if(p<176)return .70f;
+            if(p<208)return .70f-.58f*Smooth((p-176)/32);
+            return .12f*(1-Smooth((p-208)/48));
+        }
+        if(p<48)return .12f*Smooth(p/48);
+        if(p<80)return .12f+.58f*Smooth((p-48)/32);
+        if(p<96)return .70f;
+        if(p<112)return .70f-.58f*Smooth((p-96)/16);
+        if(p<160)return .12f*(1-Smooth((p-112)/48));
+        return 0;
+    }
     public static int TileAt(FrameState state,float frogSpaceX,int frogSpaceRow,int columnOffset=0) {
         int col=(frogSpaceRow/8+columnOffset)&31;
         int raw=state.objects[col*2],scroll=((raw>>4)|(raw<<4))&255;

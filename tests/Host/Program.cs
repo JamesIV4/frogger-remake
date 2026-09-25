@@ -106,3 +106,4 @@ for(int frame=0;frame<1800;frame++){
 if(!divePhases.Contains(0)||!divePhases.Contains(2))throw new Exception("Renderer did not see both surfaced and submerged original turtle tiles: "+string.Join(",",divePhases));
 File.WriteAllText("docs/evidence/presentation-tests.json",JsonSerializer.Serialize(new{turtlePhases=divePhases.Order().ToArray(),source="original VRAM and object scroll registers"}));
 Console.WriteLine("Turtle presentation follows original surface, warning and submerged tiles");
+FeedbackTests.Run(rom);

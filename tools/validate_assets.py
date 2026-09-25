@@ -42,6 +42,11 @@ for contract in json.loads((ROOT/'art/models.json').read_text()):
                 samples=values(sampler['output'])
                 if any(row!=samples[0] for row in samples[1:]):moving+=1
             assert moving>0,(contract['asset'],clip,'static clip')
+    if contract['asset'] in ('frog','lady_frog'):
+        sockets=[i for i,n in enumerate(doc['nodes']) if n.get('name')=='PassengerSocket']
+        assert len(sockets)==1,'Missing passenger attachment'
+        parent=next(n for n in doc['nodes'] if sockets[0] in n.get('children',[]))
+        assert parent['name']=='Body','Passenger must inherit the animated body bone'
     results.append({'asset':contract['asset'],'vertices':vertices,'triangles':triangles,'bones':bones,'skinned_vertices':skinned,'max_weight_error':max_error,'clips':list(clips),'passed':True})
 (ROOT/'docs/evidence/asset-validation.json').write_text(json.dumps(results,indent=2)+'\n')
 print(f'{len(results)} Blender exports validated: finite geometry, triangle counts, all vertices bound, normalized weights, expected joints and moving clips.')

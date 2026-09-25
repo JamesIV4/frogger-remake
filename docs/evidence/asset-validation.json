@@ -1,15 +1,32 @@
 [
   {
     "asset": "frog",
-    "vertices": 7196,
-    "triangles": 3444,
+    "vertices": 7204,
+    "triangles": 3448,
     "bones": 8,
-    "skinned_vertices": 7196,
+    "skinned_vertices": 7204,
     "max_weight_error": 0,
     "clips": [
       "Idle",
       "Hop",
-      "Death",
+      "Squash",
+      "Drown",
+      "Celebrate"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "lady_frog",
+    "vertices": 7204,
+    "triangles": 3448,
+    "bones": 8,
+    "skinned_vertices": 7204,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Hop",
+      "Squash",
+      "Drown",
       "Celebrate"
     ],
     "passed": true
@@ -157,8 +174,8 @@
   },
   {
     "asset": "board",
-    "vertices": 6516,
-    "triangles": 2924,
+    "vertices": 8740,
+    "triangles": 3740,
     "bones": 0,
     "skinned_vertices": 0,
     "max_weight_error": 0,

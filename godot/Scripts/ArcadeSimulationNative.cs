@@ -14,9 +14,12 @@ public sealed class ArcadeSimulation : IDisposable
     public readonly MainProgram Cpu;
     public readonly NativeSound? Sound;
     public bool ModernCollision;
+    public readonly Queue<BonusAward> BonusAwards=new();
     public int Frame { get; private set; }
     private long nextNmi;
     private int previousX,previousY;
+    private int homeAwardX,homeAwardRow;
+    private bool homeAwardOrigin;
     public ArcadeSimulation(byte[] rom,bool modern=false,byte[]? soundRom=null) {
         if(Convert.ToHexStringLower(SHA256.HashData(rom))!="f8c0a2ef4105769c627b7bbf13d0844ada8bbe43c00d177eb90dd395d1e3a1e5")
             throw new ArgumentException("ROM differs from recovered program. Run prepare_rom.py with the supplied set.");
@@ -27,6 +30,8 @@ public sealed class ArcadeSimulation : IDisposable
         Bus.Input=buttons;long target=(Frame+1L)*CyclesPerFrame;
         while(Cpu.Cycles<target) {
             if(Cpu.Cycles>=nextNmi) {nextNmi+=CyclesPerFrame;previousX=Peek(0x8044);previousY=Peek(0x8047);if(Bus.NmiEnabled)Cpu.Nmi();}
+            if(Cpu.PC==0x1f1c){homeAwardX=Peek(0x8044);homeAwardRow=Peek(0x8047);homeAwardOrigin=true;}
+            if(Cpu.PC==0x08e0)ObserveBonusAward();
             if(ModernCollision&&Cpu.PC==0x11bf&&ResolveModernRoad())Cpu.ReturnFromHook();else Cpu.StepInstruction();
         }
         Frame++;
@@ -42,6 +47,27 @@ public sealed class ArcadeSimulation : IDisposable
     public byte[] StateArray()=>Bus.Ram.Concat(Bus.Video).Concat(Bus.Objects).ToArray();
     public string StateBytes()=>JsonSerializer.Serialize(Array.ConvertAll(StateArray(),b=>(int)b));
     public void Dispose() { }
+    private void ObserveBonusAward() {
+        // Read-only presentation tap at AddScore. Real CALL return addresses
+        // distinguish the bug, rescued frog and remaining-time awards.
+        // 0x268f -> 0x2692: bug; 0x1f25 -> 0x1f28: carried frog safely home.
+        // Observing the call also catches a fifth-home award whose sprite record
+        // the board transition clears before the next frame snapshot.
+        if(Peek(0x83fe)==0)return;
+        int caller=Peek(Cpu.SP)|(Peek((Cpu.SP+1)&65535)<<8);
+        // 0x1f41 calls the once-per-home time payout (0x08c5), which writes the
+        // BCD amount then falls through into AddScore, returning to 0x1f44.
+        if(caller==0x1f44){
+            int bcd=Cpu.DE;
+            int points=10*((bcd&15)+10*((bcd>>4)&15)+100*((bcd>>8)&15)+1000*((bcd>>12)&15));
+            BonusAwards.Enqueue(new BonusAward(Frame+1,homeAwardOrigin?homeAwardX:Peek(0x8044),homeAwardOrigin?homeAwardRow:Peek(0x8047),points,BonusKind.Time));
+            homeAwardOrigin=false;return;
+        }
+        if(Cpu.DE!=0x20)return;
+        if(caller!=0x2692&&caller!=0x1f28)return;
+        BonusAwards.Enqueue(new BonusAward(Frame+1,Peek(0x8044),Peek(0x8047),200,
+            caller==0x2692?BonusKind.Bug:BonusKind.Rescue));
+    }
     // Intentional ROAD-only modernization of ROM 0x11bf/0x12e4. The original
     // kill latch, river support, score, timers and level transitions still own play.
     private bool ResolveModernRoad() {
@@ -66,6 +92,8 @@ public sealed class ArcadeSimulation : IDisposable
         return true;
     }
 }
+public enum BonusKind { Bug, Rescue, Time }
+public readonly record struct BonusAward(int Frame,int X,int Row,int Amount,BonusKind Kind);
 public sealed class FrameState {
     public int frame{get;set;}
     public int[] ram{get;set;}=new int[2048];

@@ -12,16 +12,17 @@ public partial class FroggerGame : Node3D
     private AudioStreamGeneratorPlayback audioPlayback=null!;
     private bool started,paused,modern=true,muted;
     private double accumulator;
-    private int facing=2,wasHop,coinFrames,renderFrames,highScore;
+    private int facing=2,coinFrames,renderFrames,highScore;
     private string screenshot="";
     private ShaderMaterial water=null!;
     private Camera3D camera=null!;
     public override void _Ready() {
         try {
             foreach(string arg in OS.GetCmdlineUserArgs())if(arg.StartsWith("--screenshot="))screenshot=arg[13..];
+            ReadReviewArgs();
             SetupWorld();SetupUi();LoadPreferences();ResetMachine();
-            for(int i=0;i<180;i++)simulation.Step();state=simulation.Snapshot();ShowMenu(false);
-            if(screenshot!=""&&!Array.Exists(OS.GetCmdlineUserArgs(),a=>a=="--menu-shot")){StartGame(1);for(int i=0;i<50;i++)simulation.Step();state=simulation.Snapshot();}
+            for(int i=0;i<180;i++)simulation.Step();ObserveFrame();ShowMenu(false);
+            if(screenshot!=""&&!Array.Exists(OS.GetCmdlineUserArgs(),a=>a=="--menu-shot")){StartGame(1);for(int i=0;i<50;i++)simulation.Step();ObserveFrame();}
             if(screenshot!=""&&Array.Exists(OS.GetCmdlineUserArgs(),a=>a=="--later-board")){
                 for(int round=0;round<2;round++){
                     for(int bay=0;bay<5;bay++){
@@ -30,29 +31,31 @@ public partial class FroggerGame : Node3D
                     }
                     for(int f=0;f<500;f++)simulation.Step();
                 }
-                state=simulation.Snapshot();simulation.Sound?.Samples.Clear();
+                ObserveFrame();simulation.Sound?.Samples.Clear();
             }
         } catch(Exception e){GD.PushError(e.ToString());if(message!=null)message.Text="Setup needed: run tools/setup.ps1\n"+e.Message;SetProcess(false);}
     }
-    private void ResetMachine(){simulation?.Dispose();simulation=new ArcadeSimulation(FileAccess.GetFileAsBytes("res://rom/maincpu.bin"),modern,FileAccess.GetFileAsBytes("res://rom/audiocpu.bin"));accumulator=0;wasHop=0;}
+    private void ResetMachine(){simulation?.Dispose();simulation=new ArcadeSimulation(FileAccess.GetFileAsBytes("res://rom/maincpu.bin"),modern,FileAccess.GetFileAsBytes("res://rom/audiocpu.bin"));accumulator=0;ClearPresentation();}
     private void StartGame(int players) {
         ResetMachine();for(int i=0;i<180;i++)simulation.Step();
         for(int c=0;c<players;c++){for(int i=0;i<6;i++)simulation.Step(16);for(int i=0;i<10;i++)simulation.Step();}
         for(int i=0;i<6;i++)simulation.Step(players==1?32:64);
         for(int i=0;i<45;i++)simulation.Step();
         if(highScore>0){int n=highScore/10;simulation.Poke(0x83ef,(n%10)|((n/10%10)<<4));simulation.Poke(0x83f0,(n/100%10)|((n/1000%10)<<4));}
-        state=simulation.Snapshot();simulation.Sound?.Samples.Clear();audioPlayer?.Stop();started=true;paused=false;menu.Visible=false;message.Text="";
+        ObserveFrame();simulation.Sound?.Samples.Clear();audioPlayer?.Stop();started=true;paused=false;menu.Visible=false;message.Text="";
     }
     public override void _Process(double delta) {
         if(simulation==null)return;
         var view=GetViewport().GetVisibleRect().Size;camera.Size=Math.Max(17.4f,16.2f/(view.X/view.Y));
-        if(!paused){accumulator+=Math.Min(delta,.2);int steps=0;
-            while(accumulator>=ArcadeSimulation.FrameSeconds&&steps++<12){int input=started?ReadDirection():0;if(coinFrames>0){input|=16;coinFrames--;}simulation.Step(input);accumulator-=ArcadeSimulation.FrameSeconds;}
-            state=simulation.Snapshot();
+        if(review!=""){if(reviewCapturePending)return;StepReview();}
+        else if(!paused){accumulator+=Math.Min(delta,.2);int steps=0;
+            while(accumulator>=ArcadeSimulation.FrameSeconds&&steps++<12){int input=started?ReadDirection():0;if(coinFrames>0){input|=16;coinFrames--;}simulation.Step(input);ObserveFrame();accumulator-=ArcadeSimulation.FrameSeconds;}
         }
         FeedAudio();
         UpdateActors();UpdateHud();water.SetShaderParameter("clock",state.frame*(float)ArcadeSimulation.FrameSeconds);
-        if(screenshot!=""&&++renderFrames==10)Capture();
+        UpdateReviewCamera();
+        if(review!="")CaptureReview();
+        else if(screenshot!=""&&++renderFrames==10)Capture();
     }
     private async void Capture(){await ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);var error=GetViewport().GetTexture().GetImage().SavePng(screenshot);GD.Print($"SCREENSHOT {screenshot} {error}");GetTree().Quit(error==Error.Ok?0:1);}
     private int ReadDirection(){
@@ -78,48 +81,10 @@ public partial class FroggerGame : Node3D
     private void Resume(){paused=false;menu.Visible=false;accumulator=0;}
     private ModelActor Actor(string key,string model){if(!actors.TryGetValue(key,out var actor)){actor=new ModelActor(this,model);actors.Add(key,actor);}return actor;}
     private static Vector3 Pos(float x,float row,float height=0)=>new((x-120)/16f,height,(row-128)/16f);
-    private void UpdateActors(){
-        foreach(var a in actors.Values)a.Root.Visible=false;
-        int fx=state.At(0x8044),fy=state.At(0x8047);var frog=Actor("player","frog");
-        frog.Root.Visible=fx>=8&&fx<=240&&fy>=26&&fy<=232;frog.Root.Position=Pos(fx,fy,.11f);
-        bool dead=state.At(0x8004)!=0&&state.At(0x83cd)==0;int hop=0;for(int i=0;i<4;i++)if(state.At(0x8248+i)!=0)hop=i+1;
-        if(hop>0)facing=hop switch{1=>0,2=>2,3=>1,_=>3};frog.Root.Rotation=new Vector3(0,facing*Mathf.Pi/2,0);
-        if(dead){frog.Play("Death",false);if(state.At(0x829c)!=0)frog.Root.Position+=new Vector3(0,-.025f*state.At(0x8247),0);}
-        else if(hop>0){if(hop!=wasHop)frog.Play("Hop",false,1.12f);}else frog.Play("Idle");wasHop=hop;
-        int[] widths={60,31,92,44,47,0,34,18,18,18,18};string[] models={"log","turtle","log","log","turtle","","truck","sport","car","dozer","racecar"};
-        for(int index=0;index<11;index++){
-            if(index==5)continue;int table=0x8100+index*9,count=Math.Min(8,state.At(table)),row=(index+3)*16,width=widths[index];
-            for(int j=0;j<count;j++){
-                float center=state.At(table+j+1)-(index<5?12:3)-width/2f;int members=index==1?2:index==4?3:1;
-                for(int member=0;member<members;member++)for(int wrap=-1;wrap<=1;wrap++){
-                    float x=center+wrap*256+(member-(members-1)/2f)*16;if(x<4||x>236)continue;
-                    bool crocodile=index==0&&BoardVisuals.GatorOnLog(state,x,row);
-                    var obj=Actor($"lane{index}.{j}.{member}.{wrap}.{crocodile}",crocodile?"gator":models[index]);obj.Root.Visible=true;obj.Root.Position=Pos(x,row,index<5?.01f:.02f);
-                    if(crocodile){obj.Root.Rotation=new Vector3(0,Mathf.Pi/2,0);obj.Root.Scale=new Vector3(1,1,(width-3)/30f);obj.Play("Bite");continue;}
-                    if(models[index]=="log")obj.Root.Scale=new Vector3((width-3)/16f,1,1);
-                    else if(models[index]=="turtle"){int phase=BoardVisuals.TurtlePhase(state,x,row);obj.Root.Rotation=new Vector3(0,-Mathf.Pi/2,0);obj.Root.Position+=new Vector3(0,phase==2?-.63f:phase==1?-.18f:0,0);obj.Play(phase>0?"Dive":"Swim");}
-                    else{obj.Root.Rotation=new Vector3(0,(index%2==0?-1:1)*Mathf.Pi/2,0);obj.Root.Scale=Vector3.One*.84f;obj.Play("Move");}
-                }
-            }
-        }
-        int homeBase=state.At(0x83fd)==2?0x8263:0x825e;
-        for(int i=0;i<5;i++){
-            if(state.At(homeBase+i)!=0){var a=Actor($"home{i}","frog");a.Root.Visible=true;a.Root.Position=new Vector3(-6+3*i,.12f,-6);a.Root.Rotation=new Vector3(0,Mathf.Pi,0);a.Play("Celebrate");}
-            int tile=state.At(0xab64-i*0xc0);
-            if(tile>=44&&tile<=47){var a=Actor($"homefly{i}","fly");a.Root.Visible=true;a.Root.Position=new Vector3(-6+3*i,.1f,-6);}
-            if(tile==208||state.At(0xab64-i*0xc0+32)==208){var a=Actor($"homegator{i}","gator");a.Root.Visible=true;a.Root.Position=new Vector3(-6+3*i,tile==208?0:-.15f,-6);a.Root.Scale=Vector3.One*.6f;a.Play("Bite");}
-        }
-        foreach(int addr in new[]{0x8048,0x8050,0x8058}){
-            int x=state.At(addr),y=state.At(addr+3);if(x<8||x>235||y<32||y>136||state.At(addr+1)==0)continue;
-            var a=Actor($"hazard{addr}",addr==0x8058?"otter":"snake");a.Root.Visible=true;a.Root.Position=Pos(x,y,.08f);a.Root.Rotation=new Vector3(0,Mathf.Pi/2,0);a.Root.Scale=Vector3.One*.75f;a.Play("Move");
-        }
-        int bx=state.At(0x8040),by=state.At(0x8043);
-        if(bx>7&&bx<235&&by>=32&&by<128&&state.At(0x8041)!=0){var a=Actor("lady","frog");a.Root.Visible=true;a.Root.Position=Pos(bx,by,.15f);a.Root.Scale=Vector3.One*.76f;a.Root.Rotation=new Vector3(0,Mathf.Pi,0);}
-    }
     private void SetupWorld(){
-        AddChild(new WorldEnvironment{Environment=new Godot.Environment{BackgroundMode=Godot.Environment.BGMode.Color,BackgroundColor=new Color("171e29"),AmbientLightSource=Godot.Environment.AmbientSource.Color,AmbientLightColor=Colors.White,AmbientLightEnergy=.25f,TonemapMode=Godot.Environment.ToneMapper.Aces,ReflectedLightSource=Godot.Environment.ReflectionSource.Disabled}});
-        AddChild(new DirectionalLight3D{RotationDegrees=new Vector3(-58,-30,0),LightColor=Colors.White,LightEnergy=1.05f,ShadowEnabled=true});
-        AddChild(new DirectionalLight3D{RotationDegrees=new Vector3(-40,140,0),LightColor=new Color("e8f0ff"),LightEnergy=.14f});
+        AddChild(new WorldEnvironment{Environment=new Godot.Environment{BackgroundMode=Godot.Environment.BGMode.Color,BackgroundColor=new Color("171e29"),AmbientLightSource=Godot.Environment.AmbientSource.Color,AmbientLightColor=Colors.White,AmbientLightEnergy=.22f,TonemapMode=Godot.Environment.ToneMapper.Linear,SsaoEnabled=true,SsaoIntensity=1.35f,SsaoRadius=.75f,ReflectedLightSource=Godot.Environment.ReflectionSource.Disabled}});
+        AddChild(new DirectionalLight3D{RotationDegrees=new Vector3(-58,-30,0),LightColor=Colors.White,LightEnergy=.95f,ShadowEnabled=true});
+        AddChild(new DirectionalLight3D{RotationDegrees=new Vector3(-40,140,0),LightColor=new Color("e8f0ff"),LightEnergy=.08f});
         AddChild(GD.Load<PackedScene>("res://Models/board.glb").Instantiate<Node3D>());
         camera=new Camera3D{Projection=Camera3D.ProjectionType.Orthogonal,Size=17.4f,Position=new Vector3(0,19,9.8f),KeepAspect=Camera3D.KeepAspectEnum.Height};AddChild(camera);camera.LookAt(new Vector3(0,0,.15f));camera.Current=true;
         var surface=new MeshInstance3D{Mesh=new PlaneMesh{Size=new Vector2(14,5),SubdivideWidth=64,SubdivideDepth=32},Position=new Vector3(0,-.025f,-3)};

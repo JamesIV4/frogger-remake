@@ -1,16 +1,31 @@
 [
   {
     "asset": "frog",
-    "triangles": 3444,
+    "triangles": 3448,
     "bones": 8,
     "clips": [
       "Idle",
       "Hop",
-      "Death",
+      "Squash",
+      "Drown",
       "Celebrate"
     ],
     "source": "art/source/frog.blend",
     "glb": "godot/Models/frog.glb"
+  },
+  {
+    "asset": "lady_frog",
+    "triangles": 3448,
+    "bones": 8,
+    "clips": [
+      "Idle",
+      "Hop",
+      "Squash",
+      "Drown",
+      "Celebrate"
+    ],
+    "source": "art/source/lady_frog.blend",
+    "glb": "godot/Models/lady_frog.glb"
   },
   {
     "asset": "turtle",
@@ -133,7 +148,7 @@
   },
   {
     "asset": "board",
-    "triangles": 2924,
+    "triangles": 3740,
     "bones": 0,
     "clips": [],
     "source": "art/source/board.blend",
