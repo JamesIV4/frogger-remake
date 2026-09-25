@@ -12,9 +12,9 @@ Open **`godot/project.godot`** in Godot 4.7 **.NET**, build C#, and press **F5**
 ./RunGame.ps1
 ```
 
-Arrow keys, WASD, or a controller D-pad/left stick move the frog. Enter/Space starts a one-player game. `1` / `2` start one or two players; two players take alternating turns. Escape/P pauses, R restarts, M toggles sound, F11 toggles fullscreen, and C/5 inserts a coin. The pause menu offers the original road collision rules or optional forgiving swept collision. River support and all other game rules remain in the recovered program.
+Arrow keys, WASD, or a controller D-pad/left stick move the frog. Holding a direction repeats complete hops. Enter/Space starts a one-player game. `1` / `2` start one or two players; two players take alternating turns. Escape/P pauses, R restarts, M toggles sound, F11 toggles fullscreen, and C/5 inserts a coin. The pause menu offers optional **Classic collision (original ROM)**; the default road contact uses the actual Blender model bounds on both sides of each vehicle and checks movement between frames. River support and the other game rules remain in the recovered program. The menu also offers independent perspective and follow-camera settings.
 
-The starting bank is completely walkable. Both grassy banks use flat low-poly surface detail. Lighting is neutral, the river has continuous animated ripples, and the HUD uses licensed arcade fonts.
+Both starting grass rows are walkable, including the ROM's lower row at `0xF0`. Grass uses flat low-poly surface detail; a thick rear hedge stands behind the open home bays. The blue river has continuous animated ripples and a deep translucent layer over partly submerged logs and turtles. Moving models interpolate between native pixel positions without changing gameplay. Lighting includes top-left sun, soft shadows and ambient occlusion. The top and bottom HUD panels meet the screen edges and round toward the board.
 
 ## First checkout
 
@@ -49,7 +49,7 @@ Run the complete local gate (Node 24+ and Pillow are also required for the verif
 
 See [the decompilation and verification notes](docs/DECOMPILATION.md), [machine-readable audit](docs/evidence/audit.json), [function map](docs/evidence/function-map.json), and [asset validation](docs/evidence/asset-validation.json).
 
-The native port is a faithful address-level translation, **not a completed handwritten, idiomatic C# rewrite**. The tests cover specific executions; they do not establish universal equivalence across every possible state. Forgiving road collision is a deliberate optional change. The sound CPU executes the recovered program, while the AY output stage uses a native synthesis model rather than MAME's exact analogue netlist.
+The native port is a faithful address-level translation, **not a completed handwritten, idiomatic C# rewrite**. The tests cover specific executions; they do not establish universal equivalence across every possible state. Model-sized road contact and held-direction input repeat are deliberate frontend options outside the recovered instruction bodies; Classic collision executes the original road routine. The sound CPU executes the recovered program, while the AY output stage uses a native synthesis model rather than MAME's exact analogue netlist.
 
 ## Files and licensing
 

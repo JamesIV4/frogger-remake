@@ -34,7 +34,7 @@ Headless Ghidra can return exit code 0 even when a Java post-script fails. `tool
 | Recovered-reference suite | Function equivalence, mutation controls, board hardware and new provenance checks | 439 pass, 0 fail; one optional recorded-audio-file check skipped |
 | Lifecycle scenarios | 9,000-frame idle run through timer deaths and game-over; two-player hand-off; five forced safe home entries followed by ordinary board progression | Passed; next board reached |
 | Native sound | Original sound CPU and commands running through the compiled program | 1,425,600 samples in the 1,800-frame test; non-silent output; full command sweep expands executed-code coverage |
-| Blender exports | Finite geometry, topology counts, bound vertices, normalized skin weights, exact bone counts and moving animation channels | 13 assets pass |
+| Blender exports | Finite geometry, topology counts, bound vertices, normalized skin weights, exact bone counts and moving animation channels | 14 assets pass |
 
 MAME fixtures were captured with MAME 0.289, whose downloaded binary's SHA-256 matched its official release checksums. `tools/mame_functions.lua` installs opcode-read taps gated by CURPC, captures real entry registers/RAM, and waits for the actual return PC and stack depth to capture the exit. The tape uses real coin/start controls plus explicit home/death fixtures to reach the selected branches. These fixture pokes are test setup, not normal game behavior.
 
@@ -50,9 +50,9 @@ The equivalence gate has limits: 460 frames and five independent function fixtur
 
 ## Presentation and intentional differences
 
-The game uses original object lists and sprite/VRAM state to place Blender models. Turtle submergence and home creatures are read from the original tile state, not independent random timers. A framebuffer is never drawn as the game world. The bank at row 0 remains open; grass is flat surface detail.
+The game uses original object lists and sprite/VRAM state to place Blender models. Turtle submergence and home creatures are read from the original tile state, not independent random timers. A framebuffer is never drawn as the game world. The bank at row 0 remains open; grass is flat surface detail. The visual layer smooths stepped object positions and finishes hop/drowning poses without modifying the recovered RAM or timing.
 
-The optional forgiving road hook substitutes a swept frog-center/vehicle-box test at **0x11bf** and returns through the original stack. It retains the original kill latch; river support, diving, hazards, goals, RNG, scores, timers and progression are untouched by this hook. Disable it for reference comparisons. The hook intentionally changes road collision decisions and their instruction timing.
+The default model-sized road hook at **0x11bf** uses vehicle front, rear and lateral bounds generated from actual Blender vertices, rotated into each lane's direction. It tests the whole frog footprint on both sides and sweeps relative vehicle/frog movement between original NMIs. It retains the original kill latch; river support, diving, hazards, goals, RNG, scores, timers and progression are untouched by this hook. The menu's **Classic collision (original ROM)** option executes the unmodified routine and is used for reference comparisons. The hook intentionally changes road collision decisions and their instruction timing. A held-direction input adapter supplies the release frame required by the ROM's directional latch, so holding a key produces successive original hops without changing their distance or speed.
 
 Both CPUs execute native code. `NativeSound.cs` models the AY tone/noise/envelope output and DC filtering. The analogue amplifier/filter network is **not** MAME netlist exact. Recorded MAME WAVs in the ignored local audio folder were research artifacts; the game has no dependency on them.
 

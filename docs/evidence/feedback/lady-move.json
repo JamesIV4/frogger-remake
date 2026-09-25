@@ -1,0 +1,457 @@
+[
+  {
+    "frame": 1,
+    "romFrame": 298,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 4.917,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": true,
+    "ladyYaw": 1.5707964,
+    "ladyScale": 0.62,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": true,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 8,
+    "romFrame": 305,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.032500000000001,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": true,
+    "ladyYaw": 1.5707964,
+    "ladyScale": 0.62,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": true,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0042582
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 17,
+    "romFrame": 314,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.181,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": true,
+    "ladyYaw": -1.5707964,
+    "ladyScale": 0.62,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": true,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0109679
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 25,
+    "romFrame": 322,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.313000000000001,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": true,
+    "ladyYaw": -1.5707964,
+    "ladyScale": 0.62,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": true,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0133148
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 30,
+    "romFrame": 327,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.3955,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": true,
+    "ladyYaw": -1.5707964,
+    "ladyScale": 0.62,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": true,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0126008
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 40,
+    "romFrame": 337,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.5605,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": true,
+    "ladyYaw": -1.5707964,
+    "ladyScale": 0.62,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": true,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.007002
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 45,
+    "romFrame": 342,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.643000000000001,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": true,
+    "ladyYaw": -1.5707964,
+    "ladyScale": 0.62,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0005654
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  }
+]

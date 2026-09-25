@@ -1,10 +1,10 @@
 [
   {
     "asset": "frog",
-    "vertices": 7204,
-    "triangles": 3448,
+    "vertices": 8404,
+    "triangles": 4008,
     "bones": 8,
-    "skinned_vertices": 7204,
+    "skinned_vertices": 8404,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -13,14 +13,16 @@
       "Drown",
       "Celebrate"
     ],
-    "passed": true
+    "passed": true,
+    "front_leg_span": 1.07021,
+    "rear_leg_span": 1.06
   },
   {
     "asset": "lady_frog",
-    "vertices": 7204,
-    "triangles": 3448,
+    "vertices": 8404,
+    "triangles": 4008,
     "bones": 8,
-    "skinned_vertices": 7204,
+    "skinned_vertices": 8404,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -29,7 +31,9 @@
       "Drown",
       "Celebrate"
     ],
-    "passed": true
+    "passed": true,
+    "front_leg_span": 1.07021,
+    "rear_leg_span": 1.06
   },
   {
     "asset": "turtle",
@@ -43,14 +47,15 @@
       "Swim",
       "Dive"
     ],
-    "passed": true
+    "passed": true,
+    "max_dive_bed_clearance": 0.27
   },
   {
     "asset": "gator",
-    "vertices": 3316,
-    "triangles": 1520,
+    "vertices": 4144,
+    "triangles": 1884,
     "bones": 3,
-    "skinned_vertices": 3316,
+    "skinned_vertices": 4144,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -174,8 +179,8 @@
   },
   {
     "asset": "board",
-    "vertices": 8740,
-    "triangles": 3740,
+    "vertices": 11757,
+    "triangles": 4983,
     "bones": 0,
     "skinned_vertices": 0,
     "max_weight_error": 0,

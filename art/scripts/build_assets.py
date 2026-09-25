@@ -20,7 +20,7 @@ PALETTE = {
     'ink':'101b32','white':'f5f7ff','eye':'ffc72b','rubber':'101522','hub':'b9c8dd',
     'red':'ed1237','yellow':'ffdd00','pink':'de05e8','blue':'00aafa','glass':'08265d',
     'orange':'ff7a16','wood':'94501f','woodlight':'cc8739','wooddark':'462c23',
-    'shell':'13652e','shelllight':'419e2c','water':'0754d9','road':'171d28',
+    'shell':'13652e','shelllight':'419e2c','water':'091c60','road':'171d28',
     'grass':'1c501c','grasslight':'2b6c20','grassdark':'123913','sand':'b8a46e',
     'hedge':'216a0a','hedgelight':'70b91c','hedgedark':'082f0d',
     'lady':'ff269c','ladylight':'ff9acb','ladydark':'9b075f',
@@ -78,6 +78,24 @@ def mesh(name,verts,faces,color):
     obj=bpy.data.objects.new(name,data);bpy.context.collection.objects.link(obj)
     return finish(obj,name,color)
 
+def muzzle(name,sections,color,bone):
+    """A closed, tapered octagonal head section, with broad cheeks and a flared tip."""
+    verts=[]
+    for y,width,low,high in sections:
+        verts.extend([(-width*.78,y,high),(width*.78,y,high),
+            (width,y,high-.035),(width,y,low+.035),
+            (width*.78,y,low),(-width*.78,y,low),
+            (-width,y,low+.035),(-width,y,high-.035)])
+    faces=[]
+    for ring in range(len(sections)-1):
+        for side in range(8):
+            next_side=(side+1)%8;a=ring*8+side;b=(ring+1)*8+side
+            faces.append((a,b,(ring+1)*8+next_side,ring*8+next_side))
+    faces.append(tuple(reversed(range(8))))
+    faces.append(tuple((len(sections)-1)*8+i for i in range(8)))
+    obj=mesh(name,verts,faces,color);obj['rig_bone']=bone
+    return obj
+
 def eyes(y,z,x=.19,scale=.11,bone='Head'):
     for sign in [-1,1]:
         ball('Eye mound', (sign*x,y+.014,z-.03), (scale*1.26,scale*.86,scale*1.2),'green',bone)
@@ -94,13 +112,22 @@ def frog():
     specs={'Body':((0,0,.12),(0,0,.35),None),'Head':((0,-.1,.25),(0,-.28,.38),'Body')}
     for sign,side in [(-1,'L'),(1,'R')]:
         hip=(sign*.19,.16,.21);knee=(sign*.39,.21,.15);heel=(sign*.33,.4,.085)
-        front=(sign*.22,-.14,.2);wrist=(sign*.32,-.27,.075)
+        front=(sign*.19,-.13,.21);wrist=(sign*.44,-.27,.075)
+        # The shoulder must begin well inside the body ellipsoid, otherwise
+        # widening the forearms leaves a visible seam at the torso.
+        assert (front[0]/.27)**2+((front[1]-.035)/.33)**2+((front[2]-.23)/.22)**2<.85
         specs[f'Thigh.{side}']=(hip,knee,'Body');specs[f'Shin.{side}']=(knee,heel,f'Thigh.{side}')
         specs[f'Arm.{side}']=(front,wrist,'Body')
+        # Body-weighted shoulder overlaps both the torso and the rotating arm.
+        # This remains joined through the hop clip, not just in the rest pose.
+        ball('Connected front shoulder',(sign*.265,-.145,.18),(.19,.20,.16),'green','Body',segments=9,rings=6)
+        cylinder('Continuous front-leg bridge',(sign*.14,-.08,.19),(sign*.38,-.22,.12),.13,'green','Body',vertices=10)
         ball('Powerful hind thigh',knee,(.14,.20,.135),'green',f'Thigh.{side}')
         cylinder('Hind upper leg',hip,knee,.102,'green',f'Thigh.{side}')
         cylinder('Folded shin',knee,heel,.075,'lime',f'Shin.{side}')
-        cylinder('Foreleg',front,wrist,.05,'green',f'Arm.{side}')
+        cylinder('Foreleg',front,wrist,.085,'green',f'Arm.{side}')
+        ball('Broad front forearm',(sign*.38,-.23,.12),(.15,.14,.10),'green',f'Arm.{side}',segments=9,rings=6)
+        ball('Broad front hand',wrist,(.10,.09,.065),'green',f'Arm.{side}',segments=8,rings=5)
         for n in range(3):
             toe=(heel[0]+sign*(n-1)*.054,heel[1]-.16, .05)
             cylinder('Hind toe',heel,toe,.03,'lime',f'Shin.{side}',6)
@@ -138,20 +165,33 @@ def turtle():
     return specs
 
 def gator():
-    ball('Armored body',(0,.15,.17),(.3,.54,.19),'shell')
-    cylinder('Tail',(0,.54,.17),(0,1.1,.055),.19,'shell',r2=.025)
-    box('Upper muzzle',(0,-.53,.19),(.43,.72,.17),'green','Head',.06)
-    box('Jaw',(0,-.55,.08),(.42,.7,.085),'cream','Jaw',.025)
+    ball('Armored trunk',(0,.15,.17),(.32,.54,.19),'shell',segments=12,rings=7)
+    cylinder('Long tapering tail',(0,.51,.17),(0,1.12,.05),.21,'shell',vertices=10,r2=.018)
+    muzzle('Tapered upper snout',[
+        (-.18,.25,.12,.36),(-.39,.205,.13,.33),(-.70,.155,.115,.27),
+        (-.91,.192,.11,.27),(-1.03,.147,.12,.235)],'green','Head')
+    muzzle('Lower articulated jaw',[
+        (-.17,.215,.055,.13),(-.44,.174,.045,.13),
+        (-.81,.175,.045,.135),(-.99,.137,.055,.12)],'cream','Jaw')
+    ball('Dark mouth',(0,-.67,.127),(.165,.36,.018),'ink','Head',segments=10,rings=4)
+    mesh('Top snout ridge',[(-.085,-.23,.367),(.085,-.23,.367),
+        (-.055,-.69,.279),(.055,-.69,.279),(-.05,-.94,.274),(.05,-.94,.274)],
+        [(0,1,3,2),(2,3,5,4)],'lime')['rig_bone']='Head'
     for s in [-1,1]:
-        for y in [-.29,-.46,-.63,-.78]:
-            cylinder('Tooth',(s*.18,y,.15),(s*.18,y,.06),.035,'white','Head',5,r2=0)
-        ball('Eye mound',(s*.19,-.23,.35),(.10,.13,.09),'green','Head')
-        ball('Eye',(s*.20,-.29,.38),(.045,.036,.04),'ink','Head',8,4)
-        for y in [.0,.37]: ball('Foot',(s*.36,y,.08),(.19,.11,.055),'green')
+        for y,width in [(-.39,.19),(-.56,.17),(-.73,.155),(-.87,.185)]:
+            cylinder('Triangular tooth',(s*width,y,.14),(s*width,y,.055),.031,'white','Head',5,r2=0)
+        ball('Raised eye ridge',(s*.18,-.23,.36),(.12,.13,.10),'darkgreen','Head',10,6)
+        ball('Golden eye',(s*.19,-.305,.406),(.057,.049,.044),'eye','Head',10,6)
+        ball('Narrow pupil',(s*.196,-.34,.414),(.026,.022,.033),'ink','Head',8,4)
+        ball('Nostril',(s*.104,-.94,.279),(.035,.045,.019),'darkgreen','Head',8,4)
+        for y in [-.11,.38]:
+            ball('Webbed foot',(s*.34,y,.077),(.21,.13,.065),'green')
+            for t in [-1,0,1]:
+                cylinder('Claw',(s*(.40+t*.045),y-.08,.08),(s*(.44+t*.045),y-.18,.06),.025,'cream',vertices=5,r2=0)
     for y,z in [(.03,.32),(.21,.34),(.39,.30),(.57,.24),(.74,.17)]:
-        for x in [-.12,.12]: cylinder('Back spike',(x,y,z),(x,y,z+.13),.066,'darkgreen',vertices=4,r2=0)
+        for x in [-.12,.12]: cylinder('Back spike',(x,y,z),(x,y,z+.15),.067,'darkgreen',vertices=5,r2=0)
     return {'Body':((0,0,.1),(0,0,.3),None),'Head':((0,-.1,.2),(0,-.5,.22),'Body'),
-            'Jaw':((0,-.2,.09),(0,-.64,.09),'Head')}
+            'Jaw':((0,-.2,.09),(0,-.72,.08),'Head')}
 
 def fly():
     ball('Body',(0,0,.28),(.15,.24,.13),'ink')
@@ -234,15 +274,23 @@ def log():
     return None
 
 def board():
-    box('Walnut base',(0,0,-.54),(14.85,13.35,.8),'wooddark',bevel=.14)
-    box('Inlay rim',(0,0,-.14),(14.63,13.18,.15),'woodlight',bevel=.06)
+    # Native rows 0xe0 and 0xf0 are both playable. Leave a full grass tile
+    # beyond the spawn row and keep the lip behind the frog's feet at 0xf0.
+    # Split the wooden substrate around the river. A solid slab here would sit
+    # in front of the lowered bed and turn translucent blue water purple.
+    for name,y,length in [('Lower',-3.70,8.40),('Upper',6.55,2.10)]:
+        box(name+' walnut base',(0,y,-.54),(14.85,length,.8),'wooddark',bevel=.10)
+        box(name+' inlay',(0,y,-.14),(14.63,length-.12,.15),'woodlight',bevel=.04)
+    for x in [-7.20,7.20]:box('River wall',(x,3,-.54),(.45,5.10,.8),'wooddark',bevel=.04)
     box('Road',(0,-3,-.036),(14,5,.10),'road')
-    box('River bed',(0,3,-.17),(14,5,.22),'water')
-    for y in [-6,0]:
-        box('Flat grassy bank',(0,y,.0),(14,1,.15),'grass',bevel=.04)
+    # The bed clears even the paddles at the turtles' maximum .70-unit dive.
+    # A deep open cavity keeps the whole animal visible through blue water.
+    box('River bed',(0,3,-1.31),(14,5,.22),'water')
+    for y,width in [(-6.5,2),(0,1)]:
+        box('Flat grassy bank',(0,y,.0),(14,width,.15),'grass',bevel=.04)
         rng=random.Random(int(y)+24)
-        for i in range(130):
-            x=rng.uniform(-6.9,6.9);yy=y+rng.uniform(-.43,.43);w=rng.uniform(.06,.20)
+        for i in range(130*width):
+            x=rng.uniform(-6.9,6.9);yy=y+rng.uniform(-width*.43,width*.43);w=rng.uniform(.06,.20)
             mesh('Painted grass patch',[(x-w,yy,.078),(x+w,yy+.055,.078),(x+.04,yy+.11,.078)],[(0,1,2)],'grasslight' if i%2 else 'grassdark')
     for y in [-.54,-5.46]:box('Curb',(0,y,.06),(14,.065,.1),'sand')
     for y in [-1.5,-2.5,-3.5,-4.5]:
@@ -268,10 +316,18 @@ def board():
             verts=[(lx-half,ly,.26),(lx+half,ly,.26),(tipx,tipy,height),
                    (lx,ly-.10,.50+(height-.72)*.35),(lx,ly+.035,.42)]
             mesh('Pointed hedge leaf',verts,[(0,3,2),(3,1,2),(0,2,4),(4,2,1),(0,4,1,3)],'hedgelight' if i%4==0 else 'hedge')
-    for x in [-7.25,7.25]:box('Side rail',(x,0,.04),(.28,13.15,.32),'wood',bevel=.05)
-    box('Top rail',(0,6.65,.0),(14.8,.23,.27),'wood',bevel=.04)
-    # Bottom lip is below the walkable start bank; it never cuts row 0 off.
-    box('Bottom lip',(0,-6.65,-.13),(14.8,.22,.18),'wood',bevel=.04)
+    # Rear silhouette sits beyond the five mouths. Dense, low-poly masses and
+    # large spikes read as an impassable hedge without occupying a home slot.
+    box('Back hedge trunk',(0,7.02,.23),(14.2,.72,.50),'hedgedark',bevel=.08)
+    for n in range(19):
+        x=-6.8+n*.75
+        ball('Back hedge crown',(x,7.03,.55),(.48,.40,.39),'hedge',segments=7,rings=4)
+        for k in range(5):
+            px=x+rng.uniform(-.35,.35);py=7.02+rng.uniform(-.24,.24)
+            mesh('Back hedge spear',[(px-.17,py,.47),(px+.17,py,.47),(px+rng.uniform(-.14,.14),py+rng.uniform(-.08,.08),rng.uniform(.92,1.30))],[(0,1,2)],'hedgelight' if (n+k)%4==0 else 'hedge')
+    for x in [-7.25,7.25]:box('Side rail',(x,-.15,.04),(.28,15.25,.32),'wood',bevel=.05)
+    box('Top rail',(0,7.55,.0),(14.8,.23,.27),'wood',bevel=.04)
+    box('Bottom lip',(0,-7.72,-.13),(14.8,.22,.18),'wood',bevel=.04)
     return None
 
 def rig_and_clips(specs,kind):
@@ -349,13 +405,20 @@ def rig_and_clips(specs,kind):
 def export(kind,specs):
     clips=rig_and_clips(specs,kind) if specs else []
     bpy.context.scene.frame_set(0)
+    bpy.context.view_layer.update()
+    meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
+    # These are the actual unanimated world-space mesh bounds. The native
+    # collision hook consumes the same authored silhouettes seen in Godot.
+    vertices=[o.matrix_world @ v.co for o in meshes for v in o.data.vertices]
+    footprint={'minX':round(min(p.x for p in vertices),6),'maxX':round(max(p.x for p in vertices),6),
+               'minY':round(min(p.y for p in vertices),6),'maxY':round(max(p.y for p in vertices),6),
+               'minZ':round(min(p.z for p in vertices),6),'maxZ':round(max(p.z for p in vertices),6)}
     bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE / (kind+'.blend')))
     bpy.ops.export_scene.gltf(filepath=str(OUT/(kind+'.glb')),export_format='GLB',export_animations=True,
         export_animation_mode='NLA_TRACKS',export_force_sampling=True,export_yup=True,export_apply=False)
-    meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
     triangles=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in meshes)
     RECORDS.append({'asset':kind,'triangles':triangles,'bones':len(specs) if specs else 0,'clips':clips,
-        'source':f'art/source/{kind}.blend','glb':f'godot/Models/{kind}.glb'})
+        'source':f'art/source/{kind}.blend','glb':f'godot/Models/{kind}.glb','footprintTiles':footprint})
 
 for kind,builder in [('frog',frog),('lady_frog',lady_frog),('turtle',turtle),('gator',gator),('fly',fly),('snake',snake),('otter',otter),
                      ('log',log),('car',lambda:vehicle('car')),('truck',lambda:vehicle('truck')),
@@ -363,4 +426,25 @@ for kind,builder in [('frog',frog),('lady_frog',lady_frog),('turtle',turtle),('g
                      ('sport',lambda:vehicle('sport')),('board',board)]:
     clean();specs=builder();export(kind,specs)
 (ROOT/'art/models.json').write_text(json.dumps(RECORDS,indent=2)+'\n')
+footprints={r['asset']:r['footprintTiles'] for r in RECORDS}
+assert -1.20 < -.22-.70+footprints['turtle']['minZ']-.12, 'Maximum dive clips turtle feet against the river bed'
+frog=footprints['frog']
+source=['// Generated from the Blender mesh bounds in art/scripts/build_assets.py.',
+    'namespace FroggerRemake;',
+    'public readonly record struct ModelFootprint(float MinAlongX,float MaxAlongX,float AcrossRow);',
+    'public static class ModelFootprints {',
+    f'    public const float FrogAlongX={max(abs(frog["minX"]),abs(frog["maxX"]))*16:.5f}f;',
+    f'    public const float FrogAcrossRow={max(abs(frog["minY"]),abs(frog["maxY"]))*16:.5f}f;',
+    '    // Vehicles rotate their local length axis into the ROM X direction.',
+    '    // Presentation scales every vehicle root to 0.84.',
+    '    public static ModelFootprint Vehicle(int lane)=>lane switch {']
+for lane,kind in [(6,'truck'),(7,'sport'),(8,'car'),(9,'dozer'),(10,'racecar')]:
+    b=footprints[kind]
+    # In GLB, Blender +Y maps to Godot -Z. Odd lanes rotate +90 degrees,
+    # reversing the model's longitudinal direction in ROM X coordinates.
+    min_x,max_x=(b['minY'],b['maxY']) if lane%2==0 else (-b['maxY'],-b['minY'])
+    cross=max(abs(b['minX']),abs(b['maxX']))
+    source.append(f'        {lane}=>new({min_x*16*.84:.5f}f,{max_x*16*.84:.5f}f,{cross*16*.84:.5f}f), // {kind}')
+source+=['        _=>throw new System.ArgumentOutOfRangeException(nameof(lane))','    };','}']
+(ROOT/'godot/Scripts/ModelFootprints.cs').write_text('\n'.join(source)+'\n')
 print('FROGGER_ASSETS_COMPLETE',len(RECORDS))

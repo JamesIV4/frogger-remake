@@ -10,7 +10,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 40,
     "error": "Ok"
   },
@@ -25,7 +57,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0133148
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 41,
     "error": "Ok"
   },
@@ -40,7 +104,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0021082
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 40,
     "error": "Ok"
   },
@@ -55,7 +151,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      0.9874922
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 40,
     "error": "Ok"
   },
@@ -70,7 +198,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      0.99025154
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 41,
     "error": "Ok"
   },
@@ -85,7 +245,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.007097
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 41,
     "error": "Ok"
   },
@@ -100,7 +292,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0133148
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 40,
     "error": "Ok"
   },
@@ -115,7 +339,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0004405
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 38,
     "error": "Ok"
   },
@@ -130,7 +386,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      0.9866852
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 40,
     "error": "Ok"
   },
@@ -145,7 +433,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      0.99266446
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 39,
     "error": "Ok"
   },
@@ -160,7 +480,39 @@
     "socketError": 0,
     "playerY": 0.075,
     "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0090858
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
     "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
     "visibleLogs": 40,
     "error": "Ok"
   }

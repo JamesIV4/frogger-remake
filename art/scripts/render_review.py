@@ -1,10 +1,12 @@
 """Four actual Blender renders of each source asset, with a fixed spatial reference."""
 from pathlib import Path
-import bpy,math
+import bpy,math,os
 from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'docs/evidence/models';OUT.mkdir(parents=True,exist_ok=True)
-for name in ['frog','turtle','gator','fly','snake','otter','car','truck','racecar','dozer','sport','log']:
+selected=os.environ.get('FROGGER_REVIEW_ASSETS')
+names=selected.split(',') if selected else ['frog','lady_frog','turtle','gator','fly','snake','otter','car','truck','racecar','dozer','sport','log']
+for name in names:
     bpy.ops.wm.open_mainfile(filepath=str(ROOT/'art/source'/f'{name}.blend'))
     scene=bpy.context.scene
     for obj in scene.objects:

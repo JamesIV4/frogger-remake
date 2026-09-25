@@ -1,7 +1,7 @@
 [
   {
     "asset": "frog",
-    "triangles": 3448,
+    "triangles": 4008,
     "bones": 8,
     "clips": [
       "Idle",
@@ -11,11 +11,19 @@
       "Celebrate"
     ],
     "source": "art/source/frog.blend",
-    "glb": "godot/Models/frog.glb"
+    "glb": "godot/Models/frog.glb",
+    "footprintTiles": {
+      "minX": -0.535106,
+      "maxX": 0.535106,
+      "minY": -0.425,
+      "maxY": 0.43122,
+      "minZ": -0.006061,
+      "maxZ": 0.5606
+    }
   },
   {
     "asset": "lady_frog",
-    "triangles": 3448,
+    "triangles": 4008,
     "bones": 8,
     "clips": [
       "Idle",
@@ -25,7 +33,15 @@
       "Celebrate"
     ],
     "source": "art/source/lady_frog.blend",
-    "glb": "godot/Models/lady_frog.glb"
+    "glb": "godot/Models/lady_frog.glb",
+    "footprintTiles": {
+      "minX": -0.535106,
+      "maxX": 0.535106,
+      "minY": -0.425,
+      "maxY": 0.43122,
+      "minZ": -0.006061,
+      "maxZ": 0.5606
+    }
   },
   {
     "asset": "turtle",
@@ -37,18 +53,34 @@
       "Dive"
     ],
     "source": "art/source/turtle.blend",
-    "glb": "godot/Models/turtle.glb"
+    "glb": "godot/Models/turtle.glb",
+    "footprintTiles": {
+      "minX": -0.56,
+      "maxX": 0.56,
+      "minY": -0.61,
+      "maxY": 0.43,
+      "minZ": -0.01,
+      "maxZ": 0.44
+    }
   },
   {
     "asset": "gator",
-    "triangles": 1520,
+    "triangles": 1884,
     "bones": 3,
     "clips": [
       "Idle",
       "Bite"
     ],
     "source": "art/source/gator.blend",
-    "glb": "godot/Models/gator.glb"
+    "glb": "godot/Models/gator.glb",
+    "footprintTiles": {
+      "minX": -0.55,
+      "maxX": 0.55,
+      "minY": -1.03,
+      "maxY": 1.123474,
+      "minZ": -0.036051,
+      "maxZ": 0.49
+    }
   },
   {
     "asset": "fly",
@@ -59,7 +91,15 @@
       "Move"
     ],
     "source": "art/source/fly.blend",
-    "glb": "godot/Models/fly.glb"
+    "glb": "godot/Models/fly.glb",
+    "footprintTiles": {
+      "minX": -0.5,
+      "maxX": 0.5,
+      "minY": -0.38,
+      "maxY": 0.24,
+      "minZ": 0.15,
+      "maxZ": 0.435
+    }
   },
   {
     "asset": "snake",
@@ -70,7 +110,15 @@
       "Move"
     ],
     "source": "art/source/snake.blend",
-    "glb": "godot/Models/snake.glb"
+    "glb": "godot/Models/snake.glb",
+    "footprintTiles": {
+      "minX": -0.256854,
+      "maxX": 0.256339,
+      "minY": -0.91,
+      "maxY": 0.9,
+      "minZ": 0.03,
+      "maxZ": 0.3
+    }
   },
   {
     "asset": "otter",
@@ -81,7 +129,15 @@
       "Move"
     ],
     "source": "art/source/otter.blend",
-    "glb": "godot/Models/otter.glb"
+    "glb": "godot/Models/otter.glb",
+    "footprintTiles": {
+      "minX": -0.34,
+      "maxX": 0.34,
+      "minY": -0.715,
+      "maxY": 0.914234,
+      "minZ": 0.0,
+      "maxZ": 0.395
+    }
   },
   {
     "asset": "log",
@@ -89,7 +145,15 @@
     "bones": 0,
     "clips": [],
     "source": "art/source/log.blend",
-    "glb": "godot/Models/log.glb"
+    "glb": "godot/Models/log.glb",
+    "footprintTiles": {
+      "minX": -0.511,
+      "maxX": 0.511,
+      "minY": -0.246202,
+      "maxY": 0.246202,
+      "minZ": -0.074923,
+      "maxZ": 0.418
+    }
   },
   {
     "asset": "car",
@@ -100,7 +164,15 @@
       "Move"
     ],
     "source": "art/source/car.blend",
-    "glb": "godot/Models/car.glb"
+    "glb": "godot/Models/car.glb",
+    "footprintTiles": {
+      "minX": -0.452,
+      "maxX": 0.452,
+      "minY": -0.6175,
+      "maxY": 0.58,
+      "minZ": -0.01,
+      "maxZ": 0.685
+    }
   },
   {
     "asset": "truck",
@@ -111,7 +183,15 @@
       "Move"
     ],
     "source": "art/source/truck.blend",
-    "glb": "godot/Models/truck.glb"
+    "glb": "godot/Models/truck.glb",
+    "footprintTiles": {
+      "minX": -0.452,
+      "maxX": 0.452,
+      "minY": -0.974,
+      "maxY": 0.99,
+      "minZ": -0.01,
+      "maxZ": 0.872
+    }
   },
   {
     "asset": "racecar",
@@ -122,7 +202,15 @@
       "Move"
     ],
     "source": "art/source/racecar.blend",
-    "glb": "godot/Models/racecar.glb"
+    "glb": "godot/Models/racecar.glb",
+    "footprintTiles": {
+      "minX": -0.452,
+      "maxX": 0.452,
+      "minY": -0.66,
+      "maxY": 0.5035,
+      "minZ": -0.01,
+      "maxZ": 0.46
+    }
   },
   {
     "asset": "dozer",
@@ -133,7 +221,15 @@
       "Move"
     ],
     "source": "art/source/dozer.blend",
-    "glb": "godot/Models/dozer.glb"
+    "glb": "godot/Models/dozer.glb",
+    "footprintTiles": {
+      "minX": -0.465,
+      "maxX": 0.465,
+      "minY": -0.645,
+      "maxY": 0.5035,
+      "minZ": -0.01,
+      "maxZ": 0.8
+    }
   },
   {
     "asset": "sport",
@@ -144,14 +240,30 @@
       "Move"
     ],
     "source": "art/source/sport.blend",
-    "glb": "godot/Models/sport.glb"
+    "glb": "godot/Models/sport.glb",
+    "footprintTiles": {
+      "minX": -0.452,
+      "maxX": 0.452,
+      "minY": -0.6175,
+      "maxY": 0.58,
+      "minZ": -0.01,
+      "maxZ": 0.685
+    }
   },
   {
     "asset": "board",
-    "triangles": 3740,
+    "triangles": 4983,
     "bones": 0,
     "clips": [],
     "source": "art/source/board.blend",
-    "glb": "godot/Models/board.glb"
+    "glb": "godot/Models/board.glb",
+    "footprintTiles": {
+      "minX": -7.425,
+      "maxX": 7.425,
+      "minY": -7.9,
+      "maxY": 7.665,
+      "minZ": -1.42,
+      "maxZ": 1.29548
+    }
   }
 ]

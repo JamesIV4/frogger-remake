@@ -18,6 +18,8 @@ public sealed class ArcadeSimulation : IDisposable
     public int Frame { get; private set; }
     private long nextNmi;
     private int previousX,previousY;
+    private readonly byte[] previousVehicles=new byte[2048];
+    private readonly int[] previousVehicleCounts=new int[5];
     private int homeAwardX,homeAwardRow;
     private bool homeAwardOrigin;
     public ArcadeSimulation(byte[] rom,bool modern=false,byte[]? soundRom=null) {
@@ -29,7 +31,14 @@ public sealed class ArcadeSimulation : IDisposable
     public void Step(int buttons=0) {
         Bus.Input=buttons;long target=(Frame+1L)*CyclesPerFrame;
         while(Cpu.Cycles<target) {
-            if(Cpu.Cycles>=nextNmi) {nextNmi+=CyclesPerFrame;previousX=Peek(0x8044);previousY=Peek(0x8047);if(Bus.NmiEnabled)Cpu.Nmi();}
+            if(Cpu.Cycles>=nextNmi) {
+                nextNmi+=CyclesPerFrame;previousX=Peek(0x8044);previousY=Peek(0x8047);
+                for(int lane=6;lane<=10;lane++){
+                    int table=0x8100+lane*9,count=Math.Min(8,Peek(table));previousVehicleCounts[lane-6]=count;
+                    for(int index=0;index<count;index++)previousVehicles[table+index+1-0x8000]=(byte)Peek(table+index+1);
+                }
+                if(Bus.NmiEnabled)Cpu.Nmi();
+            }
             if(Cpu.PC==0x1f1c){homeAwardX=Peek(0x8044);homeAwardRow=Peek(0x8047);homeAwardOrigin=true;}
             if(Cpu.PC==0x08e0)ObserveBonusAward();
             if(ModernCollision&&Cpu.PC==0x11bf&&ResolveModernRoad())Cpu.ReturnFromHook();else Cpu.StepInstruction();
@@ -68,20 +77,37 @@ public sealed class ArcadeSimulation : IDisposable
         BonusAwards.Enqueue(new BonusAward(Frame+1,Peek(0x8044),Peek(0x8047),200,
             caller==0x2692?BonusKind.Bug:BonusKind.Rescue));
     }
-    // Intentional ROAD-only modernization of ROM 0x11bf/0x12e4. The original
-    // kill latch, river support, score, timers and level transitions still own play.
+    // ROAD-only geometry hook at ROM 0x11bf/0x12e4. A full visible frog and
+    // visible vehicle footprint make contact symmetric; relative swept motion
+    // catches passes between NMIs. Classic mode executes the ROM unchanged.
     private bool ResolveModernRoad() {
         int y=Peek(0x8047),x=Peek(0x8044);if(y<136||y>216)return false;
         if(Peek(0x83cd)!=0||Peek(0x8004)!=0)return true;
-        for(int lane=9;lane<=13;lane++) {
-            int width=lane==9?34:18,table=0x8100+(lane-3)*9;
+        for(int lane=6;lane<=10;lane++) {
+            int width=lane==6?34:18,table=0x8100+lane*9,row=(lane+3)*16;
+            var body=ModelFootprints.Vehicle(lane);
             for(int i=0;i<Math.Min(8,Peek(table));i++) {
-                double cx=Peek(table+1+i)-3-width/2.0;
+                int address=table+i+1,raw=Peek(address);
+                double current=raw-3-width/2.0,prior=current;
+                if(i<previousVehicleCounts[lane-6]){
+                    int old=previousVehicles[address-0x8000],delta=((raw-old+128)&255)-128;
+                    prior=current-delta;
+                }
                 for(int wrap=-256;wrap<=256;wrap+=256)
-                    if(SweptBox(previousX,previousY,x,y,cx+wrap,lane*16,width/2.0-1.5,5.7)){Poke(0x8004,1);return true;}
+                    if(ModelContact(previousX,previousY,x,y,prior+wrap,current+wrap,row,body)){
+                        Poke(0x8004,1);return true;
+                    }
             }
         }
         return true;
+    }
+    public static bool ModelContact(double frogFromX,double frogFromRow,double frogToX,double frogToRow,
+        double vehicleFromX,double vehicleToX,double vehicleRow,ModelFootprint vehicle){
+        double center=(vehicle.MinAlongX+vehicle.MaxAlongX)/2;
+        double halfWidth=(vehicle.MaxAlongX-vehicle.MinAlongX)/2+ModelFootprints.FrogAlongX;
+        return SweptBox(frogFromX-vehicleFromX,frogFromRow-vehicleRow,
+            frogToX-vehicleToX,frogToRow-vehicleRow,center,0,
+            halfWidth,ModelFootprints.FrogAcrossRow+vehicle.AcrossRow);
     }
     public static bool SweptBox(double x0,double y0,double x1,double y1,double cx,double cy,double rx,double ry) {
         double near=0,far=1;

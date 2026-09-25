@@ -1,0 +1,132 @@
+[
+  {
+    "frame": 1,
+    "romFrame": 298,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 4.917,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Perspective",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      17.420841,
+      9.664643
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 40,
+    "romFrame": 337,
+    "dying": false,
+    "drowning": false,
+    "nativeX": 128,
+    "nativeRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.5605,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0133148
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Perspective",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      15.746742,
+      9.52115
+    ],
+    "visibleLogs": 41,
+    "error": "Ok"
+  }
+]

@@ -46,7 +46,8 @@ public partial class FroggerGame : Node3D
     }
     public override void _Process(double delta) {
         if(simulation==null)return;
-        var view=GetViewport().GetVisibleRect().Size;camera.Size=Math.Max(17.4f,16.2f/(view.X/view.Y));
+        presentationDelta=(float)Math.Clamp(delta,0,.1);
+        UpdateCamera(delta);
         if(review!=""){if(reviewCapturePending)return;StepReview();}
         else if(!paused){accumulator+=Math.Min(delta,.2);int steps=0;
             while(accumulator>=ArcadeSimulation.FrameSeconds&&steps++<12){int input=started?ReadDirection():0;if(coinFrames>0){input|=16;coinFrames--;}simulation.Step(input);ObserveFrame();accumulator-=ArcadeSimulation.FrameSeconds;}
@@ -62,10 +63,12 @@ public partial class FroggerGame : Node3D
         var pads=Input.GetConnectedJoypads();int joy=pads.Count>0?pads[0]:-1;
         bool K(Key k)=>Input.IsPhysicalKeyPressed(k);bool P(JoyButton b)=>joy>=0&&Input.IsJoyButtonPressed(joy,b);
         float x=joy>=0?Input.GetJoyAxis(joy,JoyAxis.LeftX):0,y=joy>=0?Input.GetJoyAxis(joy,JoyAxis.LeftY):0;
-        if(K(Key.Up)||K(Key.W)||P(JoyButton.DpadUp)||y<-.5f)return 1;
-        if(K(Key.Down)||K(Key.S)||P(JoyButton.DpadDown)||y>.5f)return 2;
-        if(K(Key.Left)||K(Key.A)||P(JoyButton.DpadLeft)||x<-.5f)return 4;
-        if(K(Key.Right)||K(Key.D)||P(JoyButton.DpadRight)||x>.5f)return 8;return 0;
+        int direction=0;
+        if(K(Key.Up)||K(Key.W)||P(JoyButton.DpadUp)||y<-.5f)direction=1;
+        else if(K(Key.Down)||K(Key.S)||P(JoyButton.DpadDown)||y>.5f)direction=2;
+        else if(K(Key.Left)||K(Key.A)||P(JoyButton.DpadLeft)||x<-.5f)direction=4;
+        else if(K(Key.Right)||K(Key.D)||P(JoyButton.DpadRight)||x>.5f)direction=8;
+        return InputPulse.ForHeldDirection(direction,state);
     }
     public override void _UnhandledInput(InputEvent input){
         if(input is InputEventKey k&&k.Pressed&&!k.Echo)switch(k.PhysicalKeycode){
@@ -82,8 +85,11 @@ public partial class FroggerGame : Node3D
     private ModelActor Actor(string key,string model){if(!actors.TryGetValue(key,out var actor)){actor=new ModelActor(this,model);actors.Add(key,actor);}return actor;}
     private static Vector3 Pos(float x,float row,float height=0)=>new((x-120)/16f,height,(row-128)/16f);
     private void SetupWorld(){
-        AddChild(new WorldEnvironment{Environment=new Godot.Environment{BackgroundMode=Godot.Environment.BGMode.Color,BackgroundColor=new Color("171e29"),AmbientLightSource=Godot.Environment.AmbientSource.Color,AmbientLightColor=Colors.White,AmbientLightEnergy=.22f,TonemapMode=Godot.Environment.ToneMapper.Linear,SsaoEnabled=true,SsaoIntensity=1.35f,SsaoRadius=.75f,ReflectedLightSource=Godot.Environment.ReflectionSource.Disabled}});
-        AddChild(new DirectionalLight3D{RotationDegrees=new Vector3(-58,-30,0),LightColor=Colors.White,LightEnergy=.95f,ShadowEnabled=true});
+        AddChild(new WorldEnvironment{Environment=new Godot.Environment{BackgroundMode=Godot.Environment.BGMode.Color,BackgroundColor=new Color("171e29"),AmbientLightSource=Godot.Environment.AmbientSource.Color,AmbientLightColor=Colors.White,AmbientLightEnergy=.30f,TonemapMode=Godot.Environment.ToneMapper.Linear,SsaoEnabled=true,SsaoIntensity=1.45f,SsaoRadius=1.0f,SsaoSharpness=.55f,ReflectedLightSource=Godot.Environment.ReflectionSource.Disabled}});
+        var sun=new DirectionalLight3D{LightColor=Colors.White,LightEnergy=1.05f,LightAngularDistance=1.5f,ShadowEnabled=true,ShadowBlur=1.8f,DirectionalShadowBlendSplits=true};
+        AddChild(sun);
+        // The source is above the board's top-left; shadows fall bottom-right.
+        sun.LookAt(new Vector3(1.4f,-2f,1f),Vector3.Up);
         AddChild(new DirectionalLight3D{RotationDegrees=new Vector3(-40,140,0),LightColor=new Color("e8f0ff"),LightEnergy=.08f});
         AddChild(GD.Load<PackedScene>("res://Models/board.glb").Instantiate<Node3D>());
         camera=new Camera3D{Projection=Camera3D.ProjectionType.Orthogonal,Size=17.4f,Position=new Vector3(0,19,9.8f),KeepAspect=Camera3D.KeepAspectEnum.Height};AddChild(camera);camera.LookAt(new Vector3(0,0,.15f));camera.Current=true;
@@ -101,7 +107,7 @@ public partial class FroggerGame : Node3D
         int n=Math.Min(samples.Count,audioPlayback.GetFramesAvailable());
         if(n>0){var buffer=new Vector2[n];for(int i=0;i<n;i++){float v=samples.Dequeue();buffer[i]=new Vector2(v,v);}audioPlayback.PushBuffer(buffer);}
     }
-    private void LoadPreferences(){if(screenshot!=""){muted=true;return;}var c=new ConfigFile();if(c.Load("user://settings.cfg")==Error.Ok){highScore=(int)c.GetValue("play","high_score",0);modern=(bool)c.GetValue("play","modern_collision",true);muted=(bool)c.GetValue("play","muted",false);}}
-    private void SavePreferences(){if(screenshot!="")return;var c=new ConfigFile();c.SetValue("play","high_score",highScore);c.SetValue("play","modern_collision",modern);c.SetValue("play","muted",muted);c.Save("user://settings.cfg");}
+    private void LoadPreferences(){if(screenshot!=""){muted=true;return;}var c=new ConfigFile();if(c.Load("user://settings.cfg")==Error.Ok){highScore=(int)c.GetValue("play","high_score",0);modern=(bool)c.GetValue("play","modern_collision",true);muted=(bool)c.GetValue("play","muted",false);perspectiveView=(bool)c.GetValue("play","perspective_view",false);followCamera=(bool)c.GetValue("play","follow_camera",false);}}
+    private void SavePreferences(){if(screenshot!="")return;var c=new ConfigFile();c.SetValue("play","high_score",highScore);c.SetValue("play","modern_collision",modern);c.SetValue("play","muted",muted);c.SetValue("play","perspective_view",perspectiveView);c.SetValue("play","follow_camera",followCamera);c.Save("user://settings.cfg");}
     public override void _ExitTree(){simulation?.Dispose();}
 }

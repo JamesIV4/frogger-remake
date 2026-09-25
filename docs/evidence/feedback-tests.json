@@ -46,6 +46,15 @@
       "events": 3
     }
   ],
-  "turtleMaximumStep": 0.10648438,
-  "turtleJumps": []
+  "turtleMaximumStep": 0.02622816,
+  "turtleJumps": [],
+  "heldRightX": 224,
+  "lowerGrassRow": 240,
+  "nativeObjectMoves": 702,
+  "nativeObjectStalls": 1088,
+  "subpixelMovesDuringNativeStalls": 1066,
+  "maxVisualLag": 0.3746338,
+  "exportedModelBoundsVerified": 6,
+  "vehicleFrontAndBackEdgesVerified": 5,
+  "modelCollisionLiveSides": 2
 }

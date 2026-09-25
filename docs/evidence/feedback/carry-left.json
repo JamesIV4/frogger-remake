@@ -1,0 +1,237 @@
+[
+  {
+    "frame": 1,
+    "romFrame": 298,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 4.917,
+    "carrying": true,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.42,
+    "riderY": 0.88,
+    "playerYaw": -3.1415925,
+    "riderYaw": -3.1415925,
+    "riderScale": 0.76,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 5,
+    "romFrame": 302,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 4.9830000000000005,
+    "carrying": true,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.42,
+    "riderY": 0.9538377,
+    "playerYaw": -1.5707964,
+    "riderYaw": -1.5707964,
+    "riderScale": 0.76,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.19820835,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 9,
+    "romFrame": 306,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 5.049,
+    "carrying": true,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.42,
+    "riderY": 1.0929561,
+    "playerYaw": -1.5707964,
+    "riderYaw": -1.5707964,
+    "riderScale": 0.76,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.34825355,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 13,
+    "romFrame": 310,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 5.115,
+    "carrying": true,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.42,
+    "riderY": 0.98828495,
+    "playerYaw": -1.5707964,
+    "riderYaw": -1.5707964,
+    "riderScale": 0.76,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.23503007,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 25,
+    "romFrame": 322,
+    "dying": false,
+    "drowning": false,
+    "deathSeconds": 5.313000000000001,
+    "carrying": true,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.42,
+    "riderY": 0.88,
+    "playerYaw": -1.5707964,
+    "riderYaw": -1.5707964,
+    "riderScale": 0.76,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.01225
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 17.4,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "visibleLogs": 41,
+    "error": "Ok"
+  }
+]

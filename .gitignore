@@ -7,6 +7,7 @@
 /vendor/arcade-js/games/frogger/audio/samples/
 /art/source/*.blend1
 /docs/evidence/*.log
+/docs/evidence/feedback/*.log
 /docs/evidence/screenshots/
 __pycache__/
 
