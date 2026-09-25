@@ -1,7 +1,7 @@
 [
   {
     "asset": "frog",
-    "triangles": 4008,
+    "triangles": 3068,
     "bones": 8,
     "clips": [
       "Idle",
@@ -23,7 +23,7 @@
   },
   {
     "asset": "lady_frog",
-    "triangles": 4008,
+    "triangles": 3068,
     "bones": 8,
     "clips": [
       "Idle",
@@ -45,7 +45,7 @@
   },
   {
     "asset": "turtle",
-    "triangles": 1416,
+    "triangles": 846,
     "bones": 6,
     "clips": [
       "Idle",
@@ -55,17 +55,17 @@
     "source": "art/source/turtle.blend",
     "glb": "godot/Models/turtle.glb",
     "footprintTiles": {
-      "minX": -0.56,
-      "maxX": 0.56,
+      "minX": -0.501364,
+      "maxX": 0.501364,
       "minY": -0.61,
       "maxY": 0.43,
       "minZ": -0.01,
-      "maxZ": 0.44
+      "maxZ": 0.441983
     }
   },
   {
     "asset": "gator",
-    "triangles": 1884,
+    "triangles": 1992,
     "bones": 3,
     "clips": [
       "Idle",
@@ -73,6 +73,25 @@
     ],
     "source": "art/source/gator.blend",
     "glb": "godot/Models/gator.glb",
+    "footprintTiles": {
+      "minX": -0.55,
+      "maxX": 0.867553,
+      "minY": -1.03,
+      "maxY": 0.709576,
+      "minZ": -0.039566,
+      "maxZ": 0.49
+    }
+  },
+  {
+    "asset": "river_gator",
+    "triangles": 1944,
+    "bones": 3,
+    "clips": [
+      "Idle",
+      "Bite"
+    ],
+    "source": "art/source/river_gator.blend",
+    "glb": "godot/Models/river_gator.glb",
     "footprintTiles": {
       "minX": -0.55,
       "maxX": 0.55,
@@ -103,7 +122,7 @@
   },
   {
     "asset": "snake",
-    "triangles": 1608,
+    "triangles": 352,
     "bones": 8,
     "clips": [
       "Idle",
@@ -112,12 +131,12 @@
     "source": "art/source/snake.blend",
     "glb": "godot/Models/snake.glb",
     "footprintTiles": {
-      "minX": -0.256854,
-      "maxX": 0.256339,
-      "minY": -0.91,
-      "maxY": 0.9,
-      "minZ": 0.03,
-      "maxZ": 0.3
+      "minX": -0.215411,
+      "maxX": 0.257485,
+      "minY": -0.92,
+      "maxY": 0.88,
+      "minZ": 0.021363,
+      "maxZ": 0.283
     }
   },
   {
@@ -141,7 +160,7 @@
   },
   {
     "asset": "log",
-    "triangles": 208,
+    "triangles": 280,
     "bones": 0,
     "clips": [],
     "source": "art/source/log.blend",
@@ -149,10 +168,10 @@
     "footprintTiles": {
       "minX": -0.511,
       "maxX": 0.511,
-      "minY": -0.246202,
-      "maxY": 0.246202,
-      "minZ": -0.074923,
-      "maxZ": 0.418
+      "minY": -0.262,
+      "maxY": 0.259,
+      "minZ": -0.094883,
+      "maxZ": 0.436645
     }
   },
   {
@@ -252,7 +271,7 @@
   },
   {
     "asset": "board",
-    "triangles": 4983,
+    "triangles": 4980,
     "bones": 0,
     "clips": [],
     "source": "art/source/board.blend",

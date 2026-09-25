@@ -33,7 +33,7 @@ public partial class FroggerGame : Node3D
                 }
                 ObserveFrame();simulation.Sound?.Samples.Clear();
             }
-        } catch(Exception e){GD.PushError(e.ToString());if(message!=null)message.Text="Setup needed: run tools/setup.ps1\n"+e.Message;SetProcess(false);}
+        } catch(Exception e){GD.PushError(e.ToString());if(message!=null){message.Text="Setup needed: run tools/setup.ps1\n"+e.Message;messagePanel.Visible=true;}SetProcess(false);}
     }
     private void ResetMachine(){simulation?.Dispose();simulation=new ArcadeSimulation(FileAccess.GetFileAsBytes("res://rom/maincpu.bin"),modern,FileAccess.GetFileAsBytes("res://rom/audiocpu.bin"));accumulator=0;ClearPresentation();}
     private void StartGame(int players) {
@@ -42,16 +42,17 @@ public partial class FroggerGame : Node3D
         for(int i=0;i<6;i++)simulation.Step(players==1?32:64);
         for(int i=0;i<45;i++)simulation.Step();
         if(highScore>0){int n=highScore/10;simulation.Poke(0x83ef,(n%10)|((n/10%10)<<4));simulation.Poke(0x83f0,(n/100%10)|((n/1000%10)<<4));}
-        ObserveFrame();simulation.Sound?.Samples.Clear();audioPlayer?.Stop();started=true;paused=false;menu.Visible=false;message.Text="";
+        ObserveFrame();simulation.Sound?.Samples.Clear();audioPlayer?.Stop();started=true;paused=false;menu.Visible=false;Input.MouseMode=Input.MouseModeEnum.Hidden;message.Text="";messagePanel.Visible=false;
     }
     public override void _Process(double delta) {
         if(simulation==null)return;
         presentationDelta=(float)Math.Clamp(delta,0,.1);
-        UpdateCamera(delta);
         if(review!=""){if(reviewCapturePending)return;StepReview();}
         else if(!paused){accumulator+=Math.Min(delta,.2);int steps=0;
             while(accumulator>=ArcadeSimulation.FrameSeconds&&steps++<12){int input=started?ReadDirection():0;if(coinFrames>0){input|=16;coinFrames--;}simulation.Step(input);ObserveFrame();accumulator-=ArcadeSimulation.FrameSeconds;}
         }
+        UpdateFrogMotion();
+        UpdateCamera(delta);
         FeedAudio();
         UpdateActors();UpdateHud();water.SetShaderParameter("clock",state.frame*(float)ArcadeSimulation.FrameSeconds);
         UpdateReviewCamera();
@@ -68,6 +69,10 @@ public partial class FroggerGame : Node3D
         else if(K(Key.Down)||K(Key.S)||P(JoyButton.DpadDown)||y>.5f)direction=2;
         else if(K(Key.Left)||K(Key.A)||P(JoyButton.DpadLeft)||x<-.5f)direction=4;
         else if(K(Key.Right)||K(Key.D)||P(JoyButton.DpadRight)||x>.5f)direction=8;
+        return AdaptDirection(direction);
+    }
+    private int AdaptDirection(int direction){
+        if(direction!=0&&homeArrival.Active(state.frame,RenderFraction))homeArrival.Cancel();
         return InputPulse.ForHeldDirection(direction,state);
     }
     public override void _UnhandledInput(InputEvent input){
@@ -81,7 +86,7 @@ public partial class FroggerGame : Node3D
         }
         if(input is InputEventJoypadButton b&&b.Pressed){if(b.ButtonIndex==JoyButton.A&&!started)StartGame(1);if(b.ButtonIndex==JoyButton.Start){if(!started)StartGame(1);else{paused=!paused;if(paused)ShowMenu(true);else Resume();}}}
     }
-    private void Resume(){paused=false;menu.Visible=false;accumulator=0;}
+    private void Resume(){paused=false;menu.Visible=false;Input.MouseMode=Input.MouseModeEnum.Hidden;accumulator=0;}
     private ModelActor Actor(string key,string model){if(!actors.TryGetValue(key,out var actor)){actor=new ModelActor(this,model);actors.Add(key,actor);}return actor;}
     private static Vector3 Pos(float x,float row,float height=0)=>new((x-120)/16f,height,(row-128)/16f);
     private void SetupWorld(){
@@ -92,7 +97,7 @@ public partial class FroggerGame : Node3D
         sun.LookAt(new Vector3(1.4f,-2f,1f),Vector3.Up);
         AddChild(new DirectionalLight3D{RotationDegrees=new Vector3(-40,140,0),LightColor=new Color("e8f0ff"),LightEnergy=.08f});
         AddChild(GD.Load<PackedScene>("res://Models/board.glb").Instantiate<Node3D>());
-        camera=new Camera3D{Projection=Camera3D.ProjectionType.Orthogonal,Size=17.4f,Position=new Vector3(0,19,9.8f),KeepAspect=Camera3D.KeepAspectEnum.Height};AddChild(camera);camera.LookAt(new Vector3(0,0,.15f));camera.Current=true;
+        camera=new Camera3D{Projection=Camera3D.ProjectionType.Orthogonal,Size=16.8f,Position=new Vector3(0,19,9.8f),KeepAspect=Camera3D.KeepAspectEnum.Height};AddChild(camera);camera.LookAt(new Vector3(0,0,-.12f));camera.Current=true;
         var surface=new MeshInstance3D{Mesh=new PlaneMesh{Size=new Vector2(14,5),SubdivideWidth=64,SubdivideDepth=32},Position=new Vector3(0,-.025f,-3)};
         water=new ShaderMaterial{Shader=GD.Load<Shader>("res://Shaders/river.gdshader")};surface.MaterialOverride=water;AddChild(surface);
     }

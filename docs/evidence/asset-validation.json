@@ -1,10 +1,10 @@
 [
   {
     "asset": "frog",
-    "vertices": 8404,
-    "triangles": 4008,
+    "vertices": 6440,
+    "triangles": 3068,
     "bones": 8,
-    "skinned_vertices": 8404,
+    "skinned_vertices": 6440,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -19,10 +19,10 @@
   },
   {
     "asset": "lady_frog",
-    "vertices": 8404,
-    "triangles": 4008,
+    "vertices": 6440,
+    "triangles": 3068,
     "bones": 8,
-    "skinned_vertices": 8404,
+    "skinned_vertices": 6440,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -37,10 +37,10 @@
   },
   {
     "asset": "turtle",
-    "vertices": 3080,
-    "triangles": 1416,
+    "vertices": 1826,
+    "triangles": 846,
     "bones": 6,
-    "skinned_vertices": 3080,
+    "skinned_vertices": 1826,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -52,10 +52,23 @@
   },
   {
     "asset": "gator",
-    "vertices": 4144,
-    "triangles": 1884,
+    "vertices": 4352,
+    "triangles": 1992,
     "bones": 3,
-    "skinned_vertices": 4144,
+    "skinned_vertices": 4352,
+    "max_weight_error": 0,
+    "clips": [
+      "Idle",
+      "Bite"
+    ],
+    "passed": true
+  },
+  {
+    "asset": "river_gator",
+    "vertices": 4248,
+    "triangles": 1944,
+    "bones": 3,
+    "skinned_vertices": 4248,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -78,11 +91,11 @@
   },
   {
     "asset": "snake",
-    "vertices": 3464,
-    "triangles": 1608,
+    "vertices": 724,
+    "triangles": 352,
     "bones": 8,
-    "skinned_vertices": 3464,
-    "max_weight_error": 0,
+    "skinned_vertices": 724,
+    "max_weight_error": 1.4901161193847656e-08,
     "clips": [
       "Idle",
       "Move"
@@ -104,8 +117,8 @@
   },
   {
     "asset": "log",
-    "vertices": 360,
-    "triangles": 208,
+    "vertices": 512,
+    "triangles": 280,
     "bones": 0,
     "skinned_vertices": 0,
     "max_weight_error": 0,
@@ -179,8 +192,8 @@
   },
   {
     "asset": "board",
-    "vertices": 11757,
-    "triangles": 4983,
+    "vertices": 11748,
+    "triangles": 4980,
     "bones": 0,
     "skinned_vertices": 0,
     "max_weight_error": 0,

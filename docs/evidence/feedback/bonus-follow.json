@@ -1,0 +1,628 @@
+[
+  {
+    "frame": 1,
+    "romFrame": 298,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 150,
+    "nativeRow": 96,
+    "displayedFrogX": 150,
+    "displayedFrogRow": 96,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 4.917,
+    "carrying": true,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.2,
+    "riderY": 0.65999997,
+    "playerYaw": -3.1415925,
+    "riderYaw": -3.1415925,
+    "riderScale": 0.76,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 30,
+    "ladyX": 150,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": false,
+    "homeX": 0,
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": true,
+    "cameraSize": 9.8,
+    "cameraFov": 54,
+    "cameraPosition": [
+      0.8459782,
+      15.48073,
+      7.408702
+    ],
+    "motionLogX": 230,
+    "motionCarX": 232,
+    "nativeLogX": -26,
+    "nativeCarX": 232,
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 13,
+    "romFrame": 310,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 128,
+    "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.115,
+    "carrying": false,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.08,
+    "riderY": 0.5402819,
+    "playerYaw": -3.1415925,
+    "riderYaw": -3.1415925,
+    "riderScale": 0.76,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 25,
+    "ladyX": 120,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0046396
+    ],
+    "bodyOrigin": [
+      0,
+      0.12028191,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": true,
+    "homeX": 120,
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "text": "\u002B200",
+        "screenX": 253.00156,
+        "screenY": 114.406
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "text": "\u002B200",
+        "screenX": 383.00153,
+        "screenY": 114.406
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "text": "TIME BONUS \u002B600",
+        "screenX": 365,
+        "screenY": 427
+      }
+    ],
+    "cameraMode": "Orthogonal",
+    "following": true,
+    "cameraSize": 9.8,
+    "cameraFov": 54,
+    "cameraPosition": [
+      1.4146184,
+      12.767772,
+      5.975578
+    ],
+    "motionLogX": 230.82034,
+    "motionCarX": 229.89838,
+    "nativeLogX": -24,
+    "nativeCarX": 229,
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 25,
+    "romFrame": 322,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 128,
+    "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.313000000000001,
+    "carrying": false,
+    "riderVisible": true,
+    "socketError": 0,
+    "playerY": 0.08,
+    "riderY": 0.63181925,
+    "playerYaw": -3.1415925,
+    "riderYaw": -3.1415925,
+    "riderScale": 0.76,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 25,
+    "ladyX": 120,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.2118192,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": true,
+    "homeX": 120,
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "text": "\u002B200",
+        "screenX": 253.00156,
+        "screenY": 107.278
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "text": "\u002B200",
+        "screenX": 383.00153,
+        "screenY": 107.278
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "text": "TIME BONUS \u002B600",
+        "screenX": 365,
+        "screenY": 427
+      }
+    ],
+    "cameraMode": "Orthogonal",
+    "following": true,
+    "cameraSize": 9.8,
+    "cameraFov": 54,
+    "cameraPosition": [
+      0.944426,
+      11.961802,
+      8.301518
+    ],
+    "motionLogX": 232.45499,
+    "motionCarX": 227.40555,
+    "nativeLogX": -22,
+    "nativeCarX": 226,
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 50,
+    "romFrame": 347,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 128,
+    "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.7255,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 25,
+    "ladyX": 120,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0099944
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": false,
+    "homeX": 120,
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "text": "\u002B200",
+        "screenX": 253.00156,
+        "screenY": 92.428
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "text": "\u002B200",
+        "screenX": 383.00153,
+        "screenY": 92.428
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "text": "TIME BONUS \u002B600",
+        "screenX": 365,
+        "screenY": 427
+      }
+    ],
+    "cameraMode": "Orthogonal",
+    "following": true,
+    "cameraSize": 9.8,
+    "cameraFov": 54,
+    "cameraPosition": [
+      0.6326885,
+      11.427445,
+      9.843617
+    ],
+    "motionLogX": 236.7159,
+    "motionCarX": 221.10007,
+    "nativeLogX": -18,
+    "nativeCarX": 219,
+    "visibleLogs": 40,
+    "error": "Ok"
+  },
+  {
+    "frame": 95,
+    "romFrame": 392,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 128,
+    "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 6.468,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 25,
+    "ladyX": 120,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0028433
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": false,
+    "homeX": 120,
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "text": "\u002B200",
+        "screenX": 253.00156,
+        "screenY": 65.698
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "text": "\u002B200",
+        "screenX": 383.00153,
+        "screenY": 65.698
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "text": "TIME BONUS \u002B600",
+        "screenX": 365,
+        "screenY": 427
+      }
+    ],
+    "cameraMode": "Orthogonal",
+    "following": true,
+    "cameraSize": 9.8,
+    "cameraFov": 54,
+    "cameraPosition": [
+      0.5172137,
+      11.2295065,
+      10.414848
+    ],
+    "motionLogX": 244.3089,
+    "motionCarX": 209.81387,
+    "nativeLogX": -10,
+    "nativeCarX": 208,
+    "visibleLogs": 41,
+    "error": "Ok"
+  },
+  {
+    "frame": 115,
+    "romFrame": 412,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 128,
+    "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 6.798,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 25,
+    "ladyX": 120,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      0.98951435
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": false,
+    "homeX": 120,
+    "bonusLabels": [
+      {
+        "amount": 200,
+        "kind": "Bug",
+        "text": "\u002B200",
+        "screenX": 253.00156,
+        "screenY": 53.818
+      },
+      {
+        "amount": 200,
+        "kind": "Rescue",
+        "text": "\u002B200",
+        "screenX": 383.00153,
+        "screenY": 53.818
+      },
+      {
+        "amount": 600,
+        "kind": "Time",
+        "text": "TIME BONUS \u002B600",
+        "screenX": 365,
+        "screenY": 427
+      }
+    ],
+    "cameraMode": "Orthogonal",
+    "following": true,
+    "cameraSize": 9.8,
+    "cameraFov": 54,
+    "cameraPosition": [
+      0.50630194,
+      11.210802,
+      10.468827
+    ],
+    "motionLogX": 247.53792,
+    "motionCarX": 204.96283,
+    "nativeLogX": -7,
+    "nativeCarX": 203,
+    "visibleLogs": 40,
+    "error": "Ok"
+  }
+]

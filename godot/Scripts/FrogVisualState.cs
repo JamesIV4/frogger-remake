@@ -31,5 +31,48 @@ public sealed class FrogVisualState
     public static float SquashProgress(double seconds)=>Ease(seconds/.11);
     // The ROM can latch death in the middle of a sideways log hop. Sink at
     // once so that a stopped horizontal hop reads as drowning, not hovering.
-    public static float DrownDepth(double seconds)=>1.15f*(1-(float)Math.Exp(-Math.Max(0,seconds)/.25));
+    public const float MaximumDrownDepth=1.15f;
+    public static float DrownDepth(double seconds)=>MaximumDrownDepth*(1-(float)Math.Exp(-Math.Max(0,seconds)/.25));
+    public static float DrownHeight(float surfaceHeight,float initialHeight,double seconds){
+        float floor=surfaceHeight-MaximumDrownDepth;
+        float remaining=Math.Max(0,initialHeight-floor);
+        return initialHeight-remaining*DrownDepth(seconds)/MaximumDrownDepth;
+    }
+}
+
+/// A brief presentation hold after the ROM awards a home. The machine keeps
+/// running normally; movement input cancels the visual hold immediately.
+public sealed class HomeArrivalVisual
+{
+    public const double HoldSeconds=.25;
+    public const double HopCompletionSeconds=6*ArcadeSimulation.FrameSeconds;
+    private const double HopClipSeconds=10.0/60.0;
+    private int startFrame=-1;
+    public int X {get;private set;}
+    public int Row {get;private set;}
+    public int TargetX {get;private set;}
+    public bool Passenger {get;private set;}
+    private double startHopPoseSeconds;
+    public void Reset(){startFrame=-1;Passenger=false;}
+    public void Cancel()=>Reset();
+    public void Begin(BonusAward timeAward,bool passenger,double hopPoseSeconds=0){
+        if(timeAward.Kind!=BonusKind.Time)throw new ArgumentException("Expected a home time award",nameof(timeAward));
+        startFrame=timeAward.Frame;X=timeAward.X;Row=timeAward.Row;Passenger=passenger;
+        int bay=Math.Clamp((int)Math.Round((X-24)/48.0),0,4);TargetX=24+48*bay;
+        startHopPoseSeconds=Math.Clamp(hopPoseSeconds,0,HopClipSeconds);
+    }
+    private double Elapsed(int frame,float fraction)=>Math.Max(0,frame-startFrame+fraction)*ArcadeSimulation.FrameSeconds;
+    private double Completion=>Row>32?HopCompletionSeconds:0;
+    public bool Active(int frame,float fraction=0)=>startFrame>=0&&frame>=startFrame&&
+        Elapsed(frame,fraction)<Completion+HoldSeconds;
+    public bool FinishingHop(int frame,float fraction=0)=>Active(frame,fraction)&&Elapsed(frame,fraction)<Completion;
+    private float Progress(int frame,float fraction){
+        if(Completion==0)return 1;
+        float p=(float)Math.Clamp(Elapsed(frame,fraction)/Completion,0,1);
+        return p*p*(3-2*p);
+    }
+    public float VisualRow(int frame,float fraction=0)=>Row+(32-Row)*Progress(frame,fraction);
+    public float VisualX(int frame,float fraction=0)=>X+(TargetX-X)*Progress(frame,fraction);
+    public double HopPoseSeconds(int frame,float fraction=0)=>startHopPoseSeconds+
+        (HopClipSeconds-startHopPoseSeconds)*Progress(frame,fraction);
 }

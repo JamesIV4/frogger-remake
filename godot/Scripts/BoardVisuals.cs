@@ -1,10 +1,19 @@
 using System;
 namespace FroggerRemake;
 
+public readonly record struct RiverGatorFit(float CenterOffsetPixels,float WidthScale,float LengthScale);
+
 /// Decodes presentation state from the original tile page; no independent hazard timers.
 public static class BoardVisuals
 {
     public const float LeftEdge=8,RightEdge=232;
+    public static RiverGatorFit FitRiverGator(int nativeWidth){
+        float lengthScale=(nativeWidth-3f)/(16f*ModelFootprints.RiverGatorLengthTiles);
+        float widthScale=14f/(16f*ModelFootprints.RiverGatorWidthTiles);
+        // Native object X is the tip. The lethal region is [X-16, X].
+        float centerOffset=nativeWidth/2f+12f-16f*ModelFootprints.RiverGatorFrontTiles*lengthScale;
+        return new RiverGatorFit(centerOffset,widthScale,lengthScale);
+    }
     public static bool IntersectsPlayfield(float center,float halfWidth)=>center+halfWidth>=LeftEdge&&center-halfWidth<=RightEdge;
     public static float InterpolateByte(int previous,int current,float alpha) {
         int d=((current-previous+128)&255)-128;
@@ -20,6 +29,10 @@ public static class BoardVisuals
     }
     private static float Mix(float a,float b,float t)=>a+(b-a)*Math.Clamp(t,0,1);
     private static float Smooth(float t){t=Math.Clamp(t,0,1);return t*t*(3-2*t);}
+    // The home gator's ROM tiles switch from emerging to full at phase 0x50.
+    // Move the 3D model through the rear hedge during that existing interval.
+    public static float HomeGatorReveal(FrameState state,bool full,float fraction=0)=>
+        full?1:Smooth((state.At(0x8122)+Math.Clamp(fraction,0,1))/80f);
     // Actual ROM phase clocks, including the pre-dive warning. Finish going
     // under BEFORE the fatal interval; do not ease toward an already-fatal state.
     public static float TurtleDepth(FrameState state,float x,int row,float alpha=0,bool knownDiver=false) {
@@ -62,5 +75,25 @@ public static class BoardVisuals
             int tile=TileAt(state,x+dx,row,col);if(tile>=0x68&&tile<=0x6b||tile>=0xd0&&tile<=0xd3)return true;
         }
         return false;
+    }
+}
+
+/// Keeps the home gator visible only long enough to slide back behind its hedge.
+/// The ROM's tile and collision state remains authoritative.
+public sealed class HomeGatorVisual
+{
+    public const float RetreatFrames=12;
+    private float retreatStart=-1,lastReveal;
+    private bool wasActive;
+    public bool Retreating=>retreatStart>=0;
+    public void Reset(){retreatStart=-1;lastReveal=0;wasActive=false;}
+    public float? Reveal(float frame,bool active,float nativeReveal){
+        if(active){wasActive=true;retreatStart=-1;lastReveal=nativeReveal;return nativeReveal;}
+        if(wasActive){wasActive=false;retreatStart=frame;}
+        if(retreatStart<0)return null;
+        float t=Math.Clamp((frame-retreatStart)/RetreatFrames,0,1);
+        if(t>=1){retreatStart=-1;return null;}
+        float smooth=t*t*(3-2*t);
+        return lastReveal*(1-smooth);
     }
 }

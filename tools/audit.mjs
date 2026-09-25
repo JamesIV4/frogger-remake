@@ -42,7 +42,9 @@ if(parity.differentBytes!==0||parity.frames<460||parity.maskedBytes!==0)failures
 const mame=read('docs/evidence/native-vs-mame.json');
 if(mame.length!==5||mame.some(f=>f.diff||f.registerDifferences))failures.push('Independent MAME gate');
 const assets=read('docs/evidence/asset-validation.json');
-if(assets.length!==14||assets.some(a=>!a.passed))failures.push('Blender export gate');
+const requiredAssets=['frog','lady_frog','turtle','gator','river_gator','fly','snake','otter','log','car','truck','racecar','dozer','sport','board'];
+const validated=new Set(assets.map(a=>a.asset));
+if(assets.length!==requiredAssets.length||assets.some(a=>!a.passed)||requiredAssets.some(name=>!validated.has(name)))failures.push('Blender export gate');
 const lifecycle=read('docs/evidence/lifecycle-tests.json'),presentation=read('docs/evidence/presentation-tests.json');
 if(!lifecycle.gameOver||!lifecycle.playerTwo||!lifecycle.nextLevel||lifecycle.timerDeaths!==3)failures.push('Native lifecycle gates');
 if(![0,1,2].every(p=>presentation.turtlePhases.includes(p)))failures.push('Native turtle presentation gate');

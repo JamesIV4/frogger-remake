@@ -4,8 +4,21 @@
     "romFrame": 298,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
     "hopFlags": [
       0,
       0,
@@ -30,6 +43,8 @@
     "ladyVisible": true,
     "ladyYaw": 1.5707964,
     "ladyScale": 0.62,
+    "ladyCode": 161,
+    "ladyX": 97,
     "snakeVisible": false,
     "snakeY": 0,
     "hopActive": false,
@@ -51,6 +66,8 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
@@ -61,6 +78,10 @@
       19,
       9.8
     ],
+    "motionLogX": 230,
+    "motionCarX": 232,
+    "nativeLogX": -26,
+    "nativeCarX": 232,
     "visibleLogs": 40,
     "error": "Ok"
   },
@@ -69,8 +90,21 @@
     "romFrame": 305,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
     "hopFlags": [
       0,
       0,
@@ -95,6 +129,8 @@
     "ladyVisible": true,
     "ladyYaw": 1.5707964,
     "ladyScale": 0.62,
+    "ladyCode": 161,
+    "ladyX": 104,
     "snakeVisible": false,
     "snakeY": 0,
     "hopActive": false,
@@ -104,7 +140,7 @@
     "bodyScale": [
       1,
       1,
-      1.0042582
+      1.004469
     ],
     "bodyOrigin": [
       0,
@@ -116,6 +152,8 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
@@ -126,7 +164,11 @@
       19,
       9.8
     ],
-    "visibleLogs": 41,
+    "motionLogX": 230.4291,
+    "motionCarX": 230.18253,
+    "nativeLogX": -25,
+    "nativeCarX": 230,
+    "visibleLogs": 40,
     "error": "Ok"
   },
   {
@@ -134,8 +176,21 @@
     "romFrame": 314,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
     "hopFlags": [
       0,
       0,
@@ -160,6 +215,8 @@
     "ladyVisible": true,
     "ladyYaw": -1.5707964,
     "ladyScale": 0.62,
+    "ladyCode": 33,
+    "ladyX": 111,
     "snakeVisible": false,
     "snakeY": 0,
     "hopActive": false,
@@ -169,7 +226,7 @@
     "bodyScale": [
       1,
       1,
-      1.0109679
+      1.0111709
     ],
     "bodyOrigin": [
       0,
@@ -181,6 +238,8 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
@@ -191,7 +250,11 @@
       19,
       9.8
     ],
-    "visibleLogs": 41,
+    "motionLogX": 231.38893,
+    "motionCarX": 228.9415,
+    "nativeLogX": -23,
+    "nativeCarX": 228,
+    "visibleLogs": 40,
     "error": "Ok"
   },
   {
@@ -199,8 +262,21 @@
     "romFrame": 322,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
     "hopFlags": [
       0,
       0,
@@ -225,6 +301,8 @@
     "ladyVisible": true,
     "ladyYaw": -1.5707964,
     "ladyScale": 0.62,
+    "ladyCode": 33,
+    "ladyX": 103,
     "snakeVisible": false,
     "snakeY": 0,
     "hopActive": false,
@@ -246,6 +324,8 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
@@ -256,6 +336,10 @@
       19,
       9.8
     ],
+    "motionLogX": 232.61975,
+    "motionCarX": 227.22977,
+    "nativeLogX": -22,
+    "nativeCarX": 226,
     "visibleLogs": 41,
     "error": "Ok"
   },
@@ -264,8 +348,21 @@
     "romFrame": 327,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
     "hopFlags": [
       0,
       0,
@@ -290,6 +387,8 @@
     "ladyVisible": true,
     "ladyYaw": -1.5707964,
     "ladyScale": 0.62,
+    "ladyCode": 33,
+    "ladyX": 98,
     "snakeVisible": false,
     "snakeY": 0,
     "hopActive": false,
@@ -299,7 +398,7 @@
     "bodyScale": [
       1,
       1,
-      1.0126008
+      1.0127295
     ],
     "bodyOrigin": [
       0,
@@ -311,6 +410,8 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
@@ -321,6 +422,10 @@
       19,
       9.8
     ],
+    "motionLogX": 233.56715,
+    "motionCarX": 225.55055,
+    "nativeLogX": -21,
+    "nativeCarX": 224,
     "visibleLogs": 41,
     "error": "Ok"
   },
@@ -329,8 +434,21 @@
     "romFrame": 337,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
     "hopFlags": [
       0,
       0,
@@ -355,6 +473,8 @@
     "ladyVisible": true,
     "ladyYaw": -1.5707964,
     "ladyScale": 0.62,
+    "ladyCode": 30,
+    "ladyX": 108,
     "snakeVisible": false,
     "snakeY": 0,
     "hopActive": false,
@@ -364,7 +484,7 @@
     "bodyScale": [
       1,
       1,
-      1.007002
+      1.0071123
     ],
     "bodyOrigin": [
       0,
@@ -376,6 +496,8 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
@@ -386,6 +508,10 @@
       19,
       9.8
     ],
+    "motionLogX": 234.92737,
+    "motionCarX": 223.74352,
+    "nativeLogX": -19,
+    "nativeCarX": 222,
     "visibleLogs": 40,
     "error": "Ok"
   },
@@ -394,8 +520,21 @@
     "romFrame": 342,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
     "hopFlags": [
       0,
       0,
@@ -420,6 +559,8 @@
     "ladyVisible": true,
     "ladyYaw": -1.5707964,
     "ladyScale": 0.62,
+    "ladyCode": 30,
+    "ladyX": 113,
     "snakeVisible": false,
     "snakeY": 0,
     "hopActive": false,
@@ -429,7 +570,7 @@
     "bodyScale": [
       1,
       1,
-      1.0005654
+      1.000261
     ],
     "bodyOrigin": [
       0,
@@ -441,6 +582,8 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
@@ -451,7 +594,11 @@
       19,
       9.8
     ],
-    "visibleLogs": 40,
+    "motionLogX": 236.2336,
+    "motionCarX": 222.29475,
+    "nativeLogX": -19,
+    "nativeCarX": 221,
+    "visibleLogs": 41,
     "error": "Ok"
   }
 ]

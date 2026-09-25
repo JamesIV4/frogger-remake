@@ -19,13 +19,26 @@ internal static class FeedbackTests
         Check(!BoardVisuals.IntersectsPlayfield(-40,46),"fully offscreen log was retained");
         Check(Math.Abs(BoardVisuals.InterpolateByte(255,0,.5f)-255.5f)<.001f,"byte wrap interpolates through the board");
         Check(Math.Abs(BoardVisuals.InterpolateByte(0,255,.5f)+.5f)<.001f,"reverse wrap interpolates through the board");
+        var gatorPhase=new FrameState();gatorPhase.ram[0x8122-0x8000]=0;
+        Check(BoardVisuals.HomeGatorReveal(gatorPhase,false)==0,"home gator did not begin behind the hedge");
+        gatorPhase.ram[0x8122-0x8000]=40;
+        Check(Math.Abs(BoardVisuals.HomeGatorReveal(gatorPhase,false)-.5f)<.001f,"home gator emergence skipped the ROM midpoint");
+        gatorPhase.ram[0x8122-0x8000]=80;
+        Check(BoardVisuals.HomeGatorReveal(gatorPhase,false)==1&&BoardVisuals.HomeGatorReveal(gatorPhase,true)==1,"home gator did not finish at the ROM full tile");
+        var homeGator=new HomeGatorVisual();
+        Check(homeGator.Reveal(0,false,0)==null,"inactive home gator rendered before its ROM tile");
+        Check(homeGator.Reveal(80,true,1)==1,"home gator failed to reach the bay");
+        Check(homeGator.Reveal(81,false,0)==1&&homeGator.Retreating,"home gator vanished when the ROM tile cleared");
+        float? retreatMid=homeGator.Reveal(87,false,0);
+        Check(retreatMid>.45f&&retreatMid<.55f,"home gator did not retreat smoothly");
+        Check(homeGator.Reveal(93,false,0)==null&&!homeGator.Retreating,"home gator did not clear the bay promptly");
         var motion=new PresentationMotion();
-        Check(motion.Step(1,0,1f/60)==0,"moving model did not initialize at native position");
-        float moving=motion.Step(1,1,1f/60),settling=motion.Step(1,1,1f/60);
+        Check(motion.Step(1,0,0,1f/60)==0,"moving model did not initialize at native position");
+        float moving=motion.Step(1,1,1,1f/120),settling=motion.Step(1,1,1,1f/120);
         Check(moving>0&&moving<1&&settling>moving&&settling<1,"visual step was not subpixel or did not settle");
-        motion.Step(2,255,1f/60);
-        Check(motion.Step(2,0,1f/60)>255,"moving model teleported across the ROM byte wrap");
-        motion.Reset();Check(motion.Step(1,80,1f/60)==80,"motion reset retained a prior level position");
+        motion.Step(2,255,0,1f/60);
+        Check(motion.Step(2,0,1,1f/60)>255,"moving model teleported across the ROM byte wrap");
+        motion.Reset();Check(motion.Step(1,80,2,1f/60)==80,"motion reset retained a prior level position");
         using var movingBoard=Started(rom);var laneMotion=new PresentationMotion();
         int nativeStalls=0,smoothedDuringStall=0,nativeMoves=0;float maxVisualLag=0;
         var lastNative=new Dictionary<int,int>();var lastShown=new Dictionary<int,float>();
@@ -34,7 +47,7 @@ internal static class FeedbackTests
             foreach(int lane in new[]{0,1,2,3,4,6,7,8,9,10}){
                 int table=0x8100+lane*9;if(movingBoard.Peek(table)==0)continue;
                 int raw=movingBoard.Peek(table+1);
-                laneMotion.Step(lane,raw,1f/120);float shown=laneMotion.Step(lane,raw,1f/120);
+                laneMotion.Step(lane,raw,f,1f/120);float shown=laneMotion.Step(lane,raw,f,1f/120);
                 float lag=raw-shown;lag-=256f*MathF.Round(lag/256f);maxVisualLag=Math.Max(maxVisualLag,Math.Abs(lag));
                 if(lastNative.TryGetValue(lane,out int old)){
                     if(old==raw){nativeStalls++;if(Math.Abs(shown-lastShown[lane])>.001f)smoothedDuringStall++;}
@@ -47,6 +60,17 @@ internal static class FeedbackTests
         Check(maxVisualLag<2.5f,"smoothing placed moving models too far from their native collision positions");
         var deaths=new List<object>();
         Check(FrogVisualState.DrownDepth(.1)>.3f,"water death waits visibly above the surface");
+        float surfaceDrown=.20f,divingStart=surfaceDrown-.70f;
+        float finalDrown=surfaceDrown-FrogVisualState.MaximumDrownDepth;
+        Check(Math.Abs(FrogVisualState.DrownHeight(surfaceDrown,divingStart,0)-divingStart)<.0001f,"diving death popped to the surface at onset");
+        float priorDrown=divingStart;
+        for(int frame=1;frame<=90;frame++){
+            float height=FrogVisualState.DrownHeight(surfaceDrown,divingStart,frame*ArcadeSimulation.FrameSeconds);
+            Check(height<=priorDrown+.0001f&&height>=finalDrown-.0001f,"diving death rebounded or passed the surface-death floor");
+            priorDrown=height;
+        }
+        Check(Math.Abs(FrogVisualState.DrownHeight(surfaceDrown,divingStart,99)-FrogVisualState.DrownHeight(surfaceDrown,surfaceDrown,99))<.0001f,
+            "turtle and surface drowning finished at different depths");
         foreach(bool water in new[]{false,true}) {
             using var sim=Started(rom);var view=new FrogVisualState();
             sim.Poke(0x8044,120);sim.Poke(0x8047,water?112:208);sim.Poke(0x8004,1);sim.Poke(0x829c,water?1:0);sim.Poke(0x83cd,0);
@@ -86,7 +110,37 @@ internal static class FeedbackTests
             Check(awards.Count(a=>a.Kind==BonusKind.Time)==1,"time bonus missing/duplicated");
             Check(awards.All(a=>(a.Kind==BonusKind.Time||a.Amount==200)&&a.X==24+48*(bay-1)),"bonus amount or origin changed: "+JsonSerializer.Serialize(awards));
             Check(sim.Snapshot().BcdScore(0x83ed)-before>=awards.Sum(a=>a.Amount),"popup had no matching score award");
+            var timeAward=awards.Single(a=>a.Kind==BonusKind.Time);
+            var hold=new HomeArrivalVisual();hold.Begin(timeAward,rider);
+            Check(hold.X==timeAward.X&&hold.Row==timeAward.Row&&hold.Passenger==rider,"home hold lost arrival pose or rider");
+            Check(hold.Active(timeAward.Frame)&&hold.Active(timeAward.Frame+15)&&!hold.Active(timeAward.Frame+16),"home hold is not a quarter second");
+            hold.Cancel();Check(!hold.Active(timeAward.Frame+1),"input did not cancel the home hold");
             bonuses.Add(new{bug,rider,fifth,events=awards.Length});
+        }
+        using(var arrival=Started(rom)){
+            for(int bay=0;bay<4;bay++)arrival.Poke(0x825e+bay,1);
+            arrival.Poke(0x825c,4);
+            arrival.Poke(0x8044,216);arrival.Poke(0x8047,42);
+            arrival.Poke(0x8004,0);arrival.Poke(0x83cd,0);arrival.Poke(0x8268,0);
+            for(int address=0x8248;address<=0x8253;address++)arrival.Poke(address,0);
+            arrival.Poke(0x8249,1);arrival.Poke(0x8251,5);arrival.Poke(0x8254,2);
+            arrival.Poke(0x8134,1);arrival.Poke(0x8135,1);
+            var arrivalTrace=new List<object>();
+            for(int frame=0;frame<18;frame++){
+                arrival.Step();var snap=arrival.Snapshot();
+                arrivalTrace.Add(new{frame,row=snap.At(0x8047),x=snap.At(0x8044),upActive=snap.At(0x8249),upCounter=snap.At(0x8251),
+                    bonus=arrival.BonusAwards.Select(a=>new{a.Kind,a.Row,a.X}).ToArray()});
+            }
+            var lastHomeAward=arrival.BonusAwards.Single(a=>a.Kind==BonusKind.Time);
+            Check(lastHomeAward.Row==40&&lastHomeAward.X==216,"final-home ROM award did not occur mid-hop at row 40");
+            var finish=new HomeArrivalVisual();finish.Begin(lastHomeAward,true,4.0/60);
+            int awarded=lastHomeAward.Frame;
+            Check(finish.FinishingHop(awarded)&&finish.VisualRow(awarded)==40,"final-home animation skipped its remaining hop");
+            Check(finish.VisualRow(awarded+3)<40&&finish.VisualRow(awarded+3)>32,"final-home hop did not pass through the bay");
+            Check(!finish.FinishingHop(awarded+6)&&Math.Abs(finish.VisualRow(awarded+6)-32)<.001f,"final-home hop did not land in the bay");
+            Check(finish.Active(awarded+21)&&!finish.Active(awarded+22),"final-home hold did not begin after landing");
+            Check(finish.HopPoseSeconds(awarded+3)>4.0/60&&finish.HopPoseSeconds(awarded+3)<10.0/60,"final-home hop clip did not finish its remaining frames");
+            File.WriteAllText("docs/evidence/home-hop-trace.json",JsonSerializer.Serialize(arrivalTrace,new JsonSerializerOptions{WriteIndented=true}));
         }
         using var turtles=Started(rom);
         var prior=new Dictionary<(int,int),(float depth,int phase,int clock)>();
@@ -115,14 +169,21 @@ internal static class FeedbackTests
         File.WriteAllText("docs/evidence/hop-trace.json",JsonSerializer.Serialize(hopTrace,new JsonSerializerOptions{WriteIndented=true}));
         using var held=Started(rom);
         var hopView=new FrogVisualState();int lastActive=-1,landedFrames=0;
+        var frogMotion=new PresentationMotion(4,.35f,72f);int frogNativeStalls=0,frogVisualMovesDuringStalls=0,lastFrogX=-1;float lastFrogShown=0,maxFrogLag=0;
         for(int f=0;f<96;f++){
             int button=InputPulse.ForHeldDirection(8,held.Snapshot());held.Step(button);var s=held.Snapshot();hopView.Observe(s);
+            int nativeX=s.At(0x8044);
+            frogMotion.Step(0,nativeX,s.frame,1f/120);float shown=frogMotion.Step(0,nativeX,s.frame,1f/120);
+            float lag=nativeX-shown;lag-=256f*MathF.Round(lag/256f);maxFrogLag=Math.Max(maxFrogLag,Math.Abs(lag));
+            if(lastFrogX==nativeX){frogNativeStalls++;if(Math.Abs(shown-lastFrogShown)>.001f)frogVisualMovesDuringStalls++;}
+            lastFrogX=nativeX;lastFrogShown=shown;
             bool nativeHop=Enumerable.Range(0,4).Any(i=>s.At(0x8248+i)!=0);
             if(nativeHop)lastActive=f;
             if(!nativeHop&&hopView.HopActive(s.frame)&&lastActive>=0&&f-lastActive<=2)landedFrames++;
         }
         Check(held.Peek(0x8044)>=192,"held right did not repeat complete native hops");
         Check(landedFrames>=2,"visual hop lost its landing frames when ROM flag cleared");
+        Check(frogNativeStalls>0&&frogVisualMovesDuringStalls>0&&maxFrogLag<2.5f,"frog presentation still follows raw pixel steps or lags input");
         using var bottom=Started(rom);
         for(int f=0;f<20;f++)bottom.Step(InputPulse.ForHeldDirection(2,bottom.Snapshot()));
         Check(bottom.Peek(0x8047)==240&&FrogVisualState.PlayerOnBoard(bottom.Snapshot()),"ROM lower grass row is not visible or walkable");
@@ -133,6 +194,22 @@ internal static class FeedbackTests
         var frogBounds=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()=="frog").GetProperty("footprintTiles");
         Check(Math.Abs(ModelFootprints.FrogAlongX-Math.Max(Math.Abs(frogBounds.GetProperty("minX").GetDouble()),Math.Abs(frogBounds.GetProperty("maxX").GetDouble()))*16)<.001,"frog X footprint drifted from Blender");
         Check(Math.Abs(ModelFootprints.FrogAcrossRow-Math.Max(Math.Abs(frogBounds.GetProperty("minY").GetDouble()),Math.Abs(frogBounds.GetProperty("maxY").GetDouble()))*16)<.001,"frog row footprint drifted from Blender");
+        var riverBounds=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()=="river_gator").GetProperty("footprintTiles");
+        var bushBounds=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()=="gator").GetProperty("footprintTiles");
+        double homeTailReach=bushBounds.GetProperty("maxX").GetDouble();
+        Check(homeTailReach>.8&&homeTailReach*0.6<.615,"home gator tail must show inside its open bay");
+        Check(Math.Abs(ModelFootprints.RiverGatorLengthTiles-(riverBounds.GetProperty("maxY").GetDouble()-riverBounds.GetProperty("minY").GetDouble()))<.001,"river gator length drifted from Blender");
+        var riverFit=BoardVisuals.FitRiverGator(60);
+        float nativeTip=162,rawCenter=nativeTip-12-60/2f;
+        float visualTip=rawCenter+riverFit.CenterOffsetPixels+16*ModelFootprints.RiverGatorFrontTiles*riverFit.LengthScale;
+        float visualSnout=16*ModelFootprints.RiverGatorSnoutTiles*riverFit.LengthScale;
+        Check(Math.Abs(visualTip-nativeTip)<.01f&&Math.Abs(visualSnout-16)<.35f,"river gator snout missed the ROM's 16px kill interval");
+        Check(Math.Abs(16*ModelFootprints.RiverGatorLengthTiles*riverFit.LengthScale-57)<.01f&&
+              Math.Abs(16*ModelFootprints.RiverGatorWidthTiles*riverFit.WidthScale-14)<.01f,"river gator no longer fits its ROM log slot");
+        var logBounds=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()=="log").GetProperty("footprintTiles");
+        var snakeBounds=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()=="snake").GetProperty("footprintTiles");
+        Check(Math.Abs(ModelFootprints.LogTopTiles-logBounds.GetProperty("maxZ").GetDouble())<.001&&
+              Math.Abs(ModelFootprints.SnakeBottomTiles-snakeBounds.GetProperty("minZ").GetDouble())<.001,"snake/log seating bounds drifted from Blender");
         foreach(int lane in Enumerable.Range(6,5)){
             string model=lane switch{6=>"truck",7=>"sport",8=>"car",9=>"dozer",_=>"racecar"};
             var record=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()==model).GetProperty("footprintTiles");
@@ -163,7 +240,7 @@ internal static class FeedbackTests
         }
         File.WriteAllText("docs/evidence/feedback-tests.json",JsonSerializer.Serialize(new{
             wrapping=true,deaths,bonuses,turtleMaximumStep=maxStep,turtleJumps=jumps,
-            heldRightX=held.Peek(0x8044),lowerGrassRow=bottom.Peek(0x8047),
+            heldRightX=held.Peek(0x8044),frogNativeStalls,frogVisualMovesDuringStalls,maxFrogLag,lowerGrassRow=bottom.Peek(0x8047),
             nativeObjectMoves=nativeMoves,nativeObjectStalls=nativeStalls,subpixelMovesDuringNativeStalls=smoothedDuringStall,maxVisualLag,
             exportedModelBoundsVerified=6,vehicleFrontAndBackEdgesVerified=5,
             modelCollisionLiveSides=2

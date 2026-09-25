@@ -1,0 +1,300 @@
+[
+  {
+    "frame": 0,
+    "row": 42,
+    "x": 216,
+    "upActive": 1,
+    "upCounter": 5,
+    "bonus": []
+  },
+  {
+    "frame": 1,
+    "row": 42,
+    "x": 216,
+    "upActive": 1,
+    "upCounter": 5,
+    "bonus": []
+  },
+  {
+    "frame": 2,
+    "row": 42,
+    "x": 216,
+    "upActive": 1,
+    "upCounter": 5,
+    "bonus": []
+  },
+  {
+    "frame": 3,
+    "row": 40,
+    "x": 216,
+    "upActive": 1,
+    "upCounter": 4,
+    "bonus": []
+  },
+  {
+    "frame": 4,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 5,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 6,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 7,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 8,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 9,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 10,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 11,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 12,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 13,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 14,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 15,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 16,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  },
+  {
+    "frame": 17,
+    "row": 224,
+    "x": 128,
+    "upActive": 0,
+    "upCounter": 0,
+    "bonus": [
+      {
+        "Kind": 1,
+        "Row": 40,
+        "X": 216
+      },
+      {
+        "Kind": 2,
+        "Row": 40,
+        "X": 216
+      }
+    ]
+  }
+]

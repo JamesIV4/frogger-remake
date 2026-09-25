@@ -4,6 +4,17 @@
     "romFrame": 298,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
     "hopFlags": [
@@ -51,6 +62,8 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
@@ -69,6 +82,17 @@
     "romFrame": 305,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
     "hopFlags": [
@@ -104,7 +128,7 @@
     "bodyScale": [
       1,
       1,
-      1.0039219
+      1.0037119
     ],
     "bodyOrigin": [
       0,
@@ -116,13 +140,15 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
     "cameraSize": 2.5,
     "cameraFov": 52,
     "cameraPosition": [
-      1.3551712,
+      1.3951616,
       2.9,
       1.5
     ],
@@ -134,6 +160,17 @@
     "romFrame": 314,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
     "hopFlags": [
@@ -169,7 +206,7 @@
     "bodyScale": [
       1,
       1,
-      1.0121185
+      1.0113006
     ],
     "bodyOrigin": [
       0,
@@ -181,13 +218,15 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
     "cameraSize": 2.5,
     "cameraFov": 52,
     "cameraPosition": [
-      1.8418407,
+      1.8376403,
       2.9,
       1.5
     ],
@@ -199,6 +238,17 @@
     "romFrame": 322,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
     "hopFlags": [
@@ -246,13 +296,15 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
     "cameraSize": 2.5,
     "cameraFov": 52,
     "cameraPosition": [
-      1.6155348,
+      1.4949737,
       2.9,
       1.5
     ],
@@ -264,6 +316,17 @@
     "romFrame": 327,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
     "hopFlags": [
@@ -299,7 +362,7 @@
     "bodyScale": [
       1,
       1,
-      1.0098534
+      1.009333
     ],
     "bodyOrigin": [
       0,
@@ -311,13 +374,15 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
     "cameraSize": 2.5,
     "cameraFov": 52,
     "cameraPosition": [
-      1.3059926,
+      1.2680306,
       2.9,
       1.5
     ],
@@ -329,6 +394,17 @@
     "romFrame": 337,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
     "hopFlags": [
@@ -364,7 +440,7 @@
     "bodyScale": [
       1,
       1,
-      0.9995248
+      0.9998319
     ],
     "bodyOrigin": [
       0,
@@ -376,13 +452,15 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
     "cameraSize": 2.5,
     "cameraFov": 52,
     "cameraPosition": [
-      1.5515285,
+      1.6298323,
       2.9,
       1.5
     ],
@@ -394,6 +472,17 @@
     "romFrame": 342,
     "dying": false,
     "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
     "nativeX": 128,
     "nativeRow": 224,
     "hopFlags": [
@@ -429,7 +518,7 @@
     "bodyScale": [
       1,
       1,
-      0.9916533
+      0.9906148
     ],
     "bodyOrigin": [
       0,
@@ -441,13 +530,15 @@
       1,
       1
     ],
+    "holdingHome": false,
+    "homeX": 0,
     "bonusLabels": [],
     "cameraMode": "Orthogonal",
     "following": false,
     "cameraSize": 2.5,
     "cameraFov": 52,
     "cameraPosition": [
-      1.8577309,
+      1.9444947,
       2.9,
       1.5
     ],

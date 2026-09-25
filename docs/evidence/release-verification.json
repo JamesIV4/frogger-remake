@@ -1,8 +1,9 @@
 {
     "engine":  "Godot 4.7 .NET",
     "runtime":  "Native C#; both ROM CPUs statically translated",
-    "executable":  "builds/windows/Frogger Remake.exe",
+    "executable":  "builds/windows/Frogger Remake - 20260925-153501.exe",
     "packaged_capture":  "docs/evidence/gameplay.png",
+    "packaged_turtle_drown_capture":  "docs/evidence/feedback/packaged-turtle-drown-175.png",
     "menu_capture":  "docs/evidence/menu.png",
     "packaged_error_bytes":  0,
     "menu_error_bytes":  0,

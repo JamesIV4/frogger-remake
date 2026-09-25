@@ -1,0 +1,320 @@
+[
+  {
+    "frame": 1,
+    "romFrame": 298,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "menuVisible": false,
+    "mouseMode": "Hidden",
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 128,
+    "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 4.917,
+    "deathInitialHeight": 0,
+    "drownFloor": -1.0699999,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerZ": 6,
+    "riderZ": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 0,
+    "ladyX": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "homeGatorVisible": false,
+    "homeGatorZ": 0,
+    "homeGatorY": 0,
+    "homeGatorPhase": 19,
+    "riverGatorVisible": true,
+    "riverGatorScale": [
+      0.7954545,
+      0.9,
+      1.6543037
+    ],
+    "riverGatorTile": true,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": false,
+    "finishingHomeHop": false,
+    "homeX": 0,
+    "homeRow": 0,
+    "homeVisualRow": 32,
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 16.8,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "motionLogX": 230,
+    "motionCarX": 232,
+    "nativeLogX": -26,
+    "nativeCarX": 232,
+    "visibleLogs": 38,
+    "error": "Ok"
+  },
+  {
+    "frame": 12,
+    "romFrame": 309,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "menuVisible": false,
+    "mouseMode": "Hidden",
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 128,
+    "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.0985000000000005,
+    "deathInitialHeight": 0,
+    "drownFloor": -1.0699999,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerZ": 6,
+    "riderZ": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 0,
+    "ladyX": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "homeGatorVisible": false,
+    "homeGatorZ": 0,
+    "homeGatorY": 0,
+    "homeGatorPhase": 30,
+    "riverGatorVisible": true,
+    "riverGatorScale": [
+      0.7954545,
+      0.9,
+      1.6543037
+    ],
+    "riverGatorTile": true,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0058119
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": false,
+    "finishingHomeHop": false,
+    "homeX": 0,
+    "homeRow": 0,
+    "homeVisualRow": 32,
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 16.8,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "motionLogX": 230.73772,
+    "motionCarX": 229.86902,
+    "nativeLogX": -24,
+    "nativeCarX": 229,
+    "visibleLogs": 39,
+    "error": "Ok"
+  },
+  {
+    "frame": 24,
+    "romFrame": 321,
+    "dying": false,
+    "drowning": false,
+    "gameState": 1,
+    "started": true,
+    "menuVisible": false,
+    "mouseMode": "Hidden",
+    "messageText": "",
+    "messagePosition": [
+      130,
+      390
+    ],
+    "messageSize": [
+      1,
+      30
+    ],
+    "nativeX": 128,
+    "nativeRow": 224,
+    "displayedFrogX": 128,
+    "displayedFrogRow": 224,
+    "hopFlags": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hopCounters": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "deathSeconds": 5.2965,
+    "deathInitialHeight": 0,
+    "drownFloor": -1.0699999,
+    "carrying": false,
+    "riderVisible": false,
+    "socketError": 0,
+    "playerY": 0.075,
+    "riderY": 0,
+    "playerZ": 6,
+    "riderZ": 0,
+    "playerYaw": -3.1415925,
+    "riderYaw": 0,
+    "riderScale": 0,
+    "ladyVisible": false,
+    "ladyYaw": 0,
+    "ladyScale": 0,
+    "ladyCode": 0,
+    "ladyX": 0,
+    "snakeVisible": false,
+    "snakeY": 0,
+    "homeGatorVisible": false,
+    "homeGatorZ": 0,
+    "homeGatorY": 0,
+    "homeGatorPhase": 42,
+    "riverGatorVisible": true,
+    "riverGatorScale": [
+      0.7954545,
+      0.9,
+      1.6543037
+    ],
+    "riverGatorTile": true,
+    "hopActive": false,
+    "hopDirection": 0,
+    "ladyHopping": false,
+    "turtleRideDepth": 0,
+    "bodyScale": [
+      1,
+      1,
+      1.0129997
+    ],
+    "bodyOrigin": [
+      0,
+      0.12,
+      0
+    ],
+    "modelScale": [
+      1,
+      1,
+      1
+    ],
+    "holdingHome": false,
+    "finishingHomeHop": false,
+    "homeX": 0,
+    "homeRow": 0,
+    "homeVisualRow": 32,
+    "bonusLabels": [],
+    "cameraMode": "Orthogonal",
+    "following": false,
+    "cameraSize": 16.8,
+    "cameraFov": 52,
+    "cameraPosition": [
+      0,
+      19,
+      9.8
+    ],
+    "motionLogX": 232.38222,
+    "motionCarX": 227.67953,
+    "nativeLogX": -22,
+    "nativeCarX": 226,
+    "visibleLogs": 38,
+    "error": "Ok"
+  }
+]
