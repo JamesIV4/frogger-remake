@@ -141,7 +141,7 @@ public partial class FroggerGame
                 int members=lane==1?2:lane==4?3:1;
                 if(turtle&&BoardVisuals.TurtlePhase(state,rawCenter,row)>0)knownDivingGroups.Add((lane,index));
                 float depth=turtle?BoardVisuals.TurtleDepth(state,rawCenter,row,fraction,knownDivingGroups.Contains((lane,index))):0;
-                bool crocodile=lane==0&&BoardVisuals.GatorOnLog(state,rawCenter,row);
+                bool crocodile=lane==0&&index==0&&BoardVisuals.RiverGatorActive(state);
                 for(int member=0;member<members;member++)for(int wrap=-1;wrap<=1;wrap++) {
                     float x=center+wrap*256+(member-(members-1)/2f)*16;
                     if(turtle)turtleSupports.Add((x,row,depth));
@@ -251,7 +251,7 @@ public partial class FroggerGame
                 var content=new VBoxContainer{Alignment=BoxContainer.AlignmentMode.Center};content.AddThemeConstantOverride("separation",4);panel.AddChild(content);
                 var heading=Text("TIME BONUS",20,Cream);heading.AddThemeFontOverride("font",displayFont);content.AddChild(heading);
                 content.AddChild(Text($"+{award.Amount}",29,new Color("7beaff")));
-                view=panel;screen=viewport*.5f;
+                view=panel;screen=new Vector2(viewport.X*.5f,viewport.Y/3f);
             } else {
                 displayText=$"+{award.Amount}";
                 var label=Text(displayText,28,award.Kind==BonusKind.Rescue?new Color("ff75da"):new Color("fff32f"));

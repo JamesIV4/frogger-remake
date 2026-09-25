@@ -7,6 +7,7 @@ using System.Text.Json;
 
 internal static class FeedbackTests
 {
+    private readonly record struct CrocProbe(int X,int Hold,int Drown,int RideTile,bool VisualDying);
     public static ArcadeSimulation Started(byte[] rom) {
         var s=new ArcadeSimulation(rom);
         for(int f=0;f<310;f++)s.Step(f>=150&&f<156?16:f>=230&&f<236?32:0);
@@ -172,10 +173,13 @@ internal static class FeedbackTests
         }
         File.WriteAllText("docs/evidence/hop-trace.json",JsonSerializer.Serialize(hopTrace,new JsonSerializerOptions{WriteIndented=true}));
         using var held=Started(rom);
+        int heldStartX=held.Peek(0x8044),heldInputFrames=0;
+        var heldInput=new InputPulse();
         var hopView=new FrogVisualState();int lastActive=-1,landedFrames=0;
         var frogMotion=new PresentationMotion(4,.35f,72f);int frogNativeStalls=0,frogVisualMovesDuringStalls=0,lastFrogX=-1;float lastFrogShown=0,maxFrogLag=0;
         for(int f=0;f<96;f++){
-            int button=InputPulse.ForHeldDirection(8,held.Snapshot());held.Step(button);var s=held.Snapshot();hopView.Observe(s);
+            int button=heldInput.FromHeldMask(8);if(button!=0)heldInputFrames++;
+            held.Step(button);var s=held.Snapshot();hopView.Observe(s);
             int nativeX=s.At(0x8044);
             frogMotion.Step(0,nativeX,s.frame,1f/120);float shown=frogMotion.Step(0,nativeX,s.frame,1f/120);
             float lag=nativeX-shown;lag-=256f*MathF.Round(lag/256f);maxFrogLag=Math.Max(maxFrogLag,Math.Abs(lag));
@@ -185,14 +189,29 @@ internal static class FeedbackTests
             if(nativeHop)lastActive=f;
             if(!nativeHop&&hopView.HopActive(s.frame)&&lastActive>=0&&f-lastActive<=2)landedFrames++;
         }
-        Check(held.Peek(0x8044)>=192,"held right did not repeat complete native hops");
+        int singlePressX=held.Peek(0x8044);
+        Check(heldInputFrames==96&&singlePressX==heldStartX+16,
+            $"holding right triggered more than one hop: start={heldStartX}, end={singlePressX}");
+        for(int f=0;f<8;f++)held.Step(heldInput.FromHeldMask(0));
+        for(int f=0;f<24;f++)held.Step(heldInput.FromHeldMask(8));
+        Check(held.Peek(0x8044)==singlePressX+16,"release and new press did not produce exactly one more hop");
+        var overlapInput=new InputPulse();
+        Check(overlapInput.FromHeldMask(8)==8&&overlapInput.FromHeldMask(9)==1&&
+              overlapInput.FromHeldMask(8)==8&&overlapInput.FromHeldMask(0)==0&&
+              overlapInput.FromHeldMask(8)==8,"direction priority or held-state sampling changed");
+        var stickInput=new InputPulse();
+        Check(stickInput.FromInputs(0,.75f,0)==8&&stickInput.FromInputs(0,.4f,0)==8&&
+              stickInput.FromInputs(0,.72f,0)==8&&stickInput.FromInputs(0,.15f,0)==0&&
+              stickInput.FromInputs(0,.75f,0)==8,"stick hysteresis failed to hold until neutral");
         Check(landedFrames>=2,"visual hop lost its landing frames when ROM flag cleared");
         Check(frogNativeStalls>0&&frogVisualMovesDuringStalls>0&&maxFrogLag<2.5f,"frog presentation still follows raw pixel steps or lags input");
         using var bottom=Started(rom);
-        for(int f=0;f<20;f++)bottom.Step(InputPulse.ForHeldDirection(2,bottom.Snapshot()));
+        var bottomInput=new InputPulse();
+        for(int f=0;f<20;f++)bottom.Step(bottomInput.FromHeldMask(2));
         Check(bottom.Peek(0x8047)==240&&FrogVisualState.PlayerOnBoard(bottom.Snapshot()),"ROM lower grass row is not visible or walkable");
         int bottomX=bottom.Peek(0x8044);
-        for(int f=0;f<30;f++)bottom.Step(InputPulse.ForHeldDirection(8,bottom.Snapshot()));
+        for(int f=0;f<8;f++)bottom.Step(bottomInput.FromHeldMask(0));
+        for(int f=0;f<30;f++)bottom.Step(bottomInput.FromHeldMask(8));
         Check(bottom.Peek(0x8044)>bottomX,"frog cannot traverse the lower grass row");
         using var bounds=JsonDocument.Parse(File.ReadAllText("art/models.json"));
         var frogBounds=bounds.RootElement.EnumerateArray().Single(e=>e.GetProperty("asset").GetString()=="frog").GetProperty("footprintTiles");
@@ -261,6 +280,7 @@ internal static class FeedbackTests
         Check(ArcadeSimulation.ModelContact(-40,160,40,160,0,0,160,car),"frog swept through car");
         Check(ArcadeSimulation.ModelContact(0,160,0,160,-40,40,160,car),"moving car swept through frog");
         Check(!ArcadeSimulation.ModelContact(-40,190,40,190,0,0,160,car),"collision ignores model row separation");
+        VerifyOriginalRiverGator(rom);
         VerifyOriginalLadySpriteClear(rom);
         foreach(int side in new[]{-1,1}){
             using var impact=Started(rom);impact.Modern(true);
@@ -275,12 +295,12 @@ internal static class FeedbackTests
         }
         File.WriteAllText("docs/evidence/feedback-tests.json",JsonSerializer.Serialize(new{
             wrapping=true,deaths,bonuses,turtleMaximumStep=maxStep,turtleJumps=jumps,
-            heldRightX=held.Peek(0x8044),frogNativeStalls,frogVisualMovesDuringStalls,maxFrogLag,lowerGrassRow=bottom.Peek(0x8047),
+            heldInputFrames,singlePressX,repressedX=held.Peek(0x8044),frogNativeStalls,frogVisualMovesDuringStalls,maxFrogLag,lowerGrassRow=bottom.Peek(0x8047),
             nativeObjectMoves=nativeMoves,nativeObjectStalls=nativeStalls,subpixelMovesDuringNativeStalls=smoothedDuringStall,maxVisualLag,
             exportedModelBoundsVerified=6,vehicleFrontAndBackEdgesVerified=5,
             modelCollisionLiveSides=2
         },new JsonSerializerOptions{WriteIndented=true}));
-        Console.WriteLine("Feedback regressions: wrapping, death/bonus continuity, smooth diving, held hops, both grass rows and model-bound road collision passed");
+        Console.WriteLine("Feedback regressions: wrapping, death/bonus continuity, smooth diving, single-press hops, both grass rows and model-bound road collision passed");
     }
     private static void VerifyOriginalLadySpriteClear(byte[] rom){
         // Reproduce ROM 0x1AA9 -> 0x27DE: an expiring fly bonus erases the
@@ -329,6 +349,48 @@ internal static class FeedbackTests
         Check(game.Peek(0x8135)!=0&&game.Peek(0x8134)!=0,"original ROM sprite clear no longer allows invisible pickup");
         Check(clearVisible&&visible&&Math.Abs(clearVisualX-80)<=2&&patrolVisualX==pickupX,
             "pink-frog renderer missed or displaced her after ROM 0x27DE blanked the shared sprite");
+    }
+    private static void VerifyOriginalRiverGator(byte[] rom){
+        CrocProbe Probe(int x){
+            using var game=new ArcadeSimulation(rom);
+            game.Poke(0x8150,1);game.Poke(0x83b7,2);
+            game.Poke(0x8044,x);game.Poke(0x8047,48);game.Poke(0x8101,160);
+            game.Poke(0x8004,0);game.Poke(0x829c,0);game.Poke(0x83cd,0);
+            game.Cpu.PC=0x28bb;game.Cpu.SP=0x87f0;
+            game.Poke(0x87f0,0x34);game.Poke(0x87f1,0x12);
+            int steps=0;
+            while(game.Cpu.PC!=0x1234&&steps++<300)game.Cpu.StepInstruction();
+            Check(game.Cpu.PC==0x1234,"native crocodile test did not return");
+            var visual=new FrogVisualState();visual.Observe(game.Snapshot());
+            return new(x,game.Peek(0x8004),game.Peek(0x829c),game.Peek(0xa846),visual.Dying);
+        }
+        var cases=new[]{Probe(103),Probe(110),Probe(120),Probe(130),Probe(143),Probe(144),Probe(145),Probe(152),Probe(160),Probe(161)};
+        Check(cases[0].Hold==0&&cases[1].Hold==0&&cases[2].Hold==0,"classic crocodile window extends into the visible tail");
+        Check(cases[3].RideTile==104&&cases[4].RideTile==104&&cases[5].RideTile==104&&
+              !cases[3].VisualDying&&!cases[4].VisualDying&&!cases[5].VisualDying,
+              "classic safe crocodile back is incorrectly shown as a death");
+        Check(cases[6].Drown==1&&cases[7].Drown==1&&cases[8].Drown==1&&cases[8].VisualDying&&cases[9].Hold==0,
+              "classic snout danger no longer matches ROM 0x28BB");
+        Check(BoardVisuals.RiverGatorContact(250,10)==RiverGatorZone.Back&&
+              BoardVisuals.RiverGatorContact(251,10)==RiverGatorZone.Snout,
+              "crocodile contact failed across the 8-bit screen wrap");
+        CrocProbe ModernProbe(int x){
+            using var game=new ArcadeSimulation(rom,modern:true);
+            game.Poke(0x8150,1);game.Poke(0x83b7,2);
+            game.Poke(0x8044,x);game.Poke(0x8047,48);game.Poke(0x8101,160);
+            Check(game.ResolveModernRiverGator(),"modern crocodile hook did not handle an armed river row");
+            var visual=new FrogVisualState();visual.Observe(game.Snapshot());
+            return new(x,game.Peek(0x8004),game.Peek(0x829c),game.Peek(0xa846),visual.Dying);
+        }
+        var modernCases=new[]{ModernProbe(102),ModernProbe(103),ModernProbe(110),ModernProbe(120),ModernProbe(130),
+            ModernProbe(144),ModernProbe(145),ModernProbe(152),ModernProbe(160),ModernProbe(161)};
+        Check(modernCases[0].Hold==0&&modernCases[9].Hold==0,"modern croc contact extends beyond its model");
+        foreach(var c in modernCases.Skip(1).Take(5))
+            Check(c.Hold==1&&c.Drown==0&&c.RideTile==104&&!c.VisualDying,$"modern croc back killed the frog at X={c.X}");
+        foreach(var c in modernCases.Skip(6).Take(3))
+            Check(c.Hold==1&&c.Drown==1&&c.RideTile==0&&c.VisualDying,$"modern croc snout was not fatal at X={c.X}");
+        File.WriteAllText("docs/evidence/gator-original-collision.json",JsonSerializer.Serialize(cases,new JsonSerializerOptions{WriteIndented=true})+"\n");
+        File.WriteAllText("docs/evidence/gator-modern-collision.json",JsonSerializer.Serialize(modernCases,new JsonSerializerOptions{WriteIndented=true})+"\n");
     }
     private static void Check(bool condition,string message){if(!condition)throw new Exception(message);}
 }

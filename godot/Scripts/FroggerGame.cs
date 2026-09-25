@@ -8,6 +8,7 @@ public partial class FroggerGame : Node3D
     private ArcadeSimulation simulation=null!;
     private FrameState state=new();
     private readonly Dictionary<string,ModelActor> actors=new();
+    private readonly InputPulse inputPulse=new();
     private AudioStreamPlayer audioPlayer=null!;
     private AudioStreamGeneratorPlayback audioPlayback=null!;
     private bool started,paused,modern=true,muted;
@@ -36,7 +37,7 @@ public partial class FroggerGame : Node3D
             }
         } catch(Exception e){GD.PushError(e.ToString());if(message!=null){message.Text="Setup needed: run tools/setup.ps1\n"+e.Message;messagePanel.Visible=true;}SetProcess(false);}
     }
-    private void ResetMachine(){simulation?.Dispose();simulation=new ArcadeSimulation(FileAccess.GetFileAsBytes("res://rom/maincpu.bin"),modern,FileAccess.GetFileAsBytes("res://rom/audiocpu.bin"));accumulator=0;ClearPresentation();}
+    private void ResetMachine(){simulation?.Dispose();simulation=new ArcadeSimulation(FileAccess.GetFileAsBytes("res://rom/maincpu.bin"),modern,FileAccess.GetFileAsBytes("res://rom/audiocpu.bin"));accumulator=0;inputPulse.Reset();ClearPresentation();}
     private void StartGame(int players) {
         ResetMachine();for(int i=0;i<180;i++)simulation.Step();
         for(int c=0;c<players;c++){for(int i=0;i<6;i++)simulation.Step(16);for(int i=0;i<10;i++)simulation.Step();}
@@ -65,16 +66,17 @@ public partial class FroggerGame : Node3D
         var pads=Input.GetConnectedJoypads();int joy=pads.Count>0?pads[0]:-1;
         bool K(Key k)=>Input.IsPhysicalKeyPressed(k);bool P(JoyButton b)=>joy>=0&&Input.IsJoyButtonPressed(joy,b);
         float x=joy>=0?Input.GetJoyAxis(joy,JoyAxis.LeftX):0,y=joy>=0?Input.GetJoyAxis(joy,JoyAxis.LeftY):0;
-        int direction=0;
-        if(K(Key.Up)||K(Key.W)||P(JoyButton.DpadUp)||y<-.5f)direction=1;
-        else if(K(Key.Down)||K(Key.S)||P(JoyButton.DpadDown)||y>.5f)direction=2;
-        else if(K(Key.Left)||K(Key.A)||P(JoyButton.DpadLeft)||x<-.5f)direction=4;
-        else if(K(Key.Right)||K(Key.D)||P(JoyButton.DpadRight)||x>.5f)direction=8;
-        return AdaptDirection(direction);
+        int digital=0;
+        if(K(Key.Up)||K(Key.W)||P(JoyButton.DpadUp))digital|=1;
+        if(K(Key.Down)||K(Key.S)||P(JoyButton.DpadDown))digital|=2;
+        if(K(Key.Left)||K(Key.A)||P(JoyButton.DpadLeft))digital|=4;
+        if(K(Key.Right)||K(Key.D)||P(JoyButton.DpadRight))digital|=8;
+        return HandleMovementPress(inputPulse.FromInputs(digital,x,y));
     }
-    private int AdaptDirection(int direction){
-        if(direction!=0&&homeArrival.Active(state.frame,RenderFraction))homeArrival.Cancel();
-        return InputPulse.ForHeldDirection(direction,state);
+    private int AdaptDirection(int heldMask)=>HandleMovementPress(inputPulse.FromHeldMask(heldMask));
+    private int HandleMovementPress(int press){
+        if(press!=0&&homeArrival.Active(state.frame,RenderFraction))homeArrival.Cancel();
+        return press;
     }
     public override void _UnhandledInput(InputEvent input){
         if(input is InputEventKey k&&k.Pressed&&!k.Echo)switch(k.PhysicalKeycode){

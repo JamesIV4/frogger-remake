@@ -266,12 +266,12 @@ def gator(river=False):
            (-.93 if river else -.91,.192,.11,.27),(-1.03,.147,.12,.235)]
     if river:
         # The dark bridge belongs visually to the rideable back, ending where
-        # the bright 16px dangerous snout begins. It closes the eye/body gap.
+        # the short 16px snout begins. It closes the eye/body gap.
         muzzle('River cheek and neck bridge',
-               [(-.17,.25,.12,.33),(-.43,.25,.12,.36)],'darkgreen','Head')
+               [(-.17,.25,.12,.33),(-.43,.25,.12,.36)],'shell','Head')
         muzzle('River throat bridge',
                [(-.17,.215,.055,.13),(-.43,.215,.055,.13)],'cream','Jaw')
-    muzzle('Tapered upper snout',upper,'green','Head')
+    muzzle('Tapered upper snout',upper,'shell' if river else 'green','Head')
     muzzle('Lower resting jaw',[
         (-.42 if river else -.17,.215,.055,.13),(-.61 if river else -.44,.174,.045,.13),
         (-.83 if river else -.81,.175,.045,.135),(-.99,.137,.055,.12)],'cream','Jaw')
@@ -280,7 +280,8 @@ def gator(river=False):
     # renders it with backface culling, unlike the old Blender-only appearance.
     ridge=[]
     for y,width,low,high in upper:
-        ridge.extend([(-width*.36,y,high+.018),(width*.36,y,high+.018)])
+        accent_width=.20 if river else .36
+        ridge.extend([(-width*accent_width,y,high+.018),(width*accent_width,y,high+.018)])
     ridge_faces=[(2*i,2*i+2,2*i+3,2*i+1) for i in range(len(upper)-1)]
     stripe=mesh('Raised center snout accent',ridge,ridge_faces,'lime');stripe['rig_bone']='Head'
     assert all(face.normal.z>.5 for face in stripe.data.polygons),'Snout accent faces must be visible from above'

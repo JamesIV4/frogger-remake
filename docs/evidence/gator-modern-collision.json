@@ -1,0 +1,72 @@
+[
+  {
+    "X": 102,
+    "Hold": 0,
+    "Drown": 0,
+    "RideTile": 0,
+    "VisualDying": false
+  },
+  {
+    "X": 103,
+    "Hold": 1,
+    "Drown": 0,
+    "RideTile": 104,
+    "VisualDying": false
+  },
+  {
+    "X": 110,
+    "Hold": 1,
+    "Drown": 0,
+    "RideTile": 104,
+    "VisualDying": false
+  },
+  {
+    "X": 120,
+    "Hold": 1,
+    "Drown": 0,
+    "RideTile": 104,
+    "VisualDying": false
+  },
+  {
+    "X": 130,
+    "Hold": 1,
+    "Drown": 0,
+    "RideTile": 104,
+    "VisualDying": false
+  },
+  {
+    "X": 144,
+    "Hold": 1,
+    "Drown": 0,
+    "RideTile": 104,
+    "VisualDying": false
+  },
+  {
+    "X": 145,
+    "Hold": 1,
+    "Drown": 1,
+    "RideTile": 0,
+    "VisualDying": true
+  },
+  {
+    "X": 152,
+    "Hold": 1,
+    "Drown": 1,
+    "RideTile": 0,
+    "VisualDying": true
+  },
+  {
+    "X": 160,
+    "Hold": 1,
+    "Drown": 1,
+    "RideTile": 0,
+    "VisualDying": true
+  },
+  {
+    "X": 161,
+    "Hold": 0,
+    "Drown": 0,
+    "RideTile": 0,
+    "VisualDying": false
+  }
+]

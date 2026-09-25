@@ -41,7 +41,9 @@ public sealed class ArcadeSimulation : IDisposable
             }
             if(Cpu.PC==0x1f1c){homeAwardX=Peek(0x8044);homeAwardRow=Peek(0x8047);homeAwardOrigin=true;}
             if(Cpu.PC==0x08e0)ObserveBonusAward();
-            if(ModernCollision&&Cpu.PC==0x11bf&&ResolveModernRoad())Cpu.ReturnFromHook();else Cpu.StepInstruction();
+            if(ModernCollision&&Cpu.PC==0x28bb&&ResolveModernRiverGator())Cpu.ReturnFromHook();
+            else if(ModernCollision&&Cpu.PC==0x11bf&&ResolveModernRoad())Cpu.ReturnFromHook();
+            else Cpu.StepInstruction();
         }
         Frame++;
         Sound?.AdvanceTo(Cpu.Cycles*NativeSound.Clock/3072000);
@@ -77,7 +79,27 @@ public sealed class ArcadeSimulation : IDisposable
         BonusAwards.Enqueue(new BonusAward(Frame+1,Peek(0x8044),Peek(0x8047),200,
             caller==0x2692?BonusKind.Bug:BonusKind.Rescue));
     }
-    // ROAD-only geometry hook at ROM 0x11bf/0x12e4. A full visible frog and
+    // The ROM tests only 24 pixels of the crocodile's back as rideable, even
+    // though the Blender model shows 41 pixels of back and tail. Modern mode
+    // extends support across that visible back while retaining the original
+    // final 16 pixels (0x28BB) as the sole lethal snout interval.
+    internal bool ResolveModernRiverGator(){
+        if(Peek(0x83b7)<2||(Peek(0x8150)&1)==0||Peek(0x8101)==0)return false;
+        int row=Peek(0x8047),biased=(row+8)&255;
+        if(biased<42||biased>=59)return false;
+        if(Peek(0x8004)!=0&&Peek(0x829c)!=0)return true;
+        var zone=BoardVisuals.RiverGatorContact(Peek(0x8044),Peek(0x8101));
+        if(zone==RiverGatorZone.Snout){
+            Poke(0x8004,1);
+            if(row>=48&&row<128)Poke(0x829c,1);
+        } else if(zone==RiverGatorZone.Back){
+            Poke(0x8004,1);
+            Poke(0xa846,0x68);Poke(0xa847,0x69);
+            Poke(0xa866,0x6a);Poke(0xa867,0x6b);
+        }
+        return true;
+    }
+    // ROAD geometry hook at ROM 0x11bf/0x12e4. A full visible frog and
     // visible vehicle footprint make contact symmetric; relative swept motion
     // catches passes between NMIs. Classic mode executes the ROM unchanged.
     private bool ResolveModernRoad() {

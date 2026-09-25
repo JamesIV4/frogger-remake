@@ -19,6 +19,7 @@ public partial class FroggerGame
     private bool reviewGatorClose;
     private bool reviewSnakeClose;
     private bool reviewLadyClearVisible,reviewLadyPatrolVisible;
+    private bool reviewGatorSafeObserved,reviewGatorSnoutDeathObserved;
     private readonly List<object> reviewMeasurements=new();
     private int[] ReviewFrames=>review switch {
         "carry" or "carry-left"=>new[]{1,5,9,13,25},
@@ -46,6 +47,7 @@ public partial class FroggerGame
         "home-gator"=>new[]{1,20,40,60,80,100},
         "home-gator-retreat"=>new[]{1,20,40,60,80,100,175,176,178,182,186,188,190},
         "river-gator"=>new[]{1,12,24},
+        "river-back" or "river-snout"=>new[]{1,2,4,8,16},
         "snake-motion"=>new[]{1,8,16,24,32,40,48,56,64,72,80},
         "wrap"=>new[]{1,2,8,24,48,72,96,120},
         "motion"=>new[]{60,61,62,63,64,65,66,67,68},
@@ -132,13 +134,13 @@ public partial class FroggerGame
         }
         int input=(review=="carry"||review=="carry-left")&&reviewFrame>=4&&reviewFrame<6
             ?review=="carry-left"?4:8:0;
-        if(review=="hop-right")input=InputPulse.ForHeldDirection(8,state);
+        // Presentation-only half frames do not sample physical input; an edge
+        // must be consumed on a frame that actually advances the native ROM.
+        if((review=="motion"||review=="frog-motion")&&reviewFrame%2==0){accumulator=0;return;}
+        if(review=="hop-right")input=AdaptDirection(8);
         if(review=="frog-motion")input=AdaptDirection(8);
         if(review=="home-input"&&reviewFrame>=16&&reviewFrame<18)input=AdaptDirection(8);
-        if(review is "log-left" or "log-right")input=InputPulse.ForHeldDirection(review=="log-left"?4:8,state);
-        // Two rendered frames per native state expose presentation motion
-        // between the original ROM's integer coordinate updates.
-        if((review=="motion"||review=="frog-motion")&&reviewFrame%2==0){accumulator=0;return;}
+        if(review is "log-left" or "log-right")input=AdaptDirection(review=="log-left"?4:8);
         simulation.Step(input);
         if(review=="lady-rom-clear"&&reviewFrame==1){
             SetReviewFrog(120,224);
@@ -152,15 +154,12 @@ public partial class FroggerGame
             if(reviewFrame==1)simulation.Poke(0x83fe,0);
             if(reviewFrame==2)_UnhandledInput(new InputEventJoypadButton{ButtonIndex=JoyButton.A,Pressed=true});
         }
-        if(review=="river-gator"){
-            // Put one native lane-0 object at a known screen position and mark
-            // its ROM tile as the gator sprite; the renderer follows the same
-            // detection path used in normal play.
-            const int x=120,row=48,col=row/8;
+        if(review is "river-gator" or "river-back" or "river-snout"){
+            // Put the ROM's armed lane-0 crocodile at a known screen position.
+            const int x=120;
             simulation.Poke(0x83b7,2);simulation.Poke(0x8100,1);simulation.Poke(0x8101,x+12+60/2);
-            var probe=simulation.Snapshot();int raw=probe.objects[col*2],scroll=((raw>>4)|(raw<<4))&255;
-            int nativeY=(248-x+scroll)&255;
-            simulation.Poke(0xa800+(nativeY>>3)*32+col,0x68);
+            simulation.Poke(0x8150,1);
+            if(reviewFrame==1&&review!="river-gator")SetReviewFrog(review=="river-back"?130:152,48);
         }
         if(review is "home-gator" or "home-gator-retreat"){
             int phase=Math.Min(reviewFrame,review=="home-gator"?120:200),bay=2,baseAddress=0xab64-bay*0xc0;
@@ -228,6 +227,8 @@ public partial class FroggerGame
         int body=Enumerable.Range(0,player.Skeleton!.GetBoneCount()).Single(i=>player.Skeleton.GetBoneParent(i)==-1);
         var bodyScale=player.Skeleton.GetBonePoseScale(body);var bodyPose=player.Skeleton.GetBoneGlobalPose(body);
         bool riderVisible=actors.TryGetValue("passenger",out var rider)&&rider.Root.IsVisibleInTree();
+        if(review=="river-back"&&state.At(0x8004)!=0&&!frogVisual.Dying)reviewGatorSafeObserved=true;
+        if(review=="river-snout"&&state.At(0x829c)!=0&&frogVisual.Dying)reviewGatorSnoutDeathObserved=true;
         if(review=="lady-rom-clear"&&state.At(0x8135)!=0&&state.At(0x8041)==0){
             if(state.At(0x8040)==0)reviewLadyClearVisible|=freeLady?.Root.IsVisibleInTree()??false;
             else reviewLadyPatrolVisible|=freeLady?.Root.IsVisibleInTree()??false;
@@ -268,7 +269,9 @@ public partial class FroggerGame
             riverGatorTipX=riverGator==null?0:120f+16f*(riverGator.Root.GlobalPosition.X+ModelFootprints.RiverGatorFrontTiles*riverGator.Root.Scale.Z),
             riverGatorSnoutLength=riverGator==null?0:16f*ModelFootprints.RiverGatorSnoutTiles*riverGator.Root.Scale.Z,
             nativeGatorTipX=state.At(0x8101),
-            riverGatorTile=BoardVisuals.GatorOnLog(state,120,48),
+            riverGatorArmed=BoardVisuals.RiverGatorActive(state),
+            riverGatorZone=BoardVisuals.RiverGatorContact(state.At(0x8044),state.At(0x8101)).ToString(),
+            riverGatorRideTile=state.At(0xa846),holdFlag=state.At(0x8004),secondBank=state.At(0x829c),
             hopActive=frogVisual.HopActive(state.frame),hopDirection=frogVisual.HopDirection,
             ladyHopping=ladyHopStartFrame>0&&state.frame-ladyHopStartFrame<12,
             turtleRideDepth=TurtleRideDepth(state.At(0x8044),state.At(0x8047)),
@@ -292,6 +295,8 @@ public partial class FroggerGame
             if(review=="lady-hidden"&&!(freeLady?.Root.IsVisibleInTree()??false)){GD.PushError("Armed pink frog is invisible with a blank ROM sprite");GetTree().Quit(1);return;}
             if(review=="lady-goal-overwrite"&&(!(freeLady?.Root.IsVisibleInTree()??false)||Math.Abs(ladyVisual.X-80)>1)){GD.PushError("Goal sprite overwrote the pink frog's position");GetTree().Quit(1);return;}
             if(review=="lady-rom-clear"&&(!reviewLadyClearVisible||!reviewLadyPatrolVisible)){GD.PushError("The original ROM clear made the pink frog invisible in Godot");GetTree().Quit(1);return;}
+            if(review=="river-back"&&!reviewGatorSafeObserved){GD.PushError("Modern river gator back did not remain safe");GetTree().Quit(1);return;}
+            if(review=="river-snout"&&!reviewGatorSnoutDeathObserved){GD.PushError("Modern river gator snout was not fatal");GetTree().Quit(1);return;}
             if(review=="lady-hidden-pickup"&&(!riderVisible||(freeLady?.Root.IsVisibleInTree()??false))){GD.PushError("Pink frog did not move visibly from log to passenger");GetTree().Quit(1);return;}
             if(review=="game-over-a"&&state.At(0x83fe)==0){GD.PushError("Controller A did not restart after game over");GetTree().Quit(1);return;}
             if(review=="default-view"&&(!modern||!perspectiveView||!followCamera||!fullscreen)){GD.PushError("Fresh-game defaults changed unexpectedly");GetTree().Quit(1);return;}
@@ -305,7 +310,7 @@ public partial class FroggerGame
     private void UpdateReviewCamera(){
         if(!reviewClose&&!reviewLadyClose&&!reviewTurtleClose&&!reviewGatorClose&&!reviewSnakeClose)return;
         var player=Actor("player","frog");
-        var target=reviewGatorClose?(review=="river-gator"?Pos(134,48,0):new Vector3(0,.30f,-6.3f))
+        var target=reviewGatorClose?(review is "river-gator" or "river-back" or "river-snout"?Pos(134,48,0):new Vector3(0,.30f,-6.3f))
             :reviewSnakeClose&&actors.TryGetValue("hazard32840",out var activeSnake)?activeSnake.Root.Position+Vector3.Up*.1f
             :reviewTurtleClose&&turtleSupports.Any(t=>t.X>=24&&t.X<=216)
             ?turtleSupports.Where(t=>t.X>=24&&t.X<=216).OrderByDescending(t=>t.Depth).Select(t=>Pos(t.X,t.Row,-.22f-t.Depth)+Vector3.Up*.2f).First()

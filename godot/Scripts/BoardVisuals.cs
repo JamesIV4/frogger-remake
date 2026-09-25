@@ -2,11 +2,24 @@ using System;
 namespace FroggerRemake;
 
 public readonly record struct RiverGatorFit(float CenterOffsetPixels,float WidthScale,float LengthScale);
+public enum RiverGatorZone { Outside, Back, Snout }
 
 /// Decodes presentation state from the original tile page; no independent hazard timers.
 public static class BoardVisuals
 {
     public const float LeftEdge=8,RightEdge=232;
+    public const int RiverGatorVisiblePixels=57,RiverGatorDangerPixels=16;
+    public static RiverGatorZone RiverGatorContact(int frogX,int tipX){
+        int behind=(tipX-frogX+256)&255;
+        return behind<RiverGatorDangerPixels?RiverGatorZone.Snout:
+            behind<=RiverGatorVisiblePixels?RiverGatorZone.Back:RiverGatorZone.Outside;
+    }
+    public static bool RiverGatorActive(FrameState state)=>
+        state.At(0x83b7)>=2&&(state.At(0x8150)&1)!=0&&state.At(0x8101)!=0;
+    public static bool RiverGatorRide(FrameState state)=>
+        RiverGatorActive(state)&&state.At(0x829c)==0&&
+        ((state.At(0x8047)+8)&255)>=42&&((state.At(0x8047)+8)&255)<59&&
+        RiverGatorContact(state.At(0x8044),state.At(0x8101))==RiverGatorZone.Back;
     public const int LadyFrogRow=96;
     public static float LadyFrogHeight(float scale)=>
         -.18f+ModelFootprints.LogTopTiles-scale*ModelFootprints.LadyBottomTiles+.012f;
@@ -71,13 +84,6 @@ public static class BoardVisuals
         // ROM tables 0x2190/0x2194 and 0x2231/0x2235 are the bubble quads;
         // 0x2198 and 0x2239 replace all four cells with 0x10 at full submergence.
         return surface?0:bubbles?1:blank?2:0;
-    }
-    public static bool GatorOnLog(FrameState state,float x,int row) {
-        if(state.At(0x83b7)<2)return false;
-        for(int dx=-24;dx<=24;dx+=8)for(int col=0;col<2;col++){
-            int tile=TileAt(state,x+dx,row,col);if(tile>=0x68&&tile<=0x6b||tile>=0xd0&&tile<=0xd3)return true;
-        }
-        return false;
     }
 }
 

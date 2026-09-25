@@ -16,7 +16,11 @@ public sealed class FrogVisualState
     public void Reset(){Dying=Drowning=Carrying=false;DeathFrame=0;HopDirection=HopStartFrame=previousHop=0;}
     public static bool PlayerOnBoard(FrameState s)=>s.At(0x8044)>=8&&s.At(0x8044)<=240&&s.At(0x8047)>=26&&s.At(0x8047)<=240;
     public void Observe(FrameState s) {
-        bool dead=PlayerOnBoard(s)&&s.At(0x8004)!=0&&s.At(0x83cd)==0;
+        // ROM 0x28BB sets the same HOLD_FLAG for a safe crocodile-back ride
+        // and for a fatal snout hit. The river death flag and position split
+        // distinguish the two; a safe ride must not play the drown animation.
+        bool ridingGator=s.At(0x8004)!=0&&BoardVisuals.RiverGatorRide(s);
+        bool dead=PlayerOnBoard(s)&&s.At(0x8004)!=0&&s.At(0x83cd)==0&&!ridingGator;
         if(dead&&!Dying){DeathFrame=s.frame;DeathX=s.At(0x8044);DeathRow=s.At(0x8047);Drowning=s.At(0x829c)!=0;}
         Dying=dead;
         Carrying=!dead&&PlayerOnBoard(s)&&s.At(0x8134)!=0&&s.At(0x8135)!=0;
