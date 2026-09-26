@@ -2,6 +2,7 @@ shader_type spatial;
 render_mode blend_mix, depth_draw_never, cull_disabled, unshaded;
 
 uniform float clock = 0.0;
+uniform bool compatibility_color = false;
 varying vec2 river_position;
 
 void vertex() {
@@ -20,6 +21,11 @@ void fragment() {
     float shine = smoothstep(0.93, 1.0, ribbons) * (0.4 + 0.6 * sin(p.x * 2.3 + clock) * sin(p.x * 2.3 + clock));
     ALBEDO = mix(vec3(0.002, 0.045, 0.42), vec3(0.002, 0.22, 0.78), wave * 0.35 + 0.5);
     ALBEDO += vec3(0.04, 0.12, 0.18) * shine * 0.35;
+    if (compatibility_color) {
+        // Compatibility/WebGL blends this transparent surface in a darker
+        // color space than Forward+. Lift it toward the desktop river palette.
+        ALBEDO = pow(max(ALBEDO, vec3(0.0)), vec3(1.0 / 2.2)) + vec3(0.08, 0.12, 0.18);
+    }
     NORMAL_MAP = normalize(vec3(-0.10 * cos(p.x * 1.6 + p.y * 2.1 + clock * 1.1),
                                -0.06 * cos(p.x * 2.9 - p.y * 1.4 - clock * 0.8), 1.0)) * 0.5 + 0.5;
     ROUGHNESS = 0.45;

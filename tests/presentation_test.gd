@@ -26,6 +26,10 @@ func run() -> void:
 	game.show_options(false)
 	await process_frame
 	check(game.options_open and not game.started, "Main menu opens Options without starting")
+	check(game.menu_scroll.scroll_deadzone > 0 and game.menu_items.mouse_filter == Control.MOUSE_FILTER_PASS, "Menu scroll accepts touch drags without accidental taps")
+	for option_control in game.menu_items.find_children("*", "Control", true, false):
+		if option_control is BaseButton or option_control is Slider:
+			check(option_control.mouse_filter == Control.MOUSE_FILTER_PASS, "Options controls pass swipe gestures to the scroll container")
 	game.navigate_back()
 	await process_frame
 	check(not game.options_open and not game.started and game.menu.visible, "Options Back returns to main menu")
@@ -114,8 +118,9 @@ func run() -> void:
 	var time_bonus := PanelContainer.new()
 	game.bonus_overlay.add_child(time_bonus)
 	game.popups.append(FroggerGame.BonusPopup.new({"kind": 2, "frame": game.state["frame"]}, time_bonus, Vector2(0.5, 0.33), "TIME BONUS +100"))
+	game.touch_device = false
 	game.update_bonuses(0.0)
-	check(is_equal_approx(time_bonus.position.y, game.hud_header.get_global_rect().end.y + 16.0), "Time Bonus sits below the HUD with padding")
+	check(is_equal_approx(time_bonus.position.y, game.hud_header.get_global_rect().end.y + 16.0), "Desktop follow Time Bonus sits below the HUD with padding")
 	check(is_equal_approx(time_bonus.position.x + time_bonus.size.x * 0.5, game.get_viewport().get_visible_rect().size.x * 0.5), "Time Bonus stays horizontally centered")
 	game.follow_camera = false
 	game.touch_device = false
@@ -123,13 +128,17 @@ func run() -> void:
 	game.update_bonuses(0.0)
 	check(is_equal_approx(time_bonus.position.y + time_bonus.size.y * 0.5, game.get_viewport().get_visible_rect().size.y * 2.0 / 3.0), "Non-follow Time Bonus is centered at two-thirds screen height")
 	game.touch_device = true
-	game.update_bonuses(0.0)
-	check(is_equal_approx(time_bonus.position.y + time_bonus.size.y * 0.5, game.get_viewport().get_visible_rect().size.y / 3.0), "Mobile non-follow Time Bonus is centered at one-third screen height")
-	game.top_down_camera = true
-	game.update_bonuses(0.0)
-	check(is_equal_approx(time_bonus.position.y, game.hud_header.get_global_rect().end.y + 16.0), "Mobile top-down Time Bonus sits below the HUD with padding even without follow")
+	for perspective_mode in [false, true]:
+		game.perspective_view = perspective_mode
+		for top_down_mode in [false, true]:
+			game.top_down_camera = top_down_mode
+			for follow_mode in [false, true]:
+				game.follow_camera = follow_mode
+				game.update_bonuses(0.0)
+				check((time_bonus.position + time_bonus.size * 0.5).is_equal_approx(game.get_viewport().get_visible_rect().size * 0.5), "Mobile Time Bonus is centered in every camera mode")
 	game.touch_device = false
 	game.top_down_camera = false
+	game.perspective_view = true
 	game.follow_camera = true
 	for model in ["lady_frog", "frog"]:
 		game.select_player_frog(model)

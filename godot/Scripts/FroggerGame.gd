@@ -115,6 +115,7 @@ var last_input_method: String = "keyboard"
 var player_header: Label = null
 var timer_bar: ProgressBar = null
 var menu: PanelContainer = null
+var menu_scroll: ScrollContainer = null
 var message_panel: PanelContainer = null
 var menu_items: VBoxContainer = null
 var bonus_overlay: Control = null
@@ -703,6 +704,7 @@ func setup_world() -> void:
 	surface.position = Vector3(0, -0.025, -3)
 	water = ShaderMaterial.new()
 	water.shader = load("res://Shaders/river.gdshader")
+	water.set_shader_parameter("compatibility_color", RenderingServer.get_current_rendering_method() == "gl_compatibility")
 	surface.material_override = water
 	add_child(surface)
 
@@ -1035,12 +1037,14 @@ func setup_ui() -> void:
 	menu.size = Vector2(440, 484)
 	menu.add_theme_stylebox_override("panel", style_box(Color(0.075, 0.10, 0.15, 0.97), 18, 2))
 	root.add_child(menu)
-	var menu_scroll := ScrollContainer.new()
+	menu_scroll = ScrollContainer.new()
 	menu_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	menu_scroll.follow_focus = true
+	menu_scroll.scroll_deadzone = 12
 	menu.add_child(menu_scroll)
 
 	menu_items = VBoxContainer.new()
+	menu_items.mouse_filter = Control.MOUSE_FILTER_PASS
 	menu_items.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	menu_items.add_theme_constant_override("separation", 14)
 	menu_scroll.add_child(menu_items)
@@ -1090,7 +1094,17 @@ func clear_menu() -> void:
 	for child in menu_items.get_children():
 		menu_items.remove_child(child)
 		child.queue_free()
+	menu_scroll.scroll_vertical = 0
 	layout_ui.call_deferred()
+
+func enable_menu_swipe_scrolling(node: Node) -> void:
+	# A child with STOP captures the emulated mouse drag before ScrollContainer
+	# receives it. PASS keeps buttons and sliders tappable while letting the
+	# parent handle a vertical swipe. Godot cancels button presses once scrolling.
+	for child in node.get_children():
+		if child is Control and child.mouse_filter == Control.MOUSE_FILTER_STOP:
+			child.mouse_filter = Control.MOUSE_FILTER_PASS
+		enable_menu_swipe_scrolling(child)
 
 func show_menu(resume: bool) -> void:
 	clear_menu()
@@ -1109,6 +1123,7 @@ func show_menu(resume: bool) -> void:
 		add_button("OPTIONS", func(): show_options(false))
 		var instructions := make_text("Swipe to hop" if touch_device else "Arrow keys / WASD / D-pad to hop", 14, Color("adb8cc"))
 		menu_items.add_child(instructions)
+	enable_menu_swipe_scrolling(menu_items)
 
 func follow_zoom_percent() -> float:
 	return mobile_follow_zoom_percent if touch_device else desktop_follow_zoom_percent
@@ -1252,6 +1267,7 @@ func show_options(return_to_pause: bool) -> void:
 	for child in menu_items.get_children():
 		if child is CheckButton:
 			child.custom_minimum_size.y = 48.0 if touch_device else 34.0
+	enable_menu_swipe_scrolling(menu_items)
 
 func add_button(text_val: String, action: Callable) -> void:
 	var b := Button.new()
@@ -1873,10 +1889,11 @@ func update_bonuses(fraction: float) -> void:
 		var origin: Vector2 = popup.anchor_uv * viewport_size
 		popup.view.position = origin - popup.view.size * 0.5 + (Vector2.ZERO if time_bonus else Vector2(0, -age * 36.0))
 		if time_bonus:
-			var below_hud: bool = follow_camera or (touch_device and top_down_camera)
-			var height_fraction: float = 1.0 / 3.0 if touch_device else 2.0 / 3.0
-			var top: float = hud_header.get_global_rect().end.y + 16.0 if below_hud else viewport_size.y * height_fraction - popup.view.size.y * 0.5
-			popup.view.position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
+			if touch_device:
+				popup.view.position = (viewport_size - popup.view.size) * 0.5
+			else:
+				var top: float = hud_header.get_global_rect().end.y + 16.0 if follow_camera else viewport_size.y * 2.0 / 3.0 - popup.view.size.y * 0.5
+				popup.view.position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
 		var opacity: float = minf(1.0, age / 0.08) if time_bonus else 1.0
 		opacity *= clampf((lifetime - age) / (0.22 if time_bonus else 0.35), 0.0, 1.0)
 		popup.view.modulate = Color(1, 1, 1, opacity)
