@@ -40,13 +40,19 @@ try {
         }
 
         $godotCppLib = "src/godot-cpp/bin/libgodot-cpp.web.template_release.wasm32.a"
-        if (-not (Test-Path $godotCppLib)) {
-            Write-Host "Building godot-cpp web library..."
+        # The stamp records that this lib was built WITH threads=yes. A lib left
+        # over from before that flag existed is silently single-threaded and scons
+        # would never rebuild it, so the stamp forces exactly one rebuild on upgrade.
+        $godotCppThreadsStamp = "src/godot-cpp/bin/.frogger-web-threads-yes"
+        if ((-not (Test-Path $godotCppLib)) -or (-not (Test-Path $godotCppThreadsStamp))) {
+            Write-Host "Building godot-cpp web library (threads=yes)..."
             Push-Location "src/godot-cpp"
             try {
-                scons platform=web target=template_release api_version=4.7
+                scons platform=web target=template_release api_version=4.7 threads=yes
                 Assert-FroggerExit 'Build godot-cpp web library'
             } finally { Pop-Location }
+            New-Item -ItemType Directory -Force (Split-Path -Parent $godotCppThreadsStamp) | Out-Null
+            New-Item -ItemType File -Force $godotCppThreadsStamp | Out-Null
         }
 
         New-Item -ItemType Directory -Force godot/bin | Out-Null
