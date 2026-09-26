@@ -15,6 +15,8 @@ var paused: bool = false
 var modern: bool = true
 var muted: bool = false
 var fullscreen: bool = true
+var shadows_enabled: bool = true
+var antialiasing_enabled: bool = true
 var accumulator: float = 0.0
 var facing: int = 2
 var coin_frames: int = 0
@@ -23,6 +25,7 @@ var high_score: int = 0
 var screenshot: String = ""
 var water: ShaderMaterial = null
 var camera: Camera3D = null
+var sun: DirectionalLight3D = null
 
 # Camera options
 var perspective_view: bool = true
@@ -330,11 +333,11 @@ func setup_world() -> void:
 	world_env.environment = env
 	add_child(world_env)
 
-	var sun := DirectionalLight3D.new()
+	sun = DirectionalLight3D.new()
 	sun.light_color = Color.WHITE
 	sun.light_energy = 1.05
 	sun.light_angular_distance = 1.5
-	sun.shadow_enabled = true
+	sun.shadow_enabled = shadows_enabled
 	if is_web:
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 		sun.directional_shadow_blend_splits = false
@@ -417,6 +420,9 @@ func feed_audio() -> void:
 func apply_fullscreen() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
+func apply_antialiasing() -> void:
+	get_viewport().msaa_3d = Viewport.MSAA_2X if antialiasing_enabled else Viewport.MSAA_DISABLED
+
 func load_preferences() -> void:
 	if screenshot != "":
 		muted = true
@@ -425,6 +431,8 @@ func load_preferences() -> void:
 	if c.load("user://settings.cfg") == OK:
 		high_score = int(c.get_value("play", "high_score", 0))
 		muted = bool(c.get_value("play", "muted", false))
+		shadows_enabled = bool(c.get_value("play", "shadows_enabled", true))
+		antialiasing_enabled = bool(c.get_value("play", "antialiasing_enabled", true))
 		var version: int = int(c.get_value("play", "defaults_version", 0))
 		var defaults = GameDefaults.from_stored(version,
 			bool(c.get_value("play", "modern_collision", true)),
@@ -440,6 +448,9 @@ func load_preferences() -> void:
 	else:
 		save_preferences()
 	apply_fullscreen()
+	apply_antialiasing()
+	if sun != null:
+		sun.shadow_enabled = shadows_enabled
 
 func save_preferences() -> void:
 	if screenshot != "":
@@ -449,6 +460,8 @@ func save_preferences() -> void:
 	c.set_value("play", "high_score", high_score)
 	c.set_value("play", "modern_collision", modern)
 	c.set_value("play", "muted", muted)
+	c.set_value("play", "shadows_enabled", shadows_enabled)
+	c.set_value("play", "antialiasing_enabled", antialiasing_enabled)
 	c.set_value("play", "perspective_view", perspective_view)
 	c.set_value("play", "follow_camera", follow_camera)
 	c.set_value("play", "fullscreen", fullscreen)
@@ -617,11 +630,11 @@ func show_menu(resume: bool) -> void:
 	for child in menu_items.get_children():
 		menu_items.remove_child(child)
 		child.queue_free()
-	menu_items.add_child(make_text("PAUSED" if resume else "ONE SMALL HOP.", 23, Cream))
-	menu_items.add_child(make_text("The crossing can wait." if resume else "Five homes. A road. A river. You.", 15, LimeColor))
 	if resume:
+		menu_items.add_child(make_text("PAUSED", 23, Cream))
+		menu_items.add_child(make_text("The crossing can wait.", 15, LimeColor))
 		add_button("RESUME", resume_game)
-	add_button("NEW GAME" if resume else "START CROSSING", func(): start_game(1))
+	add_button("NEW GAME" if resume else "ONE PLAYER", func(): start_game(1))
 	if not resume:
 		add_button("TWO PLAYERS · TAKE TURNS", func(): start_game(2))
 
@@ -651,6 +664,25 @@ func show_menu(resume: bool) -> void:
 		save_preferences())
 	menu_items.add_child(follow)
 
+	var shadows_btn := CheckButton.new()
+	shadows_btn.text = "Shadows"
+	shadows_btn.button_pressed = shadows_enabled
+	shadows_btn.toggled.connect(func(val):
+		shadows_enabled = val
+		if sun != null:
+			sun.shadow_enabled = shadows_enabled
+		save_preferences())
+	menu_items.add_child(shadows_btn)
+
+	var aa_btn := CheckButton.new()
+	aa_btn.text = "Antialiasing"
+	aa_btn.button_pressed = antialiasing_enabled
+	aa_btn.toggled.connect(func(val):
+		antialiasing_enabled = val
+		apply_antialiasing()
+		save_preferences())
+	menu_items.add_child(aa_btn)
+
 	var sound_btn := CheckButton.new()
 	sound_btn.text = "Sound"
 	sound_btn.button_pressed = not muted
@@ -669,7 +701,11 @@ func add_button(text_val: String, action: Callable) -> void:
 	b.add_theme_stylebox_override("hover", style_box(Color("6f914d"), 7))
 	b.pressed.connect(action)
 	menu_items.add_child(b)
-	if menu_items.get_child_count() == 3:
+	var btn_count: int = 0
+	for child in menu_items.get_children():
+		if child is Button:
+			btn_count += 1
+	if btn_count == 1:
 		b.grab_focus()
 
 func update_hud() -> void:
