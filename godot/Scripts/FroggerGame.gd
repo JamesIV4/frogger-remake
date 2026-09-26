@@ -7,6 +7,8 @@ var simulation: RefCounted = null
 var state: Dictionary = {"frame": 0, "ram": [], "video": [], "objects": [], "sounds": []}
 var actors: Dictionary = {}
 var batched_lanes: Dictionary = {}
+var warmup_node: Node3D = null
+var warmup_frames: int = 0
 var input_pulse: InputPulse = InputPulse.new()
 var audio_player: AudioStreamPlayer = null
 var audio_playback: AudioStreamGeneratorPlayback = null
@@ -209,6 +211,13 @@ func start_game(players: int) -> void:
 func _process(delta: float) -> void:
 	if simulation == null:
 		return
+	if warmup_node != null:
+		# Let the hidden precompiled actors draw behind the menu so GPU uploads
+		# happen now. The node hides after two presented frames; the compiled
+		# shaders stay cached for gameplay without per-type upload stutters.
+		warmup_frames += 1
+		if warmup_frames >= 2:
+			warmup_node.visible = false
 	var t_start: int = Time.get_ticks_usec()
 	presentation_delta = clampf(delta, 0.0, 0.1)
 	var steps: int = 0
@@ -352,7 +361,89 @@ func actor(key: String, model: String) -> ModelActor:
 static func pos3(x: float, row: float, height: float = 0.0) -> Vector3:
 	return Vector3((x - 120.0) / 16.0, height, (row - 128.0) / 16.0)
 
+static func _hide_warmup_shadows(node: Node) -> void:
+	# Warmup instances sit under the opaque board so the board occludes their
+	# color output; keep them out of the shadow map too so they never darken it.
+	if node is GeometryInstance3D:
+		(node as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for child in node.get_children():
+		_hide_warmup_shadows(child)
+
+# Model coverage for the one-time GPU warmup: every ModelActor asset plus the
+# batched lane bodies (including the board) and both wheel sides.
+const WarmupModels: Array = ["frog", "lady_frog", "turtle", "gator", "river_gator", "fly", "snake", "otter"]
+const WarmupClips: Dictionary = {
+	"frog": ["Idle", "Hop", "Squash", "Drown", "Celebrate"],
+	"lady_frog": ["Idle", "Hop", "Drown", "Celebrate"],
+	"turtle": ["Idle", "Swim", "Dive"],
+	"gator": ["Idle", "Bite"],
+	"river_gator": ["Idle", "Bite"],
+	"fly": ["Idle", "Move"], "snake": ["Idle", "Move"], "otter": ["Idle", "Move"],
+}
+const WarmupBatched: Array = ["log", "car", "truck", "sport", "dozer", "racecar"]
+
 func setup_world() -> void:
+	# Pre-compile every gameplay asset before the first real frame so the web
+	# build pays import, shader and skin upload costs once, up front, instead of
+	# stuttering the first time each actor type comes on screen. Instances stay
+	# alive behind the menu for a couple of frames so the renderer actually
+	# uploads them, then _process hides the node once drawn. Parked well under the
+	# board base (board vertices bottom out near y=-1.42) at board center: the
+	# opaque slab occludes every pixel so nothing ever flashes behind the menu,
+	# while the instances stay inside the frustum and still submit real draw
+	# work (so pipelines, skins and buffers upload).
+	warmup_node = Node3D.new()
+	warmup_node.name = "WarmupPrecompile"
+	warmup_node.position = Vector3(0, -3.0, 0.0)
+	add_child(warmup_node)
+	for model in WarmupModels:
+		var showcase := ModelActor.new(warmup_node, model)
+		_hide_warmup_shadows(showcase.root)
+		showcase.set_active(true)
+		showcase.set_clipped(true)
+		# Touch squash's instance uniform path once so the driver has the variant.
+		showcase.set_squash_color(0.6)
+		showcase.set_squash_color(0.0)
+		for clip in WarmupClips[model]:
+			showcase.play(clip)
+		var double := ModelActor.new(warmup_node, model)
+		double.set_active(true)
+	# Pre-build the rigid batched equivalents too: touching every log/vehicle
+	# body and wheel mesh compiles the lane shader against those vertex layouts.
+	for model in WarmupBatched:
+		var template := BatchedLane.get_template(model)
+		if template == null:
+			continue
+		var probe := MeshInstance3D.new()
+		probe.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		probe.mesh = template.body_mesh
+		warmup_node.add_child(probe)
+		if template.wheel_mesh_left != null:
+			var left := MeshInstance3D.new()
+			left.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			left.mesh = template.wheel_mesh_left
+			warmup_node.add_child(left)
+		if template.wheel_mesh_right != null:
+			var right := MeshInstance3D.new()
+			right.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			right.mesh = template.wheel_mesh_right
+			warmup_node.add_child(right)
+	# The drown ripple builds its torus lazily; compiling it now avoids a
+	# hitch on the first water death.
+	var warm_torus := TorusMesh.new()
+	warm_torus.inner_radius = 0.42
+	warm_torus.outer_radius = 0.45
+	warm_torus.rings = 32
+	warm_torus.ring_segments = 6
+	var warm_ripple := MeshInstance3D.new()
+	warm_ripple.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	warm_ripple.mesh = warm_torus
+	var warm_ripple_mat := StandardMaterial3D.new()
+	warm_ripple_mat.albedo_color = Color(0.65, 0.88, 1.0, 0.6)
+	warm_ripple_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	warm_ripple_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	warm_ripple.material_override = warm_ripple_mat
+	warmup_node.add_child(warm_ripple)
 	var is_web: bool = OS.has_feature("web")
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
