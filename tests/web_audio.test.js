@@ -28,6 +28,7 @@ function setup({ search = '', platform = 'iPhone', userAgent = 'iPhone', maxTouc
         }
         addEventListener(_name, callback) { this.onstate = callback; }
         resume() { this.state = 'running'; return Promise.resolve(); }
+        suspend() { this.state = 'suspended'; return Promise.resolve(); }
         close() { this.state = 'closed'; return Promise.resolve(); }
         createGain() { return { gain: {}, connect() {} }; }
         createBuffer(channels, length, sampleRate) {
@@ -115,7 +116,7 @@ test('catch-up retains only newest 50 ms and mute cancels scheduled nodes immedi
     assert.equal(app.contexts[0].nodes.length, 1);
 });
 
-test('hidden/interrupted output discards old PCM; returning recreates context and resumes fresh', () => {
+test('hidden/interrupted output discards old PCM; returning reuses one context and resumes fresh', async () => {
     const app = setup();
     app.event('pointerdown');
     app.api.set_active(true);
@@ -130,12 +131,90 @@ test('hidden/interrupted output discards old PCM; returning recreates context an
     assert.equal(first.state, 'running');
     app.root.document.hidden = true;
     app.event('visibilitychange');
-    assert.equal(first.state, 'closed');
+    assert.equal(first.state, 'suspended');
     app.root.document.hidden = false;
     app.event('visibilitychange');
-    assert.equal(app.contexts.length, 2);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(app.contexts.length, 1);
     app.api.push_pcm(pcm());
-    assert.equal(app.contexts[1].nodes.length, 1);
+    assert.equal(first.nodes.length, 2);
+});
+
+test('browser output selects Dummy before startup; normal desktop and A/B Godot retain engine audio', () => {
+    const app = setup();
+    assert.deepEqual(Array.from(app.api.engine_arguments()), ['--audio-driver', 'Dummy']);
+    assert.equal(app.api.diagnostics().ownsOutput, true);
+    assert.deepEqual(Array.from(setup({ search: '?audio=godot' }).api.engine_arguments()), []);
+    assert.deepEqual(Array.from(setup({ platform: 'Win32', userAgent: 'Chrome' }).api.engine_arguments()), []);
+    const failed = setup({ failCreate: true });
+    failed.api.engine_arguments();
+    failed.event('pointerdown');
+    assert.equal(failed.api.enabled, true, 'Do not fall back to a silent Dummy driver');
+    assert.match(failed.api.diagnostics().error, /Output unavailable/);
+});
+
+test('iOS requests ambient game semantics; unsupported session APIs do not break playback', () => {
+    const app = setup();
+    app.root.navigator.audioSession = { type: 'auto', state: 'inactive' };
+    app.event('pointerdown');
+    assert.equal(app.root.navigator.audioSession.type, 'ambient');
+    assert.equal(app.api.diagnostics().audioSessionType, 'ambient');
+    const rejected = setup();
+    rejected.root.navigator.audioSession = { set type(value) { throw new Error('unsupported'); } };
+    rejected.event('pointerdown');
+    assert.equal(rejected.contexts[0].state, 'running');
+});
+
+test('rapid pause/resume survives asynchronous suspension without creating a second context', async () => {
+    const app = setup();
+    app.event('pointerdown');
+    app.api.set_active(true);
+    const ctx = app.contexts[0];
+    let complete;
+    ctx.suspend = () => new Promise(resolve => { complete = () => { ctx.state = 'suspended'; resolve(); }; });
+    app.api.set_active(false);
+    app.api.set_active(true);
+    complete();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(ctx.state, 'running');
+    assert.equal(app.contexts.length, 1);
+    app.api.push_pcm(pcm());
+    assert.equal(ctx.nodes.length, 1);
+});
+
+test('backgrounding during an in-flight resume does not leave output running', async () => {
+    const app = setup();
+    app.event('pointerdown');
+    app.api.set_active(true);
+    await new Promise(resolve => setImmediate(resolve));
+    const ctx = app.contexts[0];
+    ctx.state = 'suspended';
+    let complete;
+    ctx.resume = () => new Promise(resolve => { complete = () => { ctx.state = 'running'; resolve(); }; });
+    app.event('touchend');
+    app.root.document.hidden = true;
+    app.event('visibilitychange');
+    complete();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(ctx.state, 'suspended');
+    app.api.set_active(true);
+    assert.equal(ctx.state, 'suspended', 'Background render frames cannot resume output');
+});
+
+test('pausing while resume is pending reconciles to a suspended context', async () => {
+    const app = setup();
+    app.event('pointerdown');
+    app.api.set_active(true);
+    await new Promise(resolve => setImmediate(resolve));
+    const ctx = app.contexts[0];
+    ctx.state = 'suspended';
+    let complete;
+    ctx.resume = () => new Promise(resolve => { complete = () => { ctx.state = 'running'; resolve(); }; });
+    app.event('touchend');
+    app.api.set_active(false);
+    complete();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(ctx.state, 'suspended');
 });
 
 test('10 minutes at 60 FPS stay bounded; delayed ended events do not retain nodes', () => {

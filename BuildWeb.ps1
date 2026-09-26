@@ -128,6 +128,11 @@ try {
         $html = [System.IO.File]::ReadAllText($indexHtmlPath)
         # Register the first-gesture audio handler before loading the engine.
         $html = $html.Replace('<script src="index.js"></script>', '<script src="frogger-audio.js"></script><script src="index.js"></script>')
+        # The browser PCM transport owns the sole audio context. Use Godot's
+        # supported Dummy driver rather than leaving a second silent worklet alive.
+        $audioStartup = "engine.startGame({"
+        if (-not $html.Contains($audioStartup)) { throw 'Web shell audio startup hook missing.' }
+        $html = $html.Replace($audioStartup, "$audioStartup`n`t`t`t'args': (GODOT_CONFIG.args || []).concat(window.FroggerAudio.engine_arguments()),")
         $chunkScript = @"
 		<script>
 (function() {

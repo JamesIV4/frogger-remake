@@ -118,8 +118,18 @@ func run() -> void:
 	check(is_equal_approx(time_bonus.position.y, game.hud_header.get_global_rect().end.y + 16.0), "Time Bonus sits below the HUD with padding")
 	check(is_equal_approx(time_bonus.position.x + time_bonus.size.x * 0.5, game.get_viewport().get_visible_rect().size.x * 0.5), "Time Bonus stays horizontally centered")
 	game.follow_camera = false
+	game.touch_device = false
+	game.top_down_camera = false
 	game.update_bonuses(0.0)
 	check(is_equal_approx(time_bonus.position.y + time_bonus.size.y * 0.5, game.get_viewport().get_visible_rect().size.y * 2.0 / 3.0), "Non-follow Time Bonus is centered at two-thirds screen height")
+	game.touch_device = true
+	game.update_bonuses(0.0)
+	check(is_equal_approx(time_bonus.position.y + time_bonus.size.y * 0.5, game.get_viewport().get_visible_rect().size.y / 3.0), "Mobile non-follow Time Bonus is centered at one-third screen height")
+	game.top_down_camera = true
+	game.update_bonuses(0.0)
+	check(is_equal_approx(time_bonus.position.y, game.hud_header.get_global_rect().end.y + 16.0), "Mobile top-down Time Bonus sits below the HUD with padding even without follow")
+	game.touch_device = false
+	game.top_down_camera = false
 	game.follow_camera = true
 	for model in ["lady_frog", "frog"]:
 		game.select_player_frog(model)

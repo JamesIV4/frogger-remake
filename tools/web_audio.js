@@ -20,6 +20,9 @@
     let nextTime = 0;
     let unlocked = false;
     let resumePending = false;
+    let suspendPending = false;
+    let ownsOutput = false;
+    let creationFailed = false;
     let clockAnchor = null;
     let lastReport = -Infinity;
     const sources = new Set();
@@ -37,19 +40,28 @@
     }
 
     function resume() {
-        if (!context || context.state === 'running' || context.state === 'closed' || resumePending) return;
+        if (!context || root.document.hidden || context.state === 'running' || context.state === 'closed' || resumePending) return;
         // Safari also has an 'interrupted' state. Try resume inside the original
         // gesture, never await before making this call.
         resumePending = true;
         const current = context;
         current.resume().catch(error => { stats.error = String(error); }).finally(() => {
-            if (context === current) resumePending = false;
+            if (context === current) {
+                resumePending = false;
+                if (!active || root.document.hidden) suspend();
+            }
         });
     }
 
     function create() {
-        if (context || !root.FroggerAudio.enabled || root.document.hidden) return;
+        if (context || creationFailed || !root.FroggerAudio.enabled || root.document.hidden) return;
         try {
+            // Game audio should mix with other apps and obey the silent switch.
+            // Session category is separate from Web Audio's latency hint.
+            if (ios && root.navigator.audioSession) {
+                try { root.navigator.audioSession.type = 'ambient'; }
+                catch (error) { stats.error = String(error); }
+            }
             // Let the device choose its rate; the AudioBuffer declares 48 kHz
             // explicitly so Web Audio resamples it without changing ROM timing.
             context = new Context({ latencyHint: 'interactive' });
@@ -64,7 +76,10 @@
         } catch (error) {
             stats.error = String(error);
             close();
-            root.FroggerAudio.enabled = false; // Let the game fall back to Godot.
+            creationFailed = true;
+            // With the Dummy engine driver there is no Godot output to fall
+            // back to. Keep ownership and retry on the next user gesture.
+            if (!ownsOutput) root.FroggerAudio.enabled = false;
         }
     }
 
@@ -74,12 +89,28 @@
         context = null;
         gain = null;
         resumePending = false;
+        suspendPending = false;
         if (previous && previous.state !== 'closed') previous.close().catch(() => {});
+    }
+
+    function suspend() {
+        clear();
+        if (!context || context.state === 'closed' || context.state === 'suspended' || suspendPending) return;
+        const current = context;
+        suspendPending = true;
+        current.suspend().catch(error => { stats.error = String(error); }).finally(() => {
+            // Play may have arrived while suspension was in flight.
+            if (context === current) {
+                suspendPending = false;
+                if (active && !root.document.hidden) resume();
+            }
+        });
     }
 
     function gesture() {
         if (!root.FroggerAudio.enabled) return;
         unlocked = true;
+        creationFailed = false;
         create();
         // A prior autoplay resume promise may still be waiting for activation.
         resumePending = false;
@@ -88,6 +119,12 @@
 
     root.FroggerAudio = {
         enabled,
+        engine_arguments() {
+            // Select before engine startup: skipping the GDScript player alone
+            // still leaves Godot's silent context and worklet running on iOS.
+            ownsOutput = this.enabled;
+            return ownsOutput ? ['--audio-driver', 'Dummy'] : [];
+        },
         report_driver(name) {
             this.godotDriver = name;
             if (debug) root.console.info('Frogger audio transport', JSON.stringify({
@@ -99,9 +136,9 @@
         set_active(value) {
             const wasActive = active;
             active = Boolean(value);
-            // Muting/pausing releases the browser output too. The next gesture
-            // reopens it, so output-device stalls do not survive a mute toggle.
-            if (!active && wasActive) close();
+            // Reuse one context across pause/mute instead of repeatedly
+            // tearing down and reacquiring the device's audio session.
+            if (!active && (wasActive || (context && context.state === 'running'))) suspend();
             if (active && unlocked) {
                 create();
                 resume();
@@ -161,10 +198,14 @@
         // Exposed for device diagnosis and a gesture-driven recovery without
         // reloading gameplay. Timestamp differences are diagnostics, not a
         // purported measurement of speaker latency or an automatic reset rule.
-        reset() { close(); ++stats.resets; create(); resume(); },
+        reset() { close(); creationFailed = false; ++stats.resets; create(); resume(); },
         diagnostics() {
             const stamp = context && context.getOutputTimestamp ? context.getOutputTimestamp() : null;
-            return { ...stats, enabled: this.enabled, godotDriver: this.godotDriver, active, state: context ? context.state : 'not-created',
+            return { ...stats, revision: 'single-context-1', enabled: this.enabled, ownsOutput,
+                standalone: Boolean(root.navigator.standalone || (root.matchMedia && root.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches)),
+                audioSessionType: root.navigator.audioSession ? root.navigator.audioSession.type : 'unsupported',
+                audioSessionState: root.navigator.audioSession ? root.navigator.audioSession.state : 'unsupported',
+                godotDriver: this.godotDriver, active, state: context ? context.state : 'not-created',
                 sampleRate: context ? context.sampleRate : null,
                 scheduledMs: context ? Math.max(0, nextTime - context.currentTime) * 1000 : 0,
                 sources: sources.size, baseLatency: context ? context.baseLatency : null,
@@ -178,10 +219,10 @@
             root.addEventListener(name, gesture, { capture: true, passive: true });
         }
         root.document.addEventListener('visibilitychange', () => {
-            if (root.document.hidden) close();
-            else if (unlocked) { create(); resume(); }
+            if (root.document.hidden) suspend();
+            else if (unlocked && active) { create(); resume(); }
         });
         root.addEventListener('pagehide', close);
-        root.addEventListener('pageshow', () => { if (unlocked) { create(); resume(); } });
+        root.addEventListener('pageshow', () => { if (unlocked && active) { create(); resume(); } });
     }
 })(window);

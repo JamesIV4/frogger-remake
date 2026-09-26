@@ -1873,7 +1873,9 @@ func update_bonuses(fraction: float) -> void:
 		var origin: Vector2 = popup.anchor_uv * viewport_size
 		popup.view.position = origin - popup.view.size * 0.5 + (Vector2.ZERO if time_bonus else Vector2(0, -age * 36.0))
 		if time_bonus:
-			var top: float = hud_header.get_global_rect().end.y + 16.0 if follow_camera else viewport_size.y * 2.0 / 3.0 - popup.view.size.y * 0.5
+			var below_hud: bool = follow_camera or (touch_device and top_down_camera)
+			var height_fraction: float = 1.0 / 3.0 if touch_device else 2.0 / 3.0
+			var top: float = hud_header.get_global_rect().end.y + 16.0 if below_hud else viewport_size.y * height_fraction - popup.view.size.y * 0.5
 			popup.view.position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
 		var opacity: float = minf(1.0, age / 0.08) if time_bonus else 1.0
 		opacity *= clampf((lifetime - age) / (0.22 if time_bonus else 0.35), 0.0, 1.0)
