@@ -6,12 +6,16 @@ const FRAME_SECONDS: float = 33.0 / 2000.0
 var simulation: RefCounted = null
 var state: Dictionary = {"frame": 0, "ram": [], "video": [], "objects": [], "sounds": []}
 var actors: Dictionary = {}
+var player_frog: String = "frog"
 var batched_lanes: Dictionary = {}
 var warmup_node: Node3D = null
 var warmup_frames: int = 0
 var input_pulse: InputPulse = InputPulse.new()
 var audio_player: AudioStreamPlayer = null
 var audio_playback: AudioStreamGeneratorPlayback = null
+var audio_capacity: int = 0
+var web_audio: JavaScriptObject = null
+var web_audio_checked: bool = false
 
 var started: bool = false
 var paused: bool = false
@@ -32,8 +36,12 @@ var sun: DirectionalLight3D = null
 
 # Camera options
 var perspective_view: bool = true
+var top_down_camera: bool = false
 var follow_camera: bool = true
+var desktop_follow_zoom_percent: float = 0.0
+var mobile_follow_zoom_percent: float = 0.0
 var camera_look_target: Vector3 = Vector3(0.0, 0.0, -0.12)
+var camera_view_size: Vector2 = Vector2.ZERO
 
 # Presentation helpers
 var frog_visual: FrogVisualState = FrogVisualState.new()
@@ -61,7 +69,6 @@ var death_ripple: MeshInstance3D = null
 var ripple_material: StandardMaterial3D = null
 var known_diving_groups: Dictionary = {}
 var turtle_supports: Array = []
-var snake_facing: Dictionary = {}
 var home_gator_visuals: Array = []
 var anchored_death_frame: int = -1
 var last_live_player_frame: int = -1
@@ -101,6 +108,10 @@ var swipe_direction: int = 0
 var swipe_frames: int = 0
 const SWIPE_THRESHOLD: float = 30.0
 var message_label: Label = null
+var message_hint: Label = null
+var hud_header: PanelContainer = null
+var hud_footer: PanelContainer = null
+var last_input_method: String = "keyboard"
 var player_header: Label = null
 var timer_bar: ProgressBar = null
 var menu: PanelContainer = null
@@ -109,7 +120,13 @@ var menu_items: VBoxContainer = null
 var bonus_overlay: Control = null
 var fps_container: PanelContainer = null
 var fps_label: Label = null
-var show_fps: bool = true
+var show_fps: bool = false
+var options_open: bool = false
+var options_return_to_pause: bool = false
+var gameplay_options_button: Button = null
+var mouse_idle_seconds: float = 0.0
+var touch_device: bool = false
+var layout_ui: Callable
 var prof_sim_us: float = 0.0
 var prof_cam_us: float = 0.0
 var prof_audio_us: float = 0.0
@@ -167,6 +184,10 @@ func _ready() -> void:
 		for i in range(50):
 			simulation.step()
 		observe_frame()
+	if args.has("--pause-shot"):
+		show_menu(true)
+	elif args.has("--options-shot"):
+		show_options(started)
 	if screenshot != "" and args.has("--later-board"):
 		for round_idx in range(2):
 			for bay in range(5):
@@ -214,12 +235,14 @@ func start_game(players: int) -> void:
 		audio_player.stop()
 	started = true
 	paused = false
+	options_open = false
 	menu.visible = false
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	reset_mouse_idle()
 	message_label.text = ""
 	message_panel.visible = false
 
 func _process(delta: float) -> void:
+	update_mouse_visibility(delta)
 	if simulation == null:
 		return
 	if warmup_node != null:
@@ -323,25 +346,66 @@ func handle_movement_press(press: int) -> int:
 		home_arrival.cancel()
 	return press
 
+func reset_mouse_idle() -> void:
+	mouse_idle_seconds = 0.0
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func update_mouse_visibility(delta: float) -> void:
+	if touch_device or not started or paused or menu == null or menu.visible or BoardVisuals.at(state, 0x83fe) == 0:
+		reset_mouse_idle()
+		return
+	mouse_idle_seconds += delta
+	if mouse_idle_seconds >= 2.0:
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+
+func _input(event: InputEvent) -> void:
+	# Mouse-to-touch and touch-to-mouse emulation must not change the real device.
+	if event.device != InputEvent.DEVICE_ID_EMULATION:
+		if event is InputEventKey and event.pressed and not event.echo:
+			last_input_method = "keyboard"
+		elif event is InputEventMouseButton and event.pressed:
+			last_input_method = "keyboard"
+		elif (event is InputEventJoypadButton and event.pressed) or (event is InputEventJoypadMotion and absf(event.axis_value) > 0.35):
+			last_input_method = "controller"
+		elif (event is InputEventScreenTouch and event.pressed) or event is InputEventScreenDrag:
+			last_input_method = "touch"
+	# Observe motion before Controls consume it, including motion over the HUD.
+	if event is InputEventMouseMotion and event.relative != Vector2.ZERO:
+		reset_mouse_idle()
+
+func restart_prompt() -> String:
+	match last_input_method:
+		"touch": return "Tap to restart"
+		"controller": return "Press controller A to restart"
+	return "Press Enter to restart"
+
+func navigate_back() -> void:
+	if options_open:
+		show_menu(options_return_to_pause)
+	elif started:
+		if paused:
+			resume_game()
+		else:
+			show_menu(true)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
 			KEY_ENTER, KEY_SPACE:
+				if options_open:
+					return
 				if not started or BoardVisuals.at(state, 0x83fe) == 0:
 					start_game(1)
 				elif paused:
 					resume_game()
 			KEY_1:
-				start_game(1)
+				if not options_open:
+					start_game(1)
 			KEY_2:
-				start_game(2)
+				if not options_open:
+					start_game(2)
 			KEY_ESCAPE, KEY_P:
-				if started:
-					paused = not paused
-					if paused:
-						show_menu(true)
-					else:
-						resume_game()
+				navigate_back()
 			KEY_C, KEY_5:
 				coin_frames = 6
 			KEY_R:
@@ -355,18 +419,18 @@ func _unhandled_input(event: InputEvent) -> void:
 				apply_fullscreen()
 				save_preferences()
 	if event is InputEventJoypadButton and event.pressed:
-		if event.button_index == JOY_BUTTON_A and (not started or BoardVisuals.at(state, 0x83fe) == 0):
+		if event.button_index == JOY_BUTTON_A and not options_open and (not started or BoardVisuals.at(state, 0x83fe) == 0):
 			start_game(1)
 		elif event.button_index == JOY_BUTTON_START:
-			if not started:
+			if not started and not options_open:
 				start_game(1)
 			else:
-				paused = not paused
-				if paused:
-					show_menu(true)
-				else:
-					resume_game()
+				navigate_back()
+		elif event.button_index == JOY_BUTTON_B and menu.visible:
+			navigate_back()
 
+	if menu.visible:
+		return
 	# Mobile swipe and touch controls
 	if event is InputEventScreenTouch:
 		if event.pressed:
@@ -439,14 +503,50 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func resume_game() -> void:
 	paused = false
+	options_open = false
 	menu.visible = false
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	reset_mouse_idle()
 	accumulator = 0.0
+
+func toggle_pause_from_gear() -> void:
+	if not started:
+		return
+	if paused:
+		resume_game()
+	else:
+		show_menu(true)
 
 func actor(key: String, model: String) -> ModelActor:
 	if not actors.has(key):
 		actors[key] = ModelActor.new(self, model)
 	return actors[key]
+
+func rescue_frog_model() -> String:
+	return "frog" if player_frog == "lady_frog" else "lady_frog"
+
+func select_player_frog(model: String) -> void:
+	if model == player_frog or model not in ["frog", "lady_frog"]:
+		return
+	player_frog = model
+	# The passenger is owned by its player's socket; freeing that root also
+	# frees the passenger. Recreate cached actors with their newly selected roles.
+	for view in actors.values():
+		if view.root.get_parent() == self:
+			view.root.queue_free()
+	actors.clear()
+	save_preferences()
+	show_menu(false)
+
+func setup_frog_selector(parent: VBoxContainer) -> void:
+	parent.add_child(make_text("CHOOSE YOUR FROG", 15, Cream))
+	var choices := HBoxContainer.new()
+	choices.add_theme_constant_override("separation", 10)
+	parent.add_child(choices)
+	for model in ["frog", "lady_frog"]:
+		var choice := FrogChoice.new()
+		choice.configure(model, model == player_frog, body_font)
+		choice.pressed.connect(select_player_frog.bind(model))
+		choices.add_child(choice)
 
 static func pos3(x: float, row: float, height: float = 0.0) -> Vector3:
 	return Vector3((x - 120.0) / 16.0, height, (row - 128.0) / 16.0)
@@ -607,12 +707,36 @@ func setup_world() -> void:
 	add_child(surface)
 
 func feed_audio() -> void:
+	if simulation == null:
+		return
+	if not web_audio_checked:
+		web_audio_checked = true
+		if OS.has_feature("web"):
+			web_audio = JavaScriptBridge.get_interface("FroggerAudio")
+			if web_audio != null:
+				web_audio.report_driver(AudioServer.get_driver_name())
+	if web_audio != null and bool(web_audio.enabled):
+		var audible: bool = started and not muted and not paused
+		web_audio.set_active(audible)
+		var count: int = simulation.get_sound_sample_count()
+		if audible and count > 0:
+			# The bridge accepts strings/JS objects, not PackedByteArray. One
+			# bounded mono PCM copy per frame avoids per-sample bridge calls.
+			var pcm: PackedFloat32Array = simulation.get_sound_samples(count)
+			web_audio.push_pcm(Marshalls.raw_to_base64(pcm.to_byte_array()))
+		else:
+			simulation.clear_sound_samples()
+		return
 	if audio_player == null:
 		audio_player = AudioStreamPlayer.new()
 		var gen := AudioStreamGenerator.new()
+		# The ROM synthesizer always produces 48 kHz, even when Safari's device
+		# uses a different output rate. Godot performs the output resampling.
+		gen.mix_rate_mode = AudioStreamGenerator.MIX_RATE_CUSTOM
 		gen.mix_rate = 48000
 		gen.buffer_length = 0.08
 		audio_player.stream = gen
+		audio_player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 		audio_player.volume_db = -9.0
 		add_child(audio_player)
 	if simulation == null:
@@ -626,22 +750,29 @@ func feed_audio() -> void:
 	if not audio_player.playing:
 		audio_player.play()
 		audio_playback = audio_player.get_stream_playback() as AudioStreamGeneratorPlayback
+		audio_capacity = audio_playback.get_frames_available() if audio_playback != null else 0
 	if audio_playback == null:
 		return
 	var available: int = audio_playback.get_frames_available()
-	var n: int = mini(sample_count, available)
-	if n > 0:
-		if simulation.has_method("get_stereo_sound_samples"):
-			var buf = simulation.get_stereo_sound_samples(n)
-			if buf.size() > 0:
-				audio_playback.push_buffer(buf)
-		else:
-			var raw = simulation.get_sound_samples(n)
-			var buf := PackedVector2Array()
-			buf.resize(raw.size())
-			for i in range(raw.size()):
-				var v: float = raw[i]
-				buf[i] = Vector2(v, v)
+	# A suspended/blocked browser output or a simulation catch-up can leave
+	# both queues full. Flush stale effects under the mixer lock; clear_buffer()
+	# requires a stopped playback. Reuse it so suspended output cannot accumulate
+	# retired playback objects waiting for the audio thread to consume them.
+	if audio_capacity - available + sample_count > 2400: # 50 ms at 48 kHz.
+		AudioServer.lock()
+		audio_playback.stop()
+		audio_playback.clear_buffer()
+		audio_playback.start()
+		AudioServer.unlock()
+		available = audio_playback.get_frames_available()
+		audio_capacity = available
+	# Drain the producer every frame, retaining the newest samples on overflow.
+	# Leaving the oldest samples in the native queue compounds output latency.
+	if sample_count > 0:
+		var buf: PackedVector2Array = simulation.get_stereo_sound_samples(sample_count)
+		if buf.size() > available:
+			buf = buf.slice(buf.size() - available)
+		if not buf.is_empty():
 			audio_playback.push_buffer(buf)
 
 func apply_fullscreen() -> void:
@@ -658,9 +789,15 @@ func load_preferences() -> void:
 	if c.load("user://settings.cfg") == OK:
 		high_score = int(c.get_value("play", "high_score", 0))
 		muted = bool(c.get_value("play", "muted", false))
-		show_fps = bool(c.get_value("play", "show_fps", true))
+		player_frog = str(c.get_value("play", "player_frog", "frog"))
+		if player_frog not in ["frog", "lady_frog"]:
+			player_frog = "frog"
+		show_fps = bool(c.get_value("play", "show_fps", false))
 		shadows_enabled = bool(c.get_value("play", "shadows_enabled", true))
 		antialiasing_enabled = bool(c.get_value("play", "antialiasing_enabled", true))
+		top_down_camera = bool(c.get_value("play", "top_down_camera", false))
+		desktop_follow_zoom_percent = clampf(float(c.get_value("play", "desktop_follow_zoom_percent", 0.0)), -50.0, 100.0)
+		mobile_follow_zoom_percent = clampf(float(c.get_value("play", "mobile_follow_zoom_percent", 0.0)), -50.0, 100.0)
 		var version: int = int(c.get_value("play", "defaults_version", 0))
 		var defaults = GameDefaults.from_stored(version,
 			bool(c.get_value("play", "modern_collision", true)),
@@ -690,11 +827,15 @@ func save_preferences() -> void:
 	c.set_value("play", "high_score", high_score)
 	c.set_value("play", "modern_collision", modern)
 	c.set_value("play", "muted", muted)
+	c.set_value("play", "player_frog", player_frog)
 	c.set_value("play", "show_fps", show_fps)
 	c.set_value("play", "shadows_enabled", shadows_enabled)
 	c.set_value("play", "antialiasing_enabled", antialiasing_enabled)
 	c.set_value("play", "perspective_view", perspective_view)
+	c.set_value("play", "top_down_camera", top_down_camera)
 	c.set_value("play", "follow_camera", follow_camera)
+	c.set_value("play", "desktop_follow_zoom_percent", desktop_follow_zoom_percent)
+	c.set_value("play", "mobile_follow_zoom_percent", mobile_follow_zoom_percent)
 	c.set_value("play", "fullscreen", fullscreen)
 	c.save("user://settings.cfg")
 
@@ -736,6 +877,16 @@ func make_text(text_val: String, size_val: int, color_val: Color) -> Label:
 	return l
 
 func setup_ui() -> void:
+	# Touch emulation is enabled for swipes, so touchscreen_available also reports
+	# true on a mouse-only desktop. Use the platform / browser pointer instead.
+	touch_device = OS.has_feature("android") or OS.has_feature("ios") or OS.get_cmdline_user_args().has("--mobile-ui")
+	if OS.has_feature("web"):
+		touch_device = touch_device or bool(JavaScriptBridge.eval("window.matchMedia('(pointer: coarse)').matches"))
+	last_input_method = "touch" if touch_device else "keyboard"
+	if touch_device:
+		# Match phone-sized logical UI units instead of shrinking a desktop canvas.
+		get_tree().root.content_scale_size = Vector2i(480, 320)
+		get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	display_font = load("res://Fonts/PressStart2P-Regular.ttf")
 	body_font = load("res://Fonts/Silkscreen-Regular.ttf")
 	frog_icon_texture = load("res://frogger.svg")
@@ -765,32 +916,26 @@ func setup_ui() -> void:
 	ui.add_child(root)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	var layout_root = func():
-		var size: Vector2 = get_viewport().get_visible_rect().size
-		root.size = Vector2(1100, size.y)
-		root.position = Vector2((size.x - 1100) / 2.0, 0)
-	layout_root.call()
-	get_viewport().size_changed.connect(layout_root)
-
 	var th := Theme.new()
 	th.default_font = body_font
-	th.default_font_size = 17
+	th.default_font_size = 20 if touch_device else 17
 	root.theme = th
 
 	var frame_color := Color("202733")
 	var header := PanelContainer.new()
-	header.position = Vector2(115, 0)
+	hud_header = header
 	header.size = Vector2(870, 94)
 	header.add_theme_stylebox_override("panel", edge_panel_style(frame_color, true))
 	root.add_child(header)
 
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 110)
+	row.add_theme_constant_override("separation", 12)
 	header.add_child(row)
 
 	for title in ["1-UP", "FROGGER", "HI-SCORE"]:
 		var col := VBoxContainer.new()
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.alignment = BoxContainer.ALIGNMENT_CENTER
 		row.add_child(col)
 		var heading = make_text(title, 23 if title.contains("F") else 16, Cream)
@@ -807,19 +952,35 @@ func setup_ui() -> void:
 			col.add_child(level_label)
 
 	var bottom := PanelContainer.new()
+	hud_footer = bottom
 	bottom.size = Vector2(870, 64)
 	bottom.add_theme_stylebox_override("panel", edge_panel_style(frame_color, false))
 	root.add_child(bottom)
 
 	var foot := HBoxContainer.new()
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
-	foot.add_theme_constant_override("separation", 26)
+	foot.add_theme_constant_override("separation", 12)
 	bottom.add_child(foot)
+	gameplay_options_button = Button.new()
+	gameplay_options_button.icon = load("res://Icons/settings.svg")
+	gameplay_options_button.tooltip_text = "Pause"
+	gameplay_options_button.expand_icon = true
+	gameplay_options_button.add_theme_constant_override("icon_max_width", 26)
+	gameplay_options_button.custom_minimum_size = Vector2(52, 48)
+	for button_state in ["normal", "hover", "pressed", "disabled"]:
+		var gear_style := style_box(Color("6f914d") if button_state == "hover" else Color("526e3e"), 7)
+		gear_style.content_margin_left = 12
+		gear_style.content_margin_right = 12
+		gear_style.content_margin_top = 10
+		gear_style.content_margin_bottom = 10
+		gameplay_options_button.add_theme_stylebox_override(button_state, gear_style)
+	gameplay_options_button.pressed.connect(toggle_pause_from_gear)
+	foot.add_child(gameplay_options_button)
 
 	var lives_box := HBoxContainer.new()
 	lives_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	lives_box.add_theme_constant_override("separation", 10)
-	lives_box.custom_minimum_size = Vector2(225, 0)
+	lives_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(lives_box)
 
 	lives_label = make_text("FROGS", 19, LimeColor)
@@ -835,12 +996,14 @@ func setup_ui() -> void:
 	timer_bar.max_value = 100
 	timer_bar.value = 100
 	timer_bar.show_percentage = false
-	timer_bar.custom_minimum_size = Vector2(330, 18)
+	timer_bar.custom_minimum_size = Vector2(70, 18)
+	timer_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	timer_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	timer_bar.add_theme_stylebox_override("background", style_box(Color("121a29"), 4))
 	timer_bar.add_theme_stylebox_override("fill", style_box(Color("9ac75d"), 4))
 	foot.add_child(timer_bar)
-	foot.add_child(make_text("TIME", 19, Cream))
+	var time_label := make_text("TIME", 19, Cream)
+	foot.add_child(time_label)
 
 	message_panel = PanelContainer.new()
 	message_panel.visible = false
@@ -849,6 +1012,11 @@ func setup_ui() -> void:
 	msg_style.border_color = Color("ffce57")
 	message_panel.add_theme_stylebox_override("panel", msg_style)
 	root.add_child(message_panel)
+	var message_content := VBoxContainer.new()
+	message_content.alignment = BoxContainer.ALIGNMENT_CENTER
+	message_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	message_content.add_theme_constant_override("separation", 18)
+	message_panel.add_child(message_content)
 
 	message_label = make_text("", 30, Cream)
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -856,29 +1024,54 @@ func setup_ui() -> void:
 	message_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	message_label.add_theme_color_override("font_shadow_color", Color.BLACK)
 	message_label.add_theme_constant_override("shadow_offset_y", 3)
-	message_panel.add_child(message_label)
+	message_content.add_child(message_label)
+	message_hint = make_text("", 18, Cream)
+	message_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	message_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	message_hint.visible = false
+	message_content.add_child(message_hint)
 
 	menu = PanelContainer.new()
 	menu.size = Vector2(440, 484)
 	menu.add_theme_stylebox_override("panel", style_box(Color(0.075, 0.10, 0.15, 0.97), 18, 2))
 	root.add_child(menu)
+	var menu_scroll := ScrollContainer.new()
+	menu_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	menu_scroll.follow_focus = true
+	menu.add_child(menu_scroll)
 
 	menu_items = VBoxContainer.new()
+	menu_items.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	menu_items.add_theme_constant_override("separation", 14)
-	menu.add_child(menu_items)
+	menu_scroll.add_child(menu_items)
 
-	var layout_overlay = func():
-		var viewport_size = get_viewport().get_visible_rect().size
+	layout_ui = func():
+		var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+		root.size = viewport_size
+		var panel_width: float = minf(870.0, viewport_size.x)
+		var narrow: bool = viewport_size.x < 650.0
 		var h: float = root.size.y
-		bottom.position = Vector2(115, h - 64)
+		header.size = Vector2(panel_width, 94)
+		header.position = Vector2((viewport_size.x - panel_width) / 2.0, 0)
+		for label in [score_label, high_label]:
+			label.add_theme_font_size_override("font_size", 19 if narrow else 26)
+		var title_label: Label = row.get_child(1).get_child(0)
+		title_label.add_theme_font_size_override("font_size", 18 if narrow else 23)
+		level_label.visible = not narrow
+		lives_label.visible = not narrow
+		time_label.visible = not narrow
+		bottom.size = Vector2(panel_width, 80)
+		bottom.position = Vector2((viewport_size.x - panel_width) / 2.0, h - 80)
 		var message_width: float = clampf(viewport_size.x - 48.0, 120.0, 840.0)
 		message_panel.size = Vector2(message_width, 180)
-		message_panel.position = Vector2((1100.0 - message_width) / 2.0, (h - 180.0) / 2.0)
-		message_label.custom_minimum_size = Vector2(message_width - 44.0, 150.0)
+		message_panel.position = Vector2((viewport_size.x - message_width) / 2.0, (h - 180.0) / 2.0)
+		message_label.custom_minimum_size = Vector2(message_width - 44.0, 0.0)
 		message_label.add_theme_font_size_override("font_size", 18 if viewport_size.x < 620 else (24 if viewport_size.x < 900 else 30))
-		menu.position = Vector2(330, (h - 484.0) / 2.0)
-	layout_overlay.call()
-	get_viewport().size_changed.connect(layout_overlay)
+		var menu_height: float = clampf(menu_items.get_combined_minimum_size().y + 28.0, 220.0, 620.0)
+		menu.size = Vector2(minf(480.0 if touch_device else 520.0, viewport_size.x - 24.0), minf(menu_height, h - 40.0))
+		menu.position = (viewport_size - menu.size) / 2.0
+	layout_ui.call()
+	get_viewport().size_changed.connect(layout_ui)
 
 	bonus_overlay = Control.new()
 	bonus_overlay.size = get_viewport().get_visible_rect().size
@@ -886,19 +1079,103 @@ func setup_ui() -> void:
 	ui.add_child(bonus_overlay)
 	get_viewport().size_changed.connect(func(): bonus_overlay.size = get_viewport().get_visible_rect().size)
 
-func show_menu(resume: bool) -> void:
+func clear_menu() -> void:
 	menu.visible = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	message_label.text = ""
+	message_panel.visible = false
+	reset_mouse_idle()
+	touch_active = false
+	swipe_direction = 0
+	swipe_frames = 0
 	for child in menu_items.get_children():
 		menu_items.remove_child(child)
 		child.queue_free()
+	layout_ui.call_deferred()
+
+func show_menu(resume: bool) -> void:
+	clear_menu()
+	options_open = false
+	paused = resume
 	if resume:
 		menu_items.add_child(make_text("PAUSED", 23, Cream))
-		menu_items.add_child(make_text("The crossing can wait.", 15, LimeColor))
 		add_button("RESUME", resume_game)
-	add_button("NEW GAME" if resume else "ONE PLAYER", func(): start_game(1))
-	if not resume:
-		add_button("TWO PLAYERS · TAKE TURNS", func(): start_game(2))
+		add_button("OPTIONS", func(): show_options(true))
+		add_button("RETURN TO MAIN MENU", return_to_main_menu)
+	else:
+		menu_items.add_child(make_text("FROGGER", 30, Cream))
+		setup_frog_selector(menu_items)
+		add_button("ONE PLAYER", func(): start_game(1))
+		add_button("TWO PLAYERS - TAKE TURNS", func(): start_game(2))
+		add_button("OPTIONS", func(): show_options(false))
+		var instructions := make_text("Swipe to hop" if touch_device else "Arrow keys / WASD / D-pad to hop", 14, Color("adb8cc"))
+		menu_items.add_child(instructions)
+
+func follow_zoom_percent() -> float:
+	return mobile_follow_zoom_percent if touch_device else desktop_follow_zoom_percent
+
+func set_follow_zoom_percent(value: float) -> void:
+	if touch_device:
+		mobile_follow_zoom_percent = clampf(value, -50.0, 100.0)
+	else:
+		desktop_follow_zoom_percent = clampf(value, -50.0, 100.0)
+	save_preferences()
+
+func add_follow_zoom_control(follow: CheckButton) -> void:
+	var zoom_group := VBoxContainer.new()
+	zoom_group.name = "FollowZoomControl"
+	menu_items.add_child(zoom_group)
+	var heading := HBoxContainer.new()
+	zoom_group.add_child(heading)
+	var label := make_text("", 18, Cream)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_child(label)
+	var reset := Button.new()
+	reset.name = "FollowZoomDefault"
+	reset.text = "DEFAULT"
+	reset.custom_minimum_size.y = 40
+	heading.add_child(reset)
+	var slider := HSlider.new()
+	slider.name = "FollowZoomSlider"
+	slider.min_value = -50.0
+	slider.max_value = 100.0
+	slider.step = 5.0
+	slider.value = follow_zoom_percent()
+	slider.custom_minimum_size.y = 40
+	zoom_group.add_child(slider)
+	var update_control := func():
+		var value: float = follow_zoom_percent()
+		label.text = "Follow zoom: %s%d%%" % ["+" if value > 0.0 else "", int(value)]
+		slider.editable = follow_camera
+		reset.disabled = not follow_camera or is_zero_approx(value)
+		zoom_group.modulate.a = 1.0 if follow_camera else 0.45
+	slider.value_changed.connect(func(value: float):
+		set_follow_zoom_percent(value)
+		update_control.call())
+	reset.pressed.connect(func(): slider.value = 0.0)
+	follow.toggled.connect(func(_enabled: bool): update_control.call())
+	update_control.call()
+
+func return_to_main_menu() -> void:
+	started = false
+	paused = false
+	coin_frames = 0
+	reset_machine()
+	for i in range(180):
+		simulation.step()
+	observe_frame()
+	simulation.clear_sound_samples()
+	message_label.text = ""
+	message_panel.visible = false
+	show_menu(false)
+
+func show_options(return_to_pause: bool) -> void:
+	clear_menu()
+	options_open = true
+	options_return_to_pause = return_to_pause
+	paused = started
+	menu_items.add_child(make_text("OPTIONS", 23, Cream))
+	add_button("BACK", func(): show_menu(options_return_to_pause))
 
 	var collision := CheckButton.new()
 	collision.text = "Classic collision"
@@ -912,11 +1189,19 @@ func show_menu(resume: bool) -> void:
 
 	var perspective := CheckButton.new()
 	perspective.text = "Perspective view"
+	perspective.tooltip_text = "Off uses orthographic projection"
 	perspective.button_pressed = perspective_view
 	perspective.toggled.connect(func(val):
 		perspective_view = val
 		save_preferences())
 	menu_items.add_child(perspective)
+	var top_down := CheckButton.new()
+	top_down.text = "Top-down camera"
+	top_down.button_pressed = top_down_camera
+	top_down.toggled.connect(func(val):
+		top_down_camera = val
+		save_preferences())
+	menu_items.add_child(top_down)
 
 	var follow := CheckButton.new()
 	follow.text = "Follow frog (closer view)"
@@ -925,6 +1210,7 @@ func show_menu(resume: bool) -> void:
 		follow_camera = val
 		save_preferences())
 	menu_items.add_child(follow)
+	add_follow_zoom_control(follow)
 
 	var shadows_btn := CheckButton.new()
 	shadows_btn.text = "Shadows"
@@ -963,12 +1249,15 @@ func show_menu(resume: bool) -> void:
 		save_preferences())
 	menu_items.add_child(sound_btn)
 
-	menu_items.add_child(make_text("Arrow keys / WASD / D-pad to hop\nReach all five homes. Avoid cars and open water.", 13, Color("adb8cc")))
+	for child in menu_items.get_children():
+		if child is CheckButton:
+			child.custom_minimum_size.y = 48.0 if touch_device else 34.0
 
 func add_button(text_val: String, action: Callable) -> void:
 	var b := Button.new()
 	b.text = text_val
-	b.custom_minimum_size = Vector2(350, 43)
+	b.custom_minimum_size = Vector2(0, 52 if touch_device else 43)
+	b.add_theme_font_size_override("font_size", 17)
 	b.add_theme_stylebox_override("normal", style_box(Color("526e3e"), 7))
 	b.add_theme_stylebox_override("hover", style_box(Color("6f914d"), 7))
 	b.pressed.connect(action)
@@ -981,6 +1270,9 @@ func add_button(text_val: String, action: Callable) -> void:
 		b.grab_focus()
 
 func update_hud() -> void:
+	# Keep the gear interactive and in place during pause so it can resume play.
+	gameplay_options_button.visible = started
+	gameplay_options_button.tooltip_text = "Resume" if paused else "Pause"
 	var player: int = 2 if BoardVisuals.at(state, 0x83fd) == 2 else 1
 	player_header.text = "%d-UP" % player
 	var current_score: int = bcd_score(0x83ed if player == 1 else 0x83eb)
@@ -1004,14 +1296,17 @@ func update_hud() -> void:
 		for i in range(lives_icons.get_child_count()):
 			lives_icons.get_child(i).visible = (i < count)
 	timer_bar.value = clampf(float(BoardVisuals.at(state, 0x83dd)) / 60.0, 0.0, 1.0) * 100.0
+	message_hint.text = ""
 	if started and not paused:
 		if BoardVisuals.at(state, 0x83fe) == 0:
-			message_label.text = "GAME OVER\nPress Enter or controller A to restart"
+			message_label.text = "GAME OVER"
+			message_hint.text = restart_prompt()
 		elif BoardVisuals.at(state, 0x8297) > 0 and BoardVisuals.at(state, 0x842f) >= 5:
 			message_label.text = "ALL FROGS HOME!"
 		else:
 			message_label.text = ""
 	message_panel.visible = message_label.text.length() > 0
+	message_hint.visible = not message_hint.text.is_empty()
 	if fps_label != null and show_fps:
 		var fps: float = Engine.get_frames_per_second()
 		var frame_ms: float = presentation_delta * 1000.0
@@ -1035,33 +1330,194 @@ func bcd_score(addr: int) -> int:
 
 func update_camera(delta: float) -> void:
 	var view_size: Vector2 = get_viewport().get_visible_rect().size
-	var aspect: float = maxf(0.55, view_size.x / maxf(1.0, view_size.y))
+	var resized: bool = view_size != camera_view_size
+	camera_view_size = view_size
+	var aspect: float = maxf(0.1 if touch_device else 0.55, view_size.x / maxf(1.0, view_size.y))
+	var portrait: bool = touch_device and aspect < 1.0
+	var portrait_follow: bool = portrait and follow_camera and started
+	var entering_portrait_follow: bool = portrait_follow and camera.keep_aspect != Camera3D.KEEP_WIDTH
+	var horizontal_follow_limit: float = 4.0 if portrait_follow else 2.5
 	camera.projection = Camera3D.PROJECTION_PERSPECTIVE if perspective_view else Camera3D.PROJECTION_ORTHOGONAL
+	camera.keep_aspect = Camera3D.KEEP_WIDTH if portrait_follow else Camera3D.KEEP_HEIGHT
 	camera.size = 9.8 if (follow_camera and started) else maxf(16.8, 16.2 / aspect)
-	camera.fov = 54.0 if (follow_camera and started) else 52.0
+	if portrait_follow and not perspective_view:
+		camera.size = 10.4
+	# Frame roughly nine nearby columns on phones. Follow toward each side as
+	# the frog approaches, keeping the action large rather than fitting all 14.
+	camera.fov = 48.0 if portrait_follow else (54.0 if (follow_camera and started) else 52.0)
 
 	var tracking: bool = follow_camera and started and FrogVisualState.player_on_board(state)
 	var tx: float = 0.0
 	var tz: float = 0.0
+	var followed_row: float = 0.0
 	if tracking:
 		var x: float = float(frog_visual.death_x) if frog_visual.dying else displayed_frog_x
 		var row: float = float(frog_visual.death_row) if frog_visual.dying else displayed_frog_row
 		var p: Vector3 = pos3(x, row)
-		tx = clampf(p.x, -2.5, 2.5)
+		followed_row = p.z
+		tx = clampf(p.x, -horizontal_follow_limit, horizontal_follow_limit)
 		tz = clampf(p.z, -4.0, 4.0)
 	elif follow_camera and started:
-		tx = clampf(camera.position.x, -2.5, 2.5)
-		tz = clampf(camera.position.z - (5.8 if perspective_view else 6.5), -4.0, 4.0)
+		tx = clampf(camera.position.x, -horizontal_follow_limit, horizontal_follow_limit)
+		if portrait_follow or top_down_camera or not is_zero_approx(follow_zoom_percent()):
+			# Retain the followed row while the player is temporarily off board.
+			tz = clampf(camera_look_target.z + 0.80, -4.0, 4.0)
+		else:
+			tz = clampf(camera.position.z - (5.8 if perspective_view else 6.5), -4.0, 4.0)
+		followed_row = tz
 	var desired: Vector3
 	if tracking or (follow_camera and started):
 		desired = Vector3(tx, 9.0 if perspective_view else 11.2, tz + (5.8 if perspective_view else 6.5))
 	else:
 		desired = Vector3(0, 15.5, 9.5) if perspective_view else Vector3(0, 19, 9.8)
+	var desired_look: Vector3 = Vector3(tx, 0, tz - 0.80) if (tracking or (follow_camera and started)) else Vector3(0, 0, -0.12)
+	if top_down_camera:
+		# Angle and projection are independent: either projection can look down.
+		var height: float = desired.distance_to(desired_look) if perspective_view else desired.y
+		desired = desired_look + Vector3.UP * height
+	elif portrait and perspective_view:
+		# Less board tilt on a tall screen: 22 degrees from overhead. Keep the
+		# horizontal follow scale while giving the lanes more vertical space.
+		var distance: float = desired.distance_to(desired_look)
+		desired = desired_look + Vector3(0, cos(deg_to_rad(22.0)), sin(deg_to_rad(22.0))) * distance
+	if follow_camera and started and not is_zero_approx(follow_zoom_percent()):
+		var zoom_factor: float = 1.0 + follow_zoom_percent() / 100.0
+		if perspective_view:
+			desired = desired_look + (desired - desired_look) / zoom_factor
+		else:
+			camera.size /= zoom_factor
+	if portrait_follow:
+		if top_down_camera or perspective_view:
+			var row_limit: float = portrait_follow_row(desired, desired_look, view_size)
+			desired.z += row_limit - desired_look.z
+			desired_look.z = row_limit
+		var pan_limit: float = portrait_follow_pan_limit(desired, desired_look, followed_row)
+		desired.x = clampf(desired.x, -pan_limit, pan_limit)
+		desired_look.x = clampf(desired_look.x, -pan_limit, pan_limit)
+	if not (follow_camera and started):
+		var framing := fit_board_overview(desired, desired_look, view_size, portrait)
+		desired = framing["position"]
+		desired_look = framing["target"]
+		camera.size = framing["size"]
+	if entering_portrait_follow or (resized and not (follow_camera and started)):
+		# Keep overview fitting immediate on resize, and switch portrait follow
+		# projection and framing together on start or phone rotation.
+		camera.position = desired
+		camera_look_target = desired_look
 	var responsiveness: float = 1.0 - exp(-6.0 * minf(delta, 0.1))
 	camera.position = camera.position.lerp(desired, responsiveness)
-	var desired_look: Vector3 = Vector3(tx, 0, tz - 0.80) if (tracking or (follow_camera and started)) else Vector3(0, 0, -0.12)
 	camera_look_target = camera_look_target.lerp(desired_look, responsiveness)
-	camera.look_at(camera_look_target)
+	if portrait_follow:
+		# Enforce the same limit during interpolation and after zoom changes.
+		if top_down_camera or perspective_view:
+			var row_limit: float = portrait_follow_row(camera.position, camera_look_target, view_size)
+			camera.position.z += row_limit - camera_look_target.z
+			camera_look_target.z = row_limit
+		var pan_limit: float = portrait_follow_pan_limit(camera.position, camera_look_target, followed_row)
+		camera.position.x = clampf(camera.position.x, -pan_limit, pan_limit)
+		camera_look_target.x = clampf(camera_look_target.x, -pan_limit, pan_limit)
+	camera.look_at(camera_look_target, Vector3.FORWARD if top_down_camera else Vector3.UP)
+	update_camera_clip_planes()
+
+func portrait_follow_pan_limit(position: Vector3, target: Vector3, row: float) -> float:
+	# Keep the approached board edge within the outer 16% of the screen
+	# (the marked margin), adapting to projection, angle and follow zoom.
+	var visible_width: float = camera.size
+	if perspective_view:
+		var backward := (position - target).normalized()
+		var edge := Vector3(0, 0.1, clampf(row, -7.0, 7.0))
+		var depth: float = (position - edge).dot(backward)
+		visible_width = 2.0 * tan(deg_to_rad(camera.fov * 0.5)) * depth
+	return clampf(7.4 - visible_width * 0.34, 0.0, 4.0)
+
+func portrait_follow_row(position: Vector3, target: Vector3, view_size: Vector2) -> float:
+	# Clamp scrolling against the live HUD opening. If the board fits, both
+	# ends stay visible. If it doesn't, stop at each end rather than revealing
+	# empty space while the opposite end is still cropped.
+	var top: float = minf(hud_header.get_global_rect().end.y + 12.0, view_size.y * 0.4)
+	var bottom: float = maxf(hud_footer.global_position.y - 12.0, view_size.y * 0.6)
+	var aspect: float = view_size.x / maxf(1.0, view_size.y)
+	var backward := (position - target).normalized()
+	var up := backward.cross(Vector3.RIGHT).normalized()
+	var far_edge := Vector3(0, 1.3, -7.7)
+	var near_edge := Vector3(0, 0.1, 7.9)
+	var far_limit: float
+	var near_limit: float
+	if perspective_view:
+		# A move along the board changes both projected height and perspective
+		# depth. Solve where each end meets its HUD boundary at the current angle.
+		var slope: float = tan(deg_to_rad(camera.fov * 0.5)) / aspect
+		var top_slope: float = (1.0 - 2.0 * top / view_size.y) * slope
+		var bottom_slope: float = (1.0 - 2.0 * bottom / view_size.y) * slope
+		var far_divisor: float = up.z + top_slope * backward.z
+		var near_divisor: float = up.z + bottom_slope * backward.z
+		if far_divisor >= -0.001 or near_divisor >= -0.001:
+			return target.z # The HUD opening extends above the ground-plane horizon.
+		far_limit = target.z + ((far_edge - position).dot(up) - top_slope * (position - far_edge).dot(backward)) / far_divisor
+		near_limit = target.z + ((near_edge - position).dot(up) - bottom_slope * (position - near_edge).dot(backward)) / near_divisor
+	else:
+		var span: float = camera.size / aspect
+		far_limit = target.z + ((far_edge - position).dot(up) - (0.5 - top / view_size.y) * span) / up.z
+		near_limit = target.z + ((near_edge - position).dot(up) - (0.5 - bottom / view_size.y) * span) / up.z
+	return clampf(target.z, minf(far_limit, near_limit), maxf(far_limit, near_limit))
+
+func update_camera_clip_planes() -> void:
+	# Orthographic directional shadows use the camera's depth range. The default
+	# 4000-unit far plane wastes their resolution on empty space around this board.
+	# Include the entire board, actors and hidden shader warmup models, and follow
+	# the actual camera position through overview fitting and zoom transitions.
+	var scene_distance: float = camera.position.length()
+	camera.near = maxf(0.1, scene_distance - 16.0)
+	camera.far = scene_distance + 16.0
+
+func fit_board_overview(position: Vector3, target: Vector3, view_size: Vector2, crop_frame: bool) -> Dictionary:
+	# Fit the board into the live HUD opening, preserving the chosen angle.
+	# Portrait phones prioritize playable lanes over the decorative wooden frame.
+	var backward := (position - target).normalized()
+	var up := backward.cross(Vector3.RIGHT).normalized()
+	var slope: float = tan(deg_to_rad(camera.fov * 0.5))
+	# Desktop can tuck the decorative top/bottom edges behind the HUD for a
+	# closer view; touch layouts keep a small gap around the playable region.
+	var top_padding: float = 6.0 if touch_device else -18.0
+	var bottom_padding: float = 6.0 if touch_device else -44.0
+	var top: float = minf(hud_header.get_global_rect().end.y + top_padding, view_size.y * 0.4)
+	var bottom: float = maxf(hud_footer.global_position.y - bottom_padding, view_size.y * 0.6)
+	var top_slope: float = (1.0 - 2.0 * top / view_size.y) * slope
+	var bottom_slope: float = (1.0 - 2.0 * bottom / view_size.y) * slope
+	var available_width: float = maxf(1.0, view_size.x - (8.0 if crop_frame else 12.0))
+	var side_slope: float = slope * available_width / view_size.y
+	var upper_bound: float = -INF
+	var lower_bound: float = INF
+	var low_height: float = INF
+	var high_height: float = -INF
+	var distance: float = 1.0
+	var half_width: float = 7.1 if crop_frame else 7.45
+	# Actual silhouette: only the rear hedge is tall, and the deep river bed
+	# is not at the front. Empty bounding-box corners would force a loose fit.
+	var edges: Array[Vector2] = [Vector2(-0.94, 7.90), Vector2(0.20, 7.90), Vector2(-0.94, -7.70), Vector2(0.20, -7.70), Vector2(1.30, -7.25)]
+	if crop_frame:
+		edges = [Vector2(0.1, 7.0), Vector2(0.1, -7.0), Vector2(1.30, -7.25)]
+	for x in [-half_width, half_width]:
+		for edge in edges:
+			var point := Vector3(x, edge.x, edge.y) - target
+			var depth: float = point.dot(backward)
+			var height: float = point.dot(up)
+			distance = maxf(distance, depth + absf(point.x) / side_slope)
+			upper_bound = maxf(upper_bound, height + top_slope * depth)
+			lower_bound = minf(lower_bound, height + bottom_slope * depth)
+			low_height = minf(low_height, height)
+			high_height = maxf(high_height, height)
+	var size: float = maxf(2.0 * half_width * view_size.y / available_width, (high_height - low_height) * view_size.y / (bottom - top))
+	var offset: float
+	if perspective_view:
+		distance = maxf(distance, (upper_bound - lower_bound) / (top_slope - bottom_slope))
+		offset = ((upper_bound - top_slope * distance) + (lower_bound - bottom_slope * distance)) * 0.5
+	else:
+		distance = position.distance_to(target)
+		var center_ndc: float = 1.0 - (top + bottom) / view_size.y
+		offset = (low_height + high_height) * 0.5 - center_ndc * size * 0.5
+	var centered_target: Vector3 = target + up * offset
+	return {"position": centered_target + backward * distance, "target": centered_target, "size": size}
 
 func observe_frame() -> void:
 	state = simulation.snapshot()
@@ -1077,7 +1533,6 @@ func clear_presentation() -> void:
 	frog_motion.reset()
 	for lane in batched_lanes.values():
 		lane.reset()
-	snake_facing.clear()
 	for gator in home_gator_visuals:
 		gator.reset()
 	facing = 2
@@ -1124,7 +1579,7 @@ func update_actors() -> void:
 	update_homes_and_hazards()
 
 func update_player(fraction: float) -> void:
-	var player = actor("player", "frog")
+	var player = actor("player", player_frog)
 	player.root.scale = Vector3.ONE
 	player.set_squash_color(0.0)
 	var cur_frame: int = state.get("frame", 0)
@@ -1185,7 +1640,7 @@ func update_player(fraction: float) -> void:
 			push_error("The Blender frog rig has no PassengerSocket")
 		var passenger: ModelActor
 		if not actors.has("passenger"):
-			passenger = ModelActor.new(player.passenger_socket, "lady_frog")
+			passenger = ModelActor.new(player.passenger_socket, rescue_frog_model())
 			actors["passenger"] = passenger
 		else:
 			passenger = actors["passenger"]
@@ -1297,7 +1752,7 @@ func update_homes_and_hazards() -> void:
 	for i in range(5):
 		var held_here: bool = home_arrival.active(cur_frame, frac) and absf(float(home_arrival.x) - (24.0 + 48.0 * float(i))) <= 8.0
 		if BoardVisuals.at(state, home_base + i) != 0 and not held_here:
-			var a = actor("home%d" % i, "frog")
+			var a = actor("home%d" % i, player_frog)
 			a.set_active(true)
 			a.root.position = Vector3(-6.0 + 3.0 * float(i), 0.08, -6.0)
 			a.root.rotation = Vector3(0, PI, 0)
@@ -1331,20 +1786,17 @@ func update_homes_and_hazards() -> void:
 		a.root.position = pos3(moving_visuals.step(motion_id, float(x), cur_frame, presentation_delta, paused), float(y), height)
 		var heading: int = 1
 		if is_snake:
-			if snake_facing.has(addr):
-				heading = snake_facing[addr]
-			else:
-				heading = 1 if (BoardVisuals.at(state, addr + 1) & 0x80) != 0 else -1
-			var speed: float = moving_visuals.velocity_x(motion_id)
-			if absf(speed) > 0.06:
-				heading = 1 if speed > 0.0 else -1
-			snake_facing[addr] = heading
+			# ROM 0x2a16..0x2a38 controls travel relative to the log: bit 7
+			# set crawls right, clear crawls left. World velocity includes the
+			# log's drift and can point opposite to the snake's own movement.
+			# The authored head points along +Z, so positive yaw faces right.
+			heading = 1 if (BoardVisuals.at(state, addr + 1) & 0x80) != 0 else -1
 		a.root.rotation = Vector3(0, float(heading) * PI / 2.0, 0)
 		a.root.scale = Vector3.ONE * 0.75
 		a.play("Move")
 
 	if lady_visual.visible(ModelFootprints.FrogAlongX * LadyInRiverScale):
-		var a = actor("lady", "lady_frog")
+		var a = actor("lady", rescue_frog_model())
 		a.set_active(true)
 		a.root.position = pos3(moving_visuals.step(50000, lady_visual.x, cur_frame, presentation_delta, paused),
 			float(BoardVisuals.LadyFrogRow), BoardVisuals.lady_frog_height(LadyInRiverScale))
@@ -1388,7 +1840,9 @@ func update_bonuses(fraction: float) -> void:
 			content.add_child(heading)
 			content.add_child(make_text("+%d" % amount, 29, Color("7beaff")))
 			view = panel
-			screen = Vector2(viewport_size.x * 0.5, viewport_size.y / 3.0)
+			screen = Vector2(viewport_size.x * 0.5, hud_header.get_global_rect().end.y + 16.0 + panel.size.y * 0.5)
+			if not follow_camera:
+				screen.y = viewport_size.y * 2.0 / 3.0
 		else:
 			display_text = "+%d" % amount
 			var label = make_text(display_text, 28, Color("ff75da") if kind == 1 else Color("fff32f"))
@@ -1418,6 +1872,9 @@ func update_bonuses(fraction: float) -> void:
 			popup.view.size = Vector2(minf(370.0, viewport_size.x - 24.0), 106)
 		var origin: Vector2 = popup.anchor_uv * viewport_size
 		popup.view.position = origin - popup.view.size * 0.5 + (Vector2.ZERO if time_bonus else Vector2(0, -age * 36.0))
+		if time_bonus:
+			var top: float = hud_header.get_global_rect().end.y + 16.0 if follow_camera else viewport_size.y * 2.0 / 3.0 - popup.view.size.y * 0.5
+			popup.view.position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
 		var opacity: float = minf(1.0, age / 0.08) if time_bonus else 1.0
 		opacity *= clampf((lifetime - age) / (0.22 if time_bonus else 0.35), 0.0, 1.0)
 		popup.view.modulate = Color(1, 1, 1, opacity)
@@ -1462,6 +1919,7 @@ func read_review_args() -> void:
 		follow_camera = (review == "perspective-follow" or review == "ortho-follow" or review == "bonus-follow")
 	var args = OS.get_cmdline_user_args()
 	review_close = args.has("--review-close")
+	top_down_camera = args.has("--top-down-shot")
 	review_lady_close = args.has("--review-lady-close")
 	review_turtle_close = args.has("--review-turtle-close")
 	review_gator_close = args.has("--review-gator-close")
@@ -1706,7 +2164,7 @@ func step_review() -> void:
 		if review == "snake" and (x < 50 or x > 195):
 			x = (simulation.peek(0x811d) - 34) & 255
 		simulation.poke(0x8048, x)
-		simulation.poke(0x8049, 0x81 if review == "snake-left" else 1)
+		simulation.poke(0x8049, 1)
 		simulation.poke(0x804b, 96)
 	observe_frame()
 	accumulator = 0.0
@@ -1725,7 +2183,7 @@ func capture_review() -> void:
 	var img = get_viewport().get_texture().get_image()
 	var error = img.save_png(path)
 
-	var player = actor("player", "frog")
+	var player = actor("player", player_frog)
 	var free_lady: ModelActor = actors.get("lady")
 	var snake: ModelActor = actors.get("hazard32840")
 	var home_gator: ModelActor = actors.get("homegator2")
@@ -1903,8 +2361,8 @@ func capture_review() -> void:
 			push_error("Snake failed to face its leftward travel")
 			get_tree().quit(1)
 			return
-		if review == "snake-motion" and (snake != null and snake.root.rotation.y < 1.3):
-			push_error("Snake followed a ROM flip instead of its rightward lane travel")
+		if review == "snake-motion" and snake != null and signf(snake.root.rotation.y) != (1.0 if (BoardVisuals.at(state, 0x8049) & 0x80) != 0 else -1.0):
+			push_error("Snake failed to face its own movement relative to the log")
 			get_tree().quit(1)
 			return
 		var json_str = JSON.stringify(review_measurements, "\t")
@@ -1919,7 +2377,7 @@ func capture_review() -> void:
 func update_review_camera() -> void:
 	if not review_close and not review_lady_close and not review_turtle_close and not review_gator_close and not review_snake_close:
 		return
-	var player = actor("player", "frog")
+	var player = actor("player", player_frog)
 	var target: Vector3
 	if review_gator_close:
 		target = pos3(134.0, 48.0, 0.0) if review in ["river-gator", "river-back", "river-snout"] else Vector3(0, 0.30, -6.3)
@@ -1938,3 +2396,4 @@ func update_review_camera() -> void:
 	camera.size = 3.3 if review_gator_close else 2.5
 	camera.position = target + (Vector3(2.0, 2.2, 2.9) if review_gator_close else Vector3(2.5, 2.5, 3.5))
 	camera.look_at(target)
+	update_camera_clip_planes()

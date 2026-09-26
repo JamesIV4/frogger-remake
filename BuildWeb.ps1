@@ -97,6 +97,8 @@ try {
         throw "Web export failed. See $froggerExportErr."
     }
 
+    Copy-Item -LiteralPath tools/web_audio.js -Destination builds/web/frogger-audio.js -Force
+
     New-Item -ItemType Directory -Force builds/web/licenses | Out-Null
     Copy-Item -LiteralPath LICENSE,THIRD_PARTY.md -Destination builds/web/licenses -Force
     Get-ChildItem -LiteralPath godot/Fonts -Filter '*-OFL.txt' | Copy-Item -Destination builds/web/licenses -Force
@@ -124,6 +126,8 @@ try {
     $indexHtmlPath = Join-Path $FroggerRoot "builds/web/index.html"
     if (Test-Path -LiteralPath $indexHtmlPath) {
         $html = [System.IO.File]::ReadAllText($indexHtmlPath)
+        # Register the first-gesture audio handler before loading the engine.
+        $html = $html.Replace('<script src="index.js"></script>', '<script src="frogger-audio.js"></script><script src="index.js"></script>')
         $chunkScript = @"
 		<script>
 (function() {
