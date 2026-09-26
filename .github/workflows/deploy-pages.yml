@@ -137,6 +137,10 @@ jobs:
 
       - name: Compile GDExtension wasm (nothreads side module)
         run: |
+          # **/bin/ is git-ignored with nothing tracked inside it, so a fresh
+          # checkout has no godot/bin/ -> em++ cannot create the output file.
+          # BuildWeb.ps1 does this too (New-Item ... godot/bin).
+          mkdir -p godot/bin
           em++ -sSIDE_MODULE=1 -sWASM_BIGINT -sSUPPORT_LONGJMP=wasm -O3 -std=c++17 \
             -DWEB_ENABLED -DUNIX_ENABLED \
             -Isrc -Isrc/godot-cpp/include -Isrc/godot-cpp/gen/include -Isrc/godot-cpp/gdextension \
