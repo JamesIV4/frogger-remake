@@ -159,8 +159,94 @@ try {
 "@
         if ($html -notmatch 'side\.wasm\.part0') {
             $html = $html.Replace('<script src="index.js"></script>', "$chunkScript`r`n		<script src=`"index.js`"></script>")
-            [System.IO.File]::WriteAllText($indexHtmlPath, $html)
-            Write-Host "Injected side wasm chunk loader into $indexHtmlPath"
+        }
+        if ($html -notmatch 'manifest\.webmanifest') {
+            $pwaTags = @"
+		<link rel="manifest" href="manifest.webmanifest">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-title" content="Frogger">
+		<meta name="theme-color" content="#182332">
+		<script>
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('sw.js').catch(() => {});
+				});
+			}
+		</script>
+	</head>
+"@
+            $html = $html.Replace('</head>', $pwaTags)
+        }
+        [System.IO.File]::WriteAllText($indexHtmlPath, $html)
+        Write-Host "Injected side wasm chunk loader and PWA tags into $indexHtmlPath"
+    }
+
+    # Generate PWA manifest and service worker
+    $manifestPath = Join-Path $FroggerRoot "builds/web/manifest.webmanifest"
+    $manifestContent = @"
+{
+  "name": "Frogger Remake",
+  "short_name": "Frogger",
+  "description": "1981 Arcade Frogger Remake",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#182332",
+  "theme_color": "#182332",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "index.apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
+"@
+    Set-Content -LiteralPath $manifestPath -Value $manifestContent -Encoding ascii
+
+    $swPath = Join-Path $FroggerRoot "builds/web/sw.js"
+    $swContent = @"
+self.addEventListener('install', (event) => {
+	self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+	event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener('fetch', (event) => {
+	// Let browser handle fetches natively with Cloudflare edge headers
+});
+"@
+    Set-Content -LiteralPath $swPath -Value $swContent -Encoding ascii
+
+    # Generate PWA 192 and 512 icons if missing
+    $icon192 = Join-Path $FroggerRoot "builds/web/icon-192.png"
+    $icon512 = Join-Path $FroggerRoot "builds/web/icon-512.png"
+    $appleIcon = Join-Path $FroggerRoot "builds/web/index.apple-touch-icon.png"
+    if (Test-Path -LiteralPath $appleIcon) {
+        if (-not (Test-Path -LiteralPath $icon192) -or -not (Test-Path -LiteralPath $icon512)) {
+            python -c "
+from PIL import Image
+im = Image.open(r'$appleIcon')
+im.resize((192, 192), Image.Resampling.LANCZOS).save(r'$icon192')
+im.resize((512, 512), Image.Resampling.LANCZOS).save(r'$icon512')
+" | Out-Null
         }
     }
 
