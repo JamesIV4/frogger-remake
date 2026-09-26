@@ -6,6 +6,7 @@ const FRAME_SECONDS: float = 33.0 / 2000.0
 var simulation: RefCounted = null
 var state: Dictionary = {"frame": 0, "ram": [], "video": [], "objects": [], "sounds": []}
 var actors: Dictionary = {}
+var batched_lanes: Dictionary = {}
 var input_pulse: InputPulse = InputPulse.new()
 var audio_player: AudioStreamPlayer = null
 var audio_playback: AudioStreamGeneratorPlayback = null
@@ -73,6 +74,13 @@ var lady_last_motion_frame: int = -1
 
 const LadyInRiverScale: float = 0.62
 const PassengerScale: float = 0.76
+
+# ROM lane tables. Rigid lanes render through one MultiMesh per lane; lanes with
+# rigged swimmers (turtles) and the river gator keep ModelActor nodes because
+# those meshes are skinned and animated.
+const LaneWidths: Array = [60, 31, 92, 44, 47, 0, 34, 18, 18, 18, 18]
+const LaneModels: Array = ["log", "turtle", "log", "log", "turtle", "", "truck", "sport", "car", "dozer", "racecar"]
+const BatchedLaneModels: Dictionary = {0: "log", 2: "log", 3: "log", 6: "truck", 7: "sport", 8: "car", 9: "dozer", 10: "racecar"}
 
 # UI elements
 var score_label: Label = null
@@ -389,6 +397,12 @@ func setup_world() -> void:
 
 	var board_scene = load("res://Models/board.glb")
 	add_child(board_scene.instantiate())
+
+	# Logs and vehicle bodies are rigid: one MultiMesh per lane draws every log
+	# and every car, truck, dozer or racecar with four spinning wheel pivots,
+	# instead of dozens of MeshInstance3D trees per lane.
+	for lane in BatchedLaneModels:
+		batched_lanes[lane] = BatchedLane.new(self, BatchedLaneModels[lane])
 
 	camera = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -862,6 +876,8 @@ func clear_presentation() -> void:
 	home_arrival.reset()
 	moving_visuals.reset()
 	frog_motion.reset()
+	for lane in batched_lanes.values():
+		lane.reset()
 	snake_facing.clear()
 	for gator in home_gator_visuals:
 		gator.reset()
@@ -991,21 +1007,26 @@ func update_player(fraction: float) -> void:
 
 func update_lanes(fraction: float) -> void:
 	turtle_supports.clear()
-	var widths: Array = [60, 31, 92, 44, 47, 0, 34, 18, 18, 18, 18]
-	var models: Array = ["log", "turtle", "log", "log", "turtle", "", "truck", "sport", "car", "dozer", "racecar"]
 	var level_val: int = BoardVisuals.at(state, 0x83b7)
 	if known_diving_level != level_val:
 		known_diving_groups.clear()
 		known_diving_level = level_val
 	var cur_frame: int = state.get("frame", 0)
+	# Rigid wheels share one turn clock; the per-lane offset keeps parallel
+	# traffic from spinning in lockstep.
+	var wheel_turn: float = TAU * fmod(float(cur_frame) * FRAME_SECONDS, 1.0)
 	for lane in range(11):
 		if lane == 5:
 			continue
 		var table: int = 0x8100 + lane * 9
 		var count: int = mini(8, BoardVisuals.at(state, table))
 		var row: int = (lane + 3) * 16
-		var width: int = widths[lane]
-		var is_turtle: bool = models[lane] == "turtle"
+		var width: int = LaneWidths[lane]
+		var model: String = LaneModels[lane]
+		var is_turtle: bool = model == "turtle"
+		var batch: BatchedLane = batched_lanes.get(lane)
+		if batch != null:
+			batch.begin(wheel_turn + float(lane) * 0.37)
 		for index in range(count):
 			var raw_center: float = float(BoardVisuals.at(state, table + index + 1) - (12 if lane < 5 else 3)) - float(width) / 2.0
 			var center: float = moving_visuals.step(lane * 16 + index, raw_center, cur_frame, presentation_delta, paused)
@@ -1025,8 +1046,11 @@ func update_lanes(fraction: float) -> void:
 					var render_x: float = x + (gator_fit.get("center_offset_pixels", 0.0) if crocodile else 0.0)
 					if not BoardVisuals.intersects_playfield(render_x, half_width):
 						continue
+					if batch != null and not crocodile:
+						batch.place(batched_lane_transform(lane, width, model, render_x, float(row)))
+						continue
 					var actor_key: String = "lane%d.%d.%d.%d.%s" % [lane, index, member, wrap, str(crocodile)]
-					var obj = actor(actor_key, "river_gator" if crocodile else models[lane])
+					var obj = actor(actor_key, "river_gator" if crocodile else model)
 					obj.set_active(true)
 					var straddling_edge: bool = absf(render_x - 120.0) + half_width > 110.0
 					obj.set_clipped(straddling_edge)
@@ -1035,7 +1059,7 @@ func update_lanes(fraction: float) -> void:
 						obj.root.rotation = Vector3(0, PI / 2.0, 0)
 						obj.root.scale = Vector3(gator_fit["width_scale"], 0.9, gator_fit["length_scale"])
 						obj.play("Bite")
-					elif models[lane] == "log":
+					elif model == "log":
 						obj.root.scale = Vector3((float(width) - 3.0) / 16.0, 1.0, 1.0)
 					elif is_turtle:
 						obj.root.position += Vector3(0, -depth, 0)
@@ -1045,6 +1069,17 @@ func update_lanes(fraction: float) -> void:
 						obj.root.rotation = Vector3(0, (-1.0 if lane % 2 == 0 else 1.0) * PI / 2.0, 0)
 						obj.root.scale = Vector3.ONE * 0.84
 						obj.play("Move")
+		if batch != null:
+			batch.finish()
+
+func batched_lane_transform(lane: int, width: int, model: String, render_x: float, row: float) -> Transform3D:
+	if model == "log":
+		# Logs keep their authored length axis on X and stretch to the lane slot;
+		# the batched shader cuts them at the board edge exactly like a clipped
+		# ModelActor would.
+		return Transform3D(Basis().scaled(Vector3((float(width) - 3.0) / 16.0, 1.0, 1.0)), pos3(render_x, row, -0.18))
+	var yaw: float = (-1.0 if lane % 2 == 0 else 1.0) * PI / 2.0
+	return Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3.ONE * 0.84), pos3(render_x, row, 0.02))
 
 func turtle_ride_depth(x: float, row: float) -> float:
 	var nearest: float = 10.0
@@ -1530,6 +1565,8 @@ func capture_review() -> void:
 	for k in actors.keys():
 		if k.begins_with("lane") and actors[k].root.is_visible_in_tree():
 			visible_logs += 1
+	for lane in batched_lanes.values():
+		visible_logs += lane.visible_instances()
 
 	var cur_state_frame: int = state.get("frame", 0)
 	var measurement: Dictionary = {

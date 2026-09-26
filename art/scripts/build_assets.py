@@ -82,6 +82,54 @@ def mesh(name,verts,faces,color):
     obj=bpy.data.objects.new(name,data);bpy.context.collection.objects.link(obj)
     return finish(obj,name,color)
 
+def join_objects(objects,name=None):
+    """Join parts into the first one, keeping every vertex group, material slot
+    and modifier the parts already carry."""
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in objects:obj.select_set(True)
+    bpy.context.view_layer.objects.active=objects[0]
+    if len(objects)>1:bpy.ops.object.join()
+    joined=bpy.context.view_layer.objects.active
+    if name:joined.name=name
+    return joined
+
+def consolidate(rigid=False):
+    """One mesh per material instead of one mesh per authored primitive.
+
+    Godot imports every Blender object as its own MeshInstance3D, so the parts
+    below would become hundreds of nodes, transforms and draw calls. Joining the
+    parts that already carry their rig weights (the snake's hand-weighted tube is
+    left alone) keeps every silhouette and deformation while collapsing a model
+    to one mesh per material. Rigid models have no rig at all, so they bake their
+    transforms and merge into a single multi-material mesh; a MultiMesh lane can
+    then draw every instance of the board, a log or a vehicle body from one mesh
+    resource. Wheel objects stay separate: Godot spins them as pivots.
+    """
+    groups={}
+    for obj in list(bpy.context.scene.objects):
+        if obj.type!='MESH' or obj.get('rig_wheel') or 'rig_weights_json' in obj:continue
+        groups.setdefault(tuple(sorted(material.name for material in obj.data.materials)),[]).append(obj)
+    joined=[join_objects(parts) for parts in groups.values()]
+    if not rigid:return None
+    # Bake into world space so the exported nodes stay untransformed and the
+    # authored bounds remain readable straight from the vertex data.
+    for obj in joined:
+        obj.data.transform(obj.matrix_world);obj.matrix_world=Matrix.Identity(4)
+    return join_objects(joined) if len(joined)>1 else joined[0]
+
+def wheel(name,s,y):
+    """One rigid wheel whose origin sits on its axle, so Godot can spin it with a
+    node transform instead of a wheel bone deforming skinned geometry."""
+    tire=cylinder(name,(s*.29,y,.17),(s*.44,y,.17),.18,'rubber',vertices=12)
+    hub=cylinder(name+' hub',(s*.443,y,.17),(s*.452,y,.17),.086,'hub',vertices=8)
+    for part in [tire,hub]:
+        bpy.ops.object.select_all(action='DESELECT');part.select_set(True)
+        bpy.context.view_layer.objects.active=part
+        bpy.ops.object.transform_apply(location=False,rotation=True,scale=True)
+    joined=join_objects([tire,hub],name);joined['rig_wheel']=True
+    assert joined.dimensions.x<min(joined.dimensions.y,joined.dimensions.z),f'{name} must spin around the model X axis'
+    return joined
+
 def muzzle(name,sections,color,bone):
     """A closed, tapered octagonal head section, with broad cheeks and a flared tip."""
     verts=[]
@@ -370,7 +418,8 @@ def otter():
     return {'Body':((0,0,.07),(0,0,.3),None),'Head':((0,-.25,.2),(0,-.5,.21),'Body'),'Tail':((0,.36,.12),(0,.8,.06),'Body')}
 
 def vehicle(kind):
-    specs={'Body':((0,0,.1),(0,0,.5),None)}
+    # Vehicles are rigid. Godot spins the four wheel pivots around the model X
+    # axis, so no vehicle ships an armature, skin weights or baked clip.
     long=1.85 if kind=='truck' else .94
     color={'car':'pink','racecar':'red','truck':'red','dozer':'cream','sport':'blue'}[kind]
     box('Chassis',(0,0,.18),(.66,long,.20),'rubber',bevel=.035)
@@ -399,14 +448,12 @@ def vehicle(kind):
         box('Back window',(0,.32,.54),(.46,.021,.17),'glass')
         for s in [-1,1]:box('Side window',(s*.29,.04,.57),(.02,.41,.16),'glass')
         box('Bumper',(0,-.59,.22),(.62,.055,.09),'hub',bevel=.02)
-    for s in [-1,1]:
-        for y in [-long*.34,long*.34]:
-            bone=f'Wheel{s}_{y:.2f}';specs[bone]=((s*.31,y,.17),(s*.44,y,.17),'Body')
-            cylinder('Tire',(s*.29,y,.17),(s*.44,y,.17),.18,'rubber',bone,12)
-            cylinder('Hub',(s*.443,y,.17),(s*.452,y,.17),.086,'hub',bone,8)
+    for s,side in [(-1,'L'),(1,'R')]:
+        for end,y in [('Front',-long*.34),('Rear',long*.34)]:
+            wheel(f'Wheel{end}{side}',s,y)
         box('Headlight',(s*.23,-long/2-.033,.32),(.14,.032,.10),'white')
         box('Tail lamp',(s*.23,long/2+.02,.3),(.12,.027,.075),'red')
-    return specs
+    return None
 
 def log():
     # Faceted trunk with subtle bends and taper. Its authored length remains
@@ -555,6 +602,9 @@ def rig_and_clips(specs,kind):
         else:
             group=obj.vertex_groups.new(name=obj['rig_bone']);group.add(list(range(len(obj.data.vertices))),1,'REPLACE')
         mod=obj.modifiers.new('Deform rig','ARMATURE');mod.object=rig;obj.parent=rig
+    # Every part now carries its own weights, so collapse one mesh per material
+    # before the clips bake: Godot skins a handful of meshes instead of dozens.
+    consolidate()
     clips=['Idle','Hop','Squash','Drown','Celebrate'] if kind in ('frog','lady_frog') else ['Idle','Swim','Dive'] if kind=='turtle' else ['Idle','Bite'] if kind in ('gator','river_gator') else ['Idle','Move']
     bpy.context.scene.render.fps=60
     rig.animation_data_create()
@@ -577,7 +627,6 @@ def rig_and_clips(specs,kind):
                 if 'Segment' in b.name:b.rotation_euler.z=.07*math.sin(p*math.tau+int(b.name[-1]))
                 if b.name=='Head' and clip=='Bite':b.rotation_euler.x=-.55*h
                 if b.name=='Tail':b.rotation_euler.z=.25*cycle
-                if 'Wheel' in b.name and clip=='Move':b.rotation_euler.y=p*math.tau*2
                 if clip=='Squash':
                     # Impact, then HOLD the flattened pose. No bobbing/recovery loop.
                     s=min(1,p/.14);s=s*s*(3-2*s)
@@ -616,6 +665,9 @@ def rig_and_clips(specs,kind):
 
 def export(kind,specs):
     clips=rig_and_clips(specs,kind) if specs else []
+    # Rigid models (board, logs, vehicle bodies) have no rig to weight parts, so
+    # they bake and merge into one multi-material mesh for their lane batcher.
+    if not specs:consolidate(rigid=True)
     bpy.context.scene.frame_set(0)
     bpy.context.view_layer.update()
     meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
@@ -649,29 +701,42 @@ footprints={r['asset']:r['footprintTiles'] for r in RECORDS}
 assert -1.20 < -.22-.70+footprints['turtle']['minZ']-.12, 'Maximum dive clips turtle feet against the river bed'
 frog=footprints['frog']
 gator_bounds=footprints['river_gator']
-source=['// Generated from the Blender mesh bounds in art/scripts/build_assets.py.',
-    'namespace FroggerRemake;',
-    'public readonly record struct ModelFootprint(float MinAlongX,float MaxAlongX,float AcrossRow);',
-    'public static class ModelFootprints {',
-    f'    public const float FrogAlongX={max(abs(frog["minX"]),abs(frog["maxX"]))*16:.5f}f;',
-    f'    public const float FrogAcrossRow={max(abs(frog["minY"]),abs(frog["maxY"]))*16:.5f}f;',
-    f'    public const float RiverGatorLengthTiles={gator_bounds["maxY"]-gator_bounds["minY"]:.6f}f;',
-    f'    public const float RiverGatorWidthTiles={gator_bounds["maxX"]-gator_bounds["minX"]:.6f}f;',
-    f'    public const float RiverGatorFrontTiles={-gator_bounds["minY"]:.6f}f;',
-    '    public const float RiverGatorSnoutTiles=0.605000f;',
-    f'    public const float LogTopTiles={footprints["log"]["maxZ"]:.6f}f;',
-    f'    public const float SnakeBottomTiles={footprints["snake"]["minZ"]:.6f}f;',
-    f'    public const float LadyBottomTiles={footprints["lady_frog"]["minZ"]:.6f}f;',
-    '    // Vehicles rotate their local length axis into the ROM X direction.',
-    '    // Presentation scales every vehicle root to 0.84.',
-    '    public static ModelFootprint Vehicle(int lane)=>lane switch {']
+# Recovered-hook numbers are mirrored in C# and GDScript, so generate both from
+# these values rather than letting the copies drift apart.
+constants=[('FrogAlongX',max(abs(frog['minX']),abs(frog['maxX']))*16,5),
+    ('FrogAcrossRow',max(abs(frog['minY']),abs(frog['maxY']))*16,5),
+    ('RiverGatorLengthTiles',gator_bounds['maxY']-gator_bounds['minY'],6),
+    ('RiverGatorWidthTiles',gator_bounds['maxX']-gator_bounds['minX'],6),
+    ('RiverGatorFrontTiles',-gator_bounds['minY'],6),
+    ('RiverGatorSnoutTiles',.605,6),
+    ('LogTopTiles',footprints['log']['maxZ'],6),
+    ('SnakeBottomTiles',footprints['snake']['minZ'],6),
+    ('LadyBottomTiles',footprints['lady_frog']['minZ'],6)]
+vehicles={}
 for lane,kind in [(6,'truck'),(7,'sport'),(8,'car'),(9,'dozer'),(10,'racecar')]:
     b=footprints[kind]
     # In GLB, Blender +Y maps to Godot -Z. Odd lanes rotate +90 degrees,
     # reversing the model's longitudinal direction in ROM X coordinates.
     min_x,max_x=(b['minY'],b['maxY']) if lane%2==0 else (-b['maxY'],-b['minY'])
     cross=max(abs(b['minX']),abs(b['maxX']))
-    source.append(f'        {lane}=>new({min_x*16*.84:.5f}f,{max_x*16*.84:.5f}f,{cross*16*.84:.5f}f), // {kind}')
+    vehicles[lane]=(f'{min_x*16*.84:.5f}',f'{max_x*16*.84:.5f}',f'{cross*16*.84:.5f}',kind)
+source=['// Generated from the Blender mesh bounds in art/scripts/build_assets.py.',
+    'namespace FroggerRemake;',
+    'public readonly record struct ModelFootprint(float MinAlongX,float MaxAlongX,float AcrossRow);',
+    'public static class ModelFootprints {']
+source+=[f'    public const float {name}={value:.{places}f}f;' for name,value,places in constants]
+source+=['    // Vehicles rotate their local length axis into the ROM X direction.',
+    '    // Presentation scales every vehicle root to 0.84.',
+    '    public static ModelFootprint Vehicle(int lane)=>lane switch {']
+source+=[f'        {lane}=>new({min_x}f,{max_x}f,{cross}f), // {kind}' for lane,(min_x,max_x,cross,kind) in vehicles.items()]
 source+=['        _=>throw new System.ArgumentOutOfRangeException(nameof(lane))','    };','}']
 (ROOT/'godot/Scripts/ModelFootprints.cs').write_text('\n'.join(source)+'\n')
+# The GDScript mirror is what the running game reads, so emit it from the same
+# numbers instead of letting the two drift apart.
+godot=['class_name ModelFootprints','']
+godot+=[f'const {name}: float = {value:.{places}f}' for name,value,places in constants]
+godot+=['','static func vehicle(lane: int) -> Dictionary:','\tmatch lane:']
+godot+=[f'\t\t{lane}: return {{"min_along_x": {min_x}, "max_along_x": {max_x}, "across_row": {cross}}}' for lane,(min_x,max_x,cross,kind) in vehicles.items()]
+godot+=['\t\t_: push_error("Invalid lane: %d" % lane); return {}']
+with open(ROOT/'godot/Scripts/ModelFootprints.gd','w',newline='\n') as handle:handle.write('\n'.join(godot)+'\n')
 print('FROGGER_ASSETS_COMPLETE',len(RECORDS))

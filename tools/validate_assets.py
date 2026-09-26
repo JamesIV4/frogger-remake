@@ -5,6 +5,20 @@ ROOT=Path(__file__).resolve().parents[1]
 SIZES={'SCALAR':1,'VEC2':2,'VEC3':3,'VEC4':4,'MAT4':16}
 FORMATS={5120:'b',5121:'B',5122:'h',5123:'H',5125:'I',5126:'f'}
 results=[]
+
+def node_matrix(node):
+    """Row-major 4x4 TRS matrix for one glTF node."""
+    tx,ty,tz=node.get('translation',(0,0,0));x,y,z,w=node.get('rotation',(0,0,0,1));sx,sy,sz=node.get('scale',(1,1,1))
+    r=[1-2*(y*y+z*z),2*(x*y-z*w),2*(x*z+y*w),2*(x*y+z*w),1-2*(x*x+z*z),2*(y*z-x*w),
+       2*(x*z-y*w),2*(y*z+x*w),1-2*(x*x+y*y)]
+    return [r[0]*sx,r[1]*sy,r[2]*sz,tx,r[3]*sx,r[4]*sy,r[5]*sz,ty,r[6]*sx,r[7]*sy,r[8]*sz,tz,0,0,0,1]
+
+def multiply(a,b):
+    return [sum(a[i*4+k]*b[k*4+j] for k in range(4)) for i in range(4) for j in range(4)]
+
+def apply(m,v):
+    return (m[0]*v[0]+m[1]*v[1]+m[2]*v[2]+m[3],m[4]*v[0]+m[5]*v[1]+m[6]*v[2]+m[7],m[8]*v[0]+m[9]*v[1]+m[10]*v[2]+m[11])
+
 for contract in json.loads((ROOT/'art/models.json').read_text()):
     footprint=contract['footprintTiles']
     assert all(math.isfinite(footprint[axis]) for axis in ('minX','maxX','minY','maxY','minZ','maxZ'))
@@ -21,15 +35,32 @@ for contract in json.loads((ROOT/'art/models.json').read_text()):
             scale={5121:255,5123:65535,5120:127,5122:32767}[a['componentType']]
             rows=[tuple(x/scale for x in row) for row in rows]
         return rows
+    # Rigid parts (the board, log bodies, vehicle wheels) keep authored vertices
+    # in their own node space, so their bounds only read correctly once the node
+    # chain is applied. Skinned meshes stay in bind space, where the runtime
+    # ignores the mesh node transform and the joints already place the vertices.
+    world_matrices={}
+    def visit(index,parent):
+        world_matrices[index]=multiply(parent,node_matrix(doc['nodes'][index]))
+        for child in doc['nodes'][index].get('children',[]):visit(child,world_matrices[index])
+    identity=[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]
+    for root in doc['scenes'][doc.get('scene',0)]['nodes']:visit(root,identity)
+    mesh_nodes={}
+    for index,node in enumerate(doc['nodes']):
+        if 'mesh' in node and node['mesh'] not in mesh_nodes:mesh_nodes[node['mesh']]=index
     vertices=0;skinned=0;triangles=0;max_error=0
     exported_x=[];exported_y=[];exported_z=[]
-    for mesh in doc['meshes']:
+    for index,mesh in enumerate(doc['meshes']):
+        node_index=mesh_nodes.get(index)
+        node=doc['nodes'][node_index] if node_index is not None else {}
+        node_space=identity if 'skin' in node else world_matrices.get(node_index,identity)
         for p in mesh['primitives']:
             positions=values(p['attributes']['POSITION']);vertices+=len(positions)
             assert all(math.isfinite(v) for row in positions for v in row)
-            exported_x.extend(row[0] for row in positions)
-            exported_y.extend(-row[2] for row in positions)
-            exported_z.extend(row[1] for row in positions)
+            world=[apply(node_space,row) for row in positions]
+            exported_x.extend(row[0] for row in world)
+            exported_y.extend(-row[2] for row in world)
+            exported_z.extend(row[1] for row in world)
             triangles+=doc['accessors'][p['indices']]['count']//3
             if 'WEIGHTS_0' in p['attributes']:
                 weights=values(p['attributes']['WEIGHTS_0']);skinned+=len(weights)

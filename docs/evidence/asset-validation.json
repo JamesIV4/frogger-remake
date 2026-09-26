@@ -129,65 +129,50 @@
     "asset": "car",
     "vertices": 1056,
     "triangles": 560,
-    "bones": 5,
-    "skinned_vertices": 1056,
+    "bones": 0,
+    "skinned_vertices": 0,
     "max_weight_error": 0,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "clips": [],
     "passed": true
   },
   {
     "asset": "truck",
     "vertices": 912,
     "triangles": 492,
-    "bones": 5,
-    "skinned_vertices": 912,
+    "bones": 0,
+    "skinned_vertices": 0,
     "max_weight_error": 0,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "clips": [],
     "passed": true
   },
   {
     "asset": "racecar",
-    "vertices": 1032,
+    "vertices": 1018,
     "triangles": 548,
-    "bones": 5,
-    "skinned_vertices": 1032,
+    "bones": 0,
+    "skinned_vertices": 0,
     "max_weight_error": 0,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "clips": [],
     "passed": true
   },
   {
     "asset": "dozer",
     "vertices": 1044,
     "triangles": 560,
-    "bones": 5,
-    "skinned_vertices": 1044,
+    "bones": 0,
+    "skinned_vertices": 0,
     "max_weight_error": 0,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "clips": [],
     "passed": true
   },
   {
     "asset": "sport",
     "vertices": 1056,
     "triangles": 560,
-    "bones": 5,
-    "skinned_vertices": 1056,
+    "bones": 0,
+    "skinned_vertices": 0,
     "max_weight_error": 0,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "clips": [],
     "passed": true
   },
   {

@@ -55,8 +55,8 @@
     "source": "art/source/turtle.blend",
     "glb": "godot/Models/turtle.glb",
     "footprintTiles": {
-      "minX": -0.501364,
-      "maxX": 0.501364,
+      "minX": -0.501363,
+      "maxX": 0.501363,
       "minY": -0.61,
       "maxY": 0.43,
       "minZ": -0.01,
@@ -177,11 +177,8 @@
   {
     "asset": "car",
     "triangles": 560,
-    "bones": 5,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "bones": 0,
+    "clips": [],
     "source": "art/source/car.blend",
     "glb": "godot/Models/car.glb",
     "footprintTiles": {
@@ -196,11 +193,8 @@
   {
     "asset": "truck",
     "triangles": 492,
-    "bones": 5,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "bones": 0,
+    "clips": [],
     "source": "art/source/truck.blend",
     "glb": "godot/Models/truck.glb",
     "footprintTiles": {
@@ -215,11 +209,8 @@
   {
     "asset": "racecar",
     "triangles": 548,
-    "bones": 5,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "bones": 0,
+    "clips": [],
     "source": "art/source/racecar.blend",
     "glb": "godot/Models/racecar.glb",
     "footprintTiles": {
@@ -234,11 +225,8 @@
   {
     "asset": "dozer",
     "triangles": 560,
-    "bones": 5,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "bones": 0,
+    "clips": [],
     "source": "art/source/dozer.blend",
     "glb": "godot/Models/dozer.glb",
     "footprintTiles": {
@@ -253,11 +241,8 @@
   {
     "asset": "sport",
     "triangles": 560,
-    "bones": 5,
-    "clips": [
-      "Idle",
-      "Move"
-    ],
+    "bones": 0,
+    "clips": [],
     "source": "art/source/sport.blend",
     "glb": "godot/Models/sport.glb",
     "footprintTiles": {

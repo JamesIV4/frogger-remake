@@ -73,7 +73,7 @@ try {
             "-o",
             $wasmBinary
         )
-        & em++ $cmd
+        & em++ @cmd
         Assert-FroggerExit 'Compile GDExtension wasm'
         Copy-Item -LiteralPath $wasmBinary -Destination "godot/bin/libfrogger_arcade.web.template_debug.wasm32.wasm" -Force
     }
