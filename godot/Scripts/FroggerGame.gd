@@ -89,6 +89,17 @@ var score_label: Label = null
 var high_label: Label = null
 var level_label: Label = null
 var lives_label: Label = null
+var lives_icons: HBoxContainer = null
+var frog_icon_texture: Texture2D = null
+
+# Mobile swipe & touch control state
+var touch_start_pos: Vector2 = Vector2.ZERO
+var touch_start_time: int = 0
+var touch_active: bool = false
+var swipe_triggered: bool = false
+var swipe_direction: int = 0
+var swipe_frames: int = 0
+const SWIPE_THRESHOLD: float = 30.0
 var message_label: Label = null
 var player_header: Label = null
 var timer_bar: ProgressBar = null
@@ -279,10 +290,19 @@ func capture_screenshot() -> void:
 	print("SCREENSHOT %s %s" % [screenshot, error])
 	get_tree().quit(0 if error == OK else 1)
 
+func trigger_swipe(dir: int) -> void:
+	swipe_direction = dir
+	swipe_frames = 6
+
 func read_direction() -> int:
 	var pads = Input.get_connected_joypads()
 	var joy: int = pads[0] if pads.size() > 0 else -1
 	var digital: int = 0
+	if swipe_frames > 0:
+		digital |= swipe_direction
+		swipe_frames -= 1
+		if swipe_frames == 0:
+			swipe_direction = 0
 	if Input.is_physical_key_pressed(KEY_UP) or Input.is_physical_key_pressed(KEY_W) or (joy >= 0 and Input.is_joy_button_pressed(joy, JOY_BUTTON_DPAD_UP)):
 		digital |= 1
 	if Input.is_physical_key_pressed(KEY_DOWN) or Input.is_physical_key_pressed(KEY_S) or (joy >= 0 and Input.is_joy_button_pressed(joy, JOY_BUTTON_DPAD_DOWN)):
@@ -346,6 +366,76 @@ func _unhandled_input(event: InputEvent) -> void:
 					show_menu(true)
 				else:
 					resume_game()
+
+	# Mobile swipe and touch controls
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			touch_start_pos = event.position
+			touch_start_time = Time.get_ticks_msec()
+			touch_active = true
+			swipe_triggered = false
+		else:
+			if touch_active and not swipe_triggered:
+				var elapsed: int = Time.get_ticks_msec() - touch_start_time
+				var dist: float = (event.position - touch_start_pos).length()
+				if elapsed < 350 and dist < 25.0:
+					if not started or BoardVisuals.at(state, 0x83fe) == 0:
+						start_game(1)
+					elif not paused and (menu == null or not menu.visible):
+						trigger_swipe(1)
+			touch_active = false
+			swipe_triggered = false
+
+	elif event is InputEventScreenDrag:
+		if touch_active and (menu == null or not menu.visible):
+			var offset: Vector2 = event.position - touch_start_pos
+			if offset.length() >= SWIPE_THRESHOLD:
+				if not started or BoardVisuals.at(state, 0x83fe) == 0:
+					start_game(1)
+				elif not paused:
+					var dir: int = 0
+					if absf(offset.x) > absf(offset.y):
+						dir = 8 if offset.x > 0 else 4
+					else:
+						dir = 2 if offset.y > 0 else 1
+					trigger_swipe(dir)
+				touch_start_pos = event.position
+				swipe_triggered = true
+
+	elif event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				touch_start_pos = event.position
+				touch_start_time = Time.get_ticks_msec()
+				touch_active = true
+				swipe_triggered = false
+			else:
+				if touch_active and not swipe_triggered:
+					var elapsed: int = Time.get_ticks_msec() - touch_start_time
+					var dist: float = (event.position - touch_start_pos).length()
+					if elapsed < 350 and dist < 25.0:
+						if not started or BoardVisuals.at(state, 0x83fe) == 0:
+							start_game(1)
+						elif not paused and (menu == null or not menu.visible):
+							trigger_swipe(1)
+				touch_active = false
+				swipe_triggered = false
+
+	elif event is InputEventMouseMotion:
+		if touch_active and (event.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0 and (menu == null or not menu.visible):
+			var offset: Vector2 = event.position - touch_start_pos
+			if offset.length() >= SWIPE_THRESHOLD:
+				if not started or BoardVisuals.at(state, 0x83fe) == 0:
+					start_game(1)
+				elif not paused:
+					var dir: int = 0
+					if absf(offset.x) > absf(offset.y):
+						dir = 8 if offset.x > 0 else 4
+					else:
+						dir = 2 if offset.y > 0 else 1
+					trigger_swipe(dir)
+				touch_start_pos = event.position
+				swipe_triggered = true
 
 func resume_game() -> void:
 	paused = false
@@ -648,6 +738,7 @@ func make_text(text_val: String, size_val: int, color_val: Color) -> Label:
 func setup_ui() -> void:
 	display_font = load("res://Fonts/PressStart2P-Regular.ttf")
 	body_font = load("res://Fonts/Silkscreen-Regular.ttf")
+	frog_icon_texture = load("res://frogger.svg")
 	var ui := CanvasLayer.new()
 	add_child(ui)
 
@@ -725,9 +816,19 @@ func setup_ui() -> void:
 	foot.add_theme_constant_override("separation", 26)
 	bottom.add_child(foot)
 
-	lives_label = make_text("FROGS   ●●●", 19, LimeColor)
-	lives_label.custom_minimum_size = Vector2(225, 0)
-	foot.add_child(lives_label)
+	var lives_box := HBoxContainer.new()
+	lives_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	lives_box.add_theme_constant_override("separation", 10)
+	lives_box.custom_minimum_size = Vector2(225, 0)
+	foot.add_child(lives_box)
+
+	lives_label = make_text("FROGS", 19, LimeColor)
+	lives_box.add_child(lives_label)
+
+	lives_icons = HBoxContainer.new()
+	lives_icons.add_theme_constant_override("separation", 5)
+	lives_icons.alignment = BoxContainer.ALIGNMENT_CENTER
+	lives_box.add_child(lives_icons)
 
 	timer_bar = ProgressBar.new()
 	timer_bar.min_value = 0
@@ -890,11 +991,18 @@ func update_hud() -> void:
 		save_preferences()
 	high_label.text = "%05d" % high_score
 	level_label.text = "PLAYER %d     •     LEVEL %02d" % [player, maxi(1, BoardVisuals.at(state, 0x83b7))]
-	var count: int = BoardVisuals.at(state, 0x83e5 if player == 1 else 0x83e6)
-	var circles: String = ""
-	for i in range(clampi(count, 0, 12)):
-		circles += "●"
-	lives_label.text = "FROGS   %s" % circles
+	lives_label.text = "FROGS"
+	var count: int = clampi(BoardVisuals.at(state, 0x83e5 if player == 1 else 0x83e6), 0, 12)
+	if lives_icons != null:
+		while lives_icons.get_child_count() < count:
+			var icon := TextureRect.new()
+			icon.texture = frog_icon_texture
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.custom_minimum_size = Vector2(18, 18)
+			lives_icons.add_child(icon)
+		for i in range(lives_icons.get_child_count()):
+			lives_icons.get_child(i).visible = (i < count)
 	timer_bar.value = clampf(float(BoardVisuals.at(state, 0x83dd)) / 60.0, 0.0, 1.0) * 100.0
 	if started and not paused:
 		if BoardVisuals.at(state, 0x83fe) == 0:

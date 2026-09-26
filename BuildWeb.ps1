@@ -101,6 +101,69 @@ try {
     Copy-Item -LiteralPath LICENSE,THIRD_PARTY.md -Destination builds/web/licenses -Force
     Get-ChildItem -LiteralPath godot/Fonts -Filter '*-OFL.txt' | Copy-Item -Destination builds/web/licenses -Force
 
+    # Cloudflare Pages 25 MiB file size limit: split index.side.wasm if > 25MB
+    $sideWasm = Join-Path $FroggerRoot "builds/web/index.side.wasm"
+    if (Test-Path -LiteralPath $sideWasm) {
+        $size = (Get-Item $sideWasm).Length
+        if ($size -gt 25MB) {
+            Write-Host "Splitting $sideWasm ($([math]::Round($size/1MB, 1)) MB) into Cloudflare-compatible chunks..." -ForegroundColor Cyan
+            $bytes = [System.IO.File]::ReadAllBytes($sideWasm)
+            $half = [int]([math]::Ceiling($bytes.Length / 2.0))
+            $part0 = [byte[]]::new($half)
+            $part1 = [byte[]]::new($bytes.Length - $half)
+            [System.Array]::Copy($bytes, 0, $part0, 0, $half)
+            [System.Array]::Copy($bytes, $half, $part1, 0, $bytes.Length - $half)
+            [System.IO.File]::WriteAllBytes("$sideWasm.part0", $part0)
+            [System.IO.File]::WriteAllBytes("$sideWasm.part1", $part1)
+            Remove-Item -LiteralPath $sideWasm -Force
+            Write-Host "Created index.side.wasm.part0 and index.side.wasm.part1 (< 25 MiB each)"
+        }
+    }
+
+    # Inject side wasm chunk loader into index.html
+    $indexHtmlPath = Join-Path $FroggerRoot "builds/web/index.html"
+    if (Test-Path -LiteralPath $indexHtmlPath) {
+        $html = [System.IO.File]::ReadAllText($indexHtmlPath)
+        $chunkScript = @"
+		<script>
+(function() {
+	const origFetch = window.fetch;
+	window.fetch = async function(resource, init) {
+		const url = (typeof resource === 'string') ? resource : (resource && resource.url) ? resource.url : '';
+		if (url.endsWith('.side.wasm')) {
+			const [r0, r1] = await Promise.all([
+				origFetch(url + '.part0', init),
+				origFetch(url + '.part1', init)
+			]);
+			if (!r0.ok || !r1.ok) {
+				throw new Error('Failed to load side wasm parts: ' + r0.status + ' / ' + r1.status);
+			}
+			const [b0, b1] = await Promise.all([r0.arrayBuffer(), r1.arrayBuffer()]);
+			const combined = new Uint8Array(b0.byteLength + b1.byteLength);
+			combined.set(new Uint8Array(b0), 0);
+			combined.set(new Uint8Array(b1), b0.byteLength);
+			return new Response(combined, {
+				status: 200,
+				statusText: 'OK',
+				headers: {
+					'Content-Type': 'application/wasm',
+					'Cross-Origin-Opener-Policy': 'same-origin',
+					'Cross-Origin-Embedder-Policy': 'require-corp'
+				}
+			});
+		}
+		return origFetch(resource, init);
+	};
+})();
+		</script>
+"@
+        if ($html -notmatch 'side\.wasm\.part0') {
+            $html = $html.Replace('<script src="index.js"></script>', "$chunkScript`r`n		<script src=`"index.js`"></script>")
+            [System.IO.File]::WriteAllText($indexHtmlPath, $html)
+            Write-Host "Injected side wasm chunk loader into $indexHtmlPath"
+        }
+    }
+
     $headersPath = Join-Path $FroggerRoot "builds/web/_headers"
     $headersContent = @"
 /*
