@@ -101,5 +101,15 @@ try {
     Copy-Item -LiteralPath LICENSE,THIRD_PARTY.md -Destination builds/web/licenses -Force
     Get-ChildItem -LiteralPath godot/Fonts -Filter '*-OFL.txt' | Copy-Item -Destination builds/web/licenses -Force
 
+    $headersPath = Join-Path $FroggerRoot "builds/web/_headers"
+    $headersContent = @"
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin
+"@
+    Set-Content -LiteralPath $headersPath -Value $headersContent -Encoding ascii
+
     Write-Host "Exported $froggerTarget"
+    Write-Host "Generated $headersPath"
 } finally { Pop-Location }

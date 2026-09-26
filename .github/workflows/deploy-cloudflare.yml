@@ -1,0 +1,37 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - web-release
+  workflow_dispatch:
+
+concurrency:
+  group: cloudflare-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Pre-built Web Artifacts
+    steps:
+      - name: Checkout web artifacts
+        uses: actions/checkout@v4
+
+      - name: Verify Web Artifacts
+        run: |
+          if [ ! -f index.html ]; then
+            echo "::error::index.html not found. Ensure this branch or commit contains the exported web artifacts."
+            exit 1
+          fi
+          if [ ! -f _headers ]; then
+            echo "::warning::_headers file missing; generating default COOP/COEP headers..."
+            printf "/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n" > _headers
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=frogger-remake --branch=main
