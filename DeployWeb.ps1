@@ -13,7 +13,6 @@ try {
     if (-not $SkipBuild) {
         Write-Host "Building web artifacts with BuildWeb.ps1..." -ForegroundColor Cyan
         & "$PSScriptRoot/BuildWeb.ps1"
-        Assert-FroggerExit 'BuildWeb'
     }
 
     $webDir = Join-Path $FroggerRoot "builds/web"
@@ -41,6 +40,9 @@ try {
         try {
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             Copy-Item -Path "$webDir/*" -Destination $tempDir -Recurse -Force
+            if (Test-Path -LiteralPath (Join-Path $webDir "_headers")) {
+                Copy-Item -LiteralPath (Join-Path $webDir "_headers") -Destination $tempDir -Force
+            }
 
             $originUrl = (git config --get remote.origin.url)
             if (-not $originUrl) {
@@ -49,7 +51,8 @@ try {
 
             Push-Location $tempDir
             try {
-                git init -b web-release | Out-Null
+                git init | Out-Null
+                git checkout -B web-release | Out-Null
                 git remote add origin $originUrl | Out-Null
                 git add -A | Out-Null
                 $commitMsg = "Deploy web build $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"

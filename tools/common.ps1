@@ -22,4 +22,4 @@ function Get-FroggerGodotStandard {
     }
     return Get-FroggerGodot
 }
-function Assert-FroggerExit([string]$Step) { if ($LASTEXITCODE -ne 0) { throw "$Step failed (exit $LASTEXITCODE)." } }
+function Assert-FroggerExit([string]$Step) { if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "$Step failed (exit $LASTEXITCODE)." } }
