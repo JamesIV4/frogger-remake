@@ -1,6 +1,6 @@
 # Frogger Remake
 
-- The game is in `godot/`, written in native C#. Do not introduce a JavaScript runtime or move rendering to the web.
+- The game is in `godot/`, written in native C#.
 - Treat `reference/frogger.zip` as immutable ground truth. `tools/prepare_rom.py` checks the precise set before producing local binaries. Keep original binaries and local Ghidra projects ignored.
 - Regenerate `godot/Scripts/Generated/` with `python tools/recompile.py`; do not hand-edit generated instruction bodies. Preserve cycle counts, unsigned wrapping, flags, register liveness and interrupt boundaries. Source maps and direct addresses are essential.
 - The vendored JavaScript is a checksum-pinned reference and test oracle. Keep it unchanged. Its descriptive names can be wrong; verify against bytes, Ghidra and MAME.
