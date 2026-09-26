@@ -4,19 +4,6 @@
 # Result: https://<owner>.github.io/<repo>/  (enable Pages: Settings ->
 # Pages -> Source: "GitHub Actions").
 #
-# ---------------------------------------------------------------------------
-# COPYRIGHT / ROM WARNING — READ BEFORE PUSHING THE BUTTON
-# ---------------------------------------------------------------------------
-# The exported .pck embeds res://rom/{maincpu,audiocpu,gfx,proms}.bin, which
-# are bytes derived from the copyrighted Frogger arcade ROMs
-# (reference/frogger.zip). Publishing them to a *public* Pages URL is
-# redistributing copyrighted material. Only use this workflow on a PRIVATE
-# repository (Pages on a private repo is visible to collaborators only), or
-# with ROMs you have the rights to distribute, or for a local-only test.
-# The compiled WASM side module (libfrogger_arcade.*.wasm) is your own code
-# and is fine to commit/publish — but the .pck is NOT, while it embeds ROMs.
-# ---------------------------------------------------------------------------
-#
 # How CI gets a ROM: a fresh runner has no reference/frogger.zip (git-ignored
 # on purpose). Provide it as a base64 Actions secret named FROGGER_ZIP_B64:
 #
@@ -174,6 +161,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-
-
