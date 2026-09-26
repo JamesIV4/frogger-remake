@@ -7,12 +7,17 @@
 # How CI gets a ROM: a fresh runner has no reference/frogger.zip (git-ignored
 # on purpose). Provide it as a base64 Actions secret named FROGGER_ZIP_B64:
 #
-#   [Windows]  certutil -encode reference\frogger.zip %TEMP%\fz.b64
-#              (strip the -----BEGIN/END CERTIFICATE----- lines, join to one line)
-#   [mac/Linux] base64 -w0 reference/frogger.zip
+#   [Windows]  certutil -encode reference\frogger.zip reference\frogger.txt
+#   [mac/Linux] base64 -w0 reference/frogger.zip > fz.b64
+#
+#   The step below normalises whatever you paste: it creates the git-ignored
+#   reference/ directory, strips certutil's -----BEGIN/END CERTIFICATE-----
+#   wrapper and CRLF endings, and joins everything to a single line. So both
+#   the raw multi-line certutil file and a pre-joined one-liner work. A
+#   ~22 KB value is fine (GitHub's secret limit is 48 KB).
 #
 #   Repo -> Settings -> Secrets and variables -> Actions -> New repository
-#   secret:  Name = FROGGER_ZIP_B64, Value = <that one long line>
+#   secret:  Name = FROGGER_ZIP_B64, Value = <the file contents>
 #
 # The workflow decodes the secret to reference/frogger.zip, runs
 # tools/prepare_rom.py (which verifies SHA-256 checksums before producing
@@ -63,12 +68,27 @@ jobs:
 
       - name: Restore ROM from secret
         shell: bash
+        env:
+          FROGGER_ZIP_B64: ${{ secrets.FROGGER_ZIP_B64 }}
         run: |
-          if [ -z "${{ secrets.FROGGER_ZIP_B64 }}" ]; then
+          set -euo pipefail
+          if [ -z "${FROGGER_ZIP_B64:-}" ]; then
             echo "::error::FROGGER_ZIP_B64 secret is not set. See .github/workflows/deploy-pages.yml header for setup."
             exit 1
           fi
-          echo "${{ secrets.FROGGER_ZIP_B64 }}" | base64 -d > reference/frogger.zip
+          # /reference is fully git-ignored and has no tracked files, so a fresh
+          # checkout has no reference/ directory at all -> the redirect below
+          # would fail with "No such file or directory". Create it first.
+          mkdir -p reference
+          # Normalise to a single bare line: certutil writes CRLF endings (GNU
+          # base64 -d rejects a stray CR), and drop the PEM-style
+          # -----BEGIN/END CERTIFICATE----- wrapper if it was pasted along.
+          printf '%s' "$FROGGER_ZIP_B64" \
+            | tr -d '\r' \
+            | sed -e '/-----BEGIN CERTIFICATE-----/d' -e '/-----END CERTIFICATE-----/d' \
+            | tr -d '\n \t' \
+            | base64 -d > reference/frogger.zip
+          python3 -c "import zipfile;print('restored', len(zipfile.ZipFile('reference/frogger.zip').namelist()), 'entries from secret')"
           python3 tools/prepare_rom.py
 
       - name: Setup Python
