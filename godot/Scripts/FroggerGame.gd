@@ -800,7 +800,7 @@ func show_menu(resume: bool) -> void:
 		add_button("TWO PLAYERS · TAKE TURNS", func(): start_game(2))
 
 	var collision := CheckButton.new()
-	collision.text = "Classic collision (original ROM)"
+	collision.text = "Classic collision"
 	collision.button_pressed = not modern
 	collision.toggled.connect(func(val):
 		modern = not val
