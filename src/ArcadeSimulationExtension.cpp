@@ -12,6 +12,7 @@ void ArcadeSimulation::_bind_methods() {
     ClassDB::bind_method(D_METHOD("snapshot"), &ArcadeSimulation::snapshot);
     ClassDB::bind_method(D_METHOD("get_sound_sample_count"), &ArcadeSimulation::get_sound_sample_count);
     ClassDB::bind_method(D_METHOD("get_sound_samples", "count"), &ArcadeSimulation::get_sound_samples);
+    ClassDB::bind_method(D_METHOD("get_stereo_sound_samples", "count"), &ArcadeSimulation::get_stereo_sound_samples);
     ClassDB::bind_method(D_METHOD("clear_sound_samples"), &ArcadeSimulation::clear_sound_samples);
     ClassDB::bind_method(D_METHOD("get_bonus_awards"), &ArcadeSimulation::get_bonus_awards);
     ClassDB::bind_method(D_METHOD("state_array"), &ArcadeSimulation::state_array);
@@ -83,6 +84,10 @@ int ArcadeSimulation::get_sound_sample_count() const {
 PackedFloat32Array ArcadeSimulation::get_sound_samples(int count) {
     PackedFloat32Array arr;
     if (!core || !core->Sound) return arr;
+    if (core->Sound->Samples.size() > 2400) {
+        size_t excess = core->Sound->Samples.size() - 2400;
+        core->Sound->Samples.erase(core->Sound->Samples.begin(), core->Sound->Samples.begin() + excess);
+    }
     int n = std::min(count, (int)core->Sound->Samples.size());
     if (n <= 0) return arr;
     arr.resize(n);
@@ -90,6 +95,25 @@ PackedFloat32Array ArcadeSimulation::get_sound_samples(int count) {
     for (int i = 0; i < n; i++) {
         w[i] = core->Sound->Samples.front();
         core->Sound->Samples.pop_front();
+    }
+    return arr;
+}
+
+PackedVector2Array ArcadeSimulation::get_stereo_sound_samples(int count) {
+    PackedVector2Array arr;
+    if (!core || !core->Sound) return arr;
+    if (core->Sound->Samples.size() > 2400) {
+        size_t excess = core->Sound->Samples.size() - 2400;
+        core->Sound->Samples.erase(core->Sound->Samples.begin(), core->Sound->Samples.begin() + excess);
+    }
+    int n = std::min(count, (int)core->Sound->Samples.size());
+    if (n <= 0) return arr;
+    arr.resize(n);
+    Vector2* w = (Vector2*)arr.ptrw();
+    for (int i = 0; i < n; i++) {
+        float v = core->Sound->Samples.front();
+        core->Sound->Samples.pop_front();
+        w[i] = Vector2(v, v);
     }
     return arr;
 }

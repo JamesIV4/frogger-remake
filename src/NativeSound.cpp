@@ -11,6 +11,25 @@ void NativeSound::Command(int value) {
     irq = true;
 }
 
+static const double VolumeTable[16] = {
+    7.4989420933245579e-02, // 0
+    8.9125093813374551e-02, // 1
+    1.0592537251772889e-01, // 2
+    1.2589254117941673e-01, // 3
+    1.4962356560944334e-01, // 4
+    1.7782794100389229e-01, // 5
+    2.1134890398366465e-01, // 6
+    2.5118864315095801e-01, // 7
+    2.9853826189179594e-01, // 8
+    3.5481338923357547e-01, // 9
+    4.2169650342858223e-01, // 10
+    5.0118723362727224e-01, // 11
+    5.9566214352901048e-01, // 12
+    7.0794578438413791e-01, // 13
+    8.4139514164519513e-01, // 14
+    1.0000000000000000e+00  // 15
+};
+
 void NativeSound::AdvanceTo(double cycles) {
     int64_t end = (int64_t)(cycles * 48000.0 / Clock);
     while (sampleNumber < end) {
@@ -23,6 +42,9 @@ void NativeSound::AdvanceTo(double cycles) {
         }
         Samples.push_back(Synthesize());
         sampleNumber++;
+    }
+    if (Samples.size() > 2400) {
+        Samples.erase(Samples.begin(), Samples.end() - 2400);
     }
 }
 
@@ -97,12 +119,13 @@ float NativeSound::Synthesize() {
     double sum = 0.0;
     for (int ch = 0; ch < 3; ch++) {
         int p = Registers[2 * ch] | ((Registers[2 * ch + 1] & 15) << 8);
-        tone[ch] = fmod(tone[ch] + Clock / (16.0 * 48000.0 * (double)std::max(1, p)), 1.0);
+        tone[ch] += Clock / (16.0 * 48000.0 * (double)std::max(1, p));
+        if (tone[ch] >= 1.0) tone[ch] -= (double)(int64_t)tone[ch];
         bool gate = ((Registers[7] & (1 << ch)) != 0 || tone[ch] < 0.5) &&
                     ((Registers[7] & (8 << ch)) != 0 || (lfsr & 1) != 0);
         int volume = (Registers[8 + ch] & 16) != 0 ? envelopeStep : (Registers[8 + ch] & 15);
         if (gate && volume > 0) {
-            sum += pow(10.0, (double)(volume - 15) * 1.5 / 20.0);
+            sum += VolumeTable[std::clamp(volume, 0, 15)];
         }
     }
     double raw = sum * 0.23;

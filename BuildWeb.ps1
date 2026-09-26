@@ -51,6 +51,7 @@ try {
 
         New-Item -ItemType Directory -Force godot/bin | Out-Null
         $cmd = @(
+            "-pthread",
             "-sSIDE_MODULE=1",
             "-sWASM_BIGINT",
             "-sSUPPORT_LONGJMP=wasm",
@@ -63,7 +64,7 @@ try {
             "-Isrc/godot-cpp/gen/include",
             "-Isrc/godot-cpp/gdextension",
             "src/ArcadeSimulation.cpp",
-            "src/ArcadeSimulationNative.cpp",
+            "src/ArcadeSimulationExtension.cpp",
             "src/NativeSound.cpp",
             "src/Generated/MainProgram.cpp",
             "src/Generated/SoundProgram.cpp",

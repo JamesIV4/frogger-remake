@@ -7,3 +7,7 @@ windows.debug.x86_64 = "res://bin/libfrogger_arcade.windows.template_debug.x86_6
 windows.release.x86_64 = "res://bin/libfrogger_arcade.windows.template_release.x86_64.dll"
 web.debug.wasm32 = "res://bin/libfrogger_arcade.web.template_debug.wasm32.wasm"
 web.release.wasm32 = "res://bin/libfrogger_arcade.web.template_release.wasm32.wasm"
+web.debug.wasm32.threads = "res://bin/libfrogger_arcade.web.template_debug.wasm32.wasm"
+web.release.wasm32.threads = "res://bin/libfrogger_arcade.web.template_release.wasm32.wasm"
+web.debug.wasm32.nothreads = "res://bin/libfrogger_arcade.web.template_debug.wasm32.wasm"
+web.release.wasm32.nothreads = "res://bin/libfrogger_arcade.web.template_release.wasm32.wasm"

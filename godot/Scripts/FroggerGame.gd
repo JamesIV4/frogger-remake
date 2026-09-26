@@ -194,9 +194,9 @@ func _process(delta: float) -> void:
 			return
 		step_review()
 	elif not paused:
-		accumulator += minf(delta, 0.2)
+		accumulator = minf(accumulator + delta, 0.066)
 		var steps: int = 0
-		while accumulator >= FRAME_SECONDS and steps < 12:
+		while accumulator >= FRAME_SECONDS and steps < 4:
 			steps += 1
 			var input_val: int = read_direction() if started else 0
 			if coin_frames > 0:
@@ -310,6 +310,7 @@ static func pos3(x: float, row: float, height: float = 0.0) -> Vector3:
 	return Vector3((x - 120.0) / 16.0, height, (row - 128.0) / 16.0)
 
 func setup_world() -> void:
+	var is_web: bool = OS.has_feature("web")
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color("171e29")
@@ -317,10 +318,13 @@ func setup_world() -> void:
 	env.ambient_light_color = Color.WHITE
 	env.ambient_light_energy = 0.30
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
-	env.ssao_enabled = true
-	env.ssao_intensity = 1.45
-	env.ssao_radius = 1.0
-	env.ssao_sharpness = 0.55
+	if is_web:
+		env.ssao_enabled = false
+	else:
+		env.ssao_enabled = true
+		env.ssao_intensity = 1.45
+		env.ssao_radius = 1.0
+		env.ssao_sharpness = 0.55
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
 	var world_env := WorldEnvironment.new()
 	world_env.environment = env
@@ -331,8 +335,14 @@ func setup_world() -> void:
 	sun.light_energy = 1.05
 	sun.light_angular_distance = 1.5
 	sun.shadow_enabled = true
-	sun.shadow_blur = 1.8
-	sun.directional_shadow_blend_splits = true
+	if is_web:
+		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
+		sun.directional_shadow_blend_splits = false
+		sun.shadow_blur = 0.6
+		sun.directional_shadow_max_distance = 28.0
+	else:
+		sun.shadow_blur = 1.8
+		sun.directional_shadow_blend_splits = true
 	add_child(sun)
 	sun.look_at(Vector3(1.4, -2.0, 1.0), Vector3.UP)
 
@@ -371,7 +381,7 @@ func feed_audio() -> void:
 		audio_player = AudioStreamPlayer.new()
 		var gen := AudioStreamGenerator.new()
 		gen.mix_rate = 48000
-		gen.buffer_length = 0.12
+		gen.buffer_length = 0.08
 		audio_player.stream = gen
 		audio_player.volume_db = -9.0
 		add_child(audio_player)
@@ -388,15 +398,21 @@ func feed_audio() -> void:
 		audio_playback = audio_player.get_stream_playback() as AudioStreamGeneratorPlayback
 	if audio_playback == null:
 		return
-	var n: int = mini(sample_count, audio_playback.get_frames_available())
+	var available: int = audio_playback.get_frames_available()
+	var n: int = mini(sample_count, available)
 	if n > 0:
-		var raw = simulation.get_sound_samples(n)
-		var buf := PackedVector2Array()
-		buf.resize(raw.size())
-		for i in range(raw.size()):
-			var v: float = raw[i]
-			buf[i] = Vector2(v, v)
-		audio_playback.push_buffer(buf)
+		if simulation.has_method("get_stereo_sound_samples"):
+			var buf = simulation.get_stereo_sound_samples(n)
+			if buf.size() > 0:
+				audio_playback.push_buffer(buf)
+		else:
+			var raw = simulation.get_sound_samples(n)
+			var buf := PackedVector2Array()
+			buf.resize(raw.size())
+			for i in range(raw.size()):
+				var v: float = raw[i]
+				buf[i] = Vector2(v, v)
+			audio_playback.push_buffer(buf)
 
 func apply_fullscreen() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
@@ -769,7 +785,7 @@ func track_lady_hop() -> void:
 func update_actors() -> void:
 	var fraction: float = render_fraction()
 	for a in actors.values():
-		a.root.visible = false
+		a.set_active(false)
 	update_bonuses(fraction)
 	update_lanes(fraction)
 	update_player(fraction)
@@ -781,7 +797,7 @@ func update_player(fraction: float) -> void:
 	player.set_squash_color(0.0)
 	var cur_frame: int = state.get("frame", 0)
 	var holding_home: bool = home_arrival.active(cur_frame, fraction)
-	player.root.visible = holding_home or FrogVisualState.player_on_board(state)
+	player.set_active(holding_home or FrogVisualState.player_on_board(state))
 	var hop: int = frog_visual.hop_direction
 	if frog_visual.hop_active(cur_frame):
 		match hop:
@@ -841,7 +857,7 @@ func update_player(fraction: float) -> void:
 			actors["passenger"] = passenger
 		else:
 			passenger = actors["passenger"]
-		passenger.root.visible = true
+		passenger.set_active(true)
 		passenger.root.position = Vector3.ZERO
 		passenger.root.scale = Vector3.ONE * PassengerScale
 		passenger.root.global_rotation = Vector3(0, player.root.global_rotation.y, 0)
@@ -894,7 +910,9 @@ func update_lanes(fraction: float) -> void:
 						continue
 					var actor_key: String = "lane%d.%d.%d.%d.%s" % [lane, index, member, wrap, str(crocodile)]
 					var obj = actor(actor_key, "river_gator" if crocodile else models[lane])
-					obj.root.visible = true
+					obj.set_active(true)
+					var straddling_edge: bool = absf(render_x - 120.0) + half_width > 110.0
+					obj.set_clipped(straddling_edge)
 					obj.root.position = pos3(render_x, float(row), ((-0.22 if is_turtle else -0.18) if lane < 5 else 0.02))
 					if crocodile:
 						obj.root.rotation = Vector3(0, PI / 2.0, 0)
@@ -929,21 +947,21 @@ func update_homes_and_hazards() -> void:
 		var held_here: bool = home_arrival.active(cur_frame, frac) and absf(float(home_arrival.x) - (24.0 + 48.0 * float(i))) <= 8.0
 		if BoardVisuals.at(state, home_base + i) != 0 and not held_here:
 			var a = actor("home%d" % i, "frog")
-			a.root.visible = true
+			a.set_active(true)
 			a.root.position = Vector3(-6.0 + 3.0 * float(i), 0.08, -6.0)
 			a.root.rotation = Vector3(0, PI, 0)
 			a.play("Celebrate")
 		var tile: int = BoardVisuals.at(state, 0xab64 - i * 0xc0)
 		if tile >= 44 and tile <= 47:
 			var a = actor("homefly%d" % i, "fly")
-			a.root.visible = true
+			a.set_active(true)
 			a.root.position = Vector3(-6.0 + 3.0 * float(i), 0.12, -6.0)
 		var native_gator: bool = (tile == 208 or BoardVisuals.at(state, 0xab64 - i * 0xc0 + 32) == 208)
 		var native_reveal: float = BoardVisuals.home_gator_reveal(state, tile == 208, frac) if native_gator else 0.0
 		var reveal_val = home_gator_visuals[i].reveal(float(cur_frame) + frac, native_gator, native_reveal)
 		if reveal_val != null:
 			var a = actor("homegator%d" % i, "gator")
-			a.root.visible = true
+			a.set_active(true)
 			a.root.position = Vector3(-6.0 + 3.0 * float(i), 0.10, -7.03 + 0.75 * float(reveal_val))
 			a.root.scale = Vector3.ONE * 0.6
 			a.play("Bite" if native_gator else "Idle")
@@ -955,7 +973,7 @@ func update_homes_and_hazards() -> void:
 			continue
 		var is_snake: bool = (addr != 0x8058)
 		var a = actor("hazard%d" % addr, "snake" if is_snake else "otter")
-		a.root.visible = true
+		a.set_active(true)
 		var surface: float = -0.18 + ModelFootprints.LogTopTiles if (is_snake and y < 128) else BoardVisuals.surface_height(float(y))
 		var height: float = surface - 0.75 * ModelFootprints.SnakeBottomTiles + 0.008 if is_snake else surface + 0.01
 		var motion_id: int = 1000 + addr
@@ -976,7 +994,7 @@ func update_homes_and_hazards() -> void:
 
 	if lady_visual.visible(ModelFootprints.FrogAlongX * LadyInRiverScale):
 		var a = actor("lady", "lady_frog")
-		a.root.visible = true
+		a.set_active(true)
 		a.root.position = pos3(moving_visuals.step(50000, lady_visual.x, cur_frame, presentation_delta, paused),
 			float(BoardVisuals.LadyFrogRow), BoardVisuals.lady_frog_height(LadyInRiverScale))
 		a.root.scale = Vector3.ONE * LadyInRiverScale
