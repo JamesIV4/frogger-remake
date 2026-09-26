@@ -86,6 +86,16 @@ var menu: PanelContainer = null
 var message_panel: PanelContainer = null
 var menu_items: VBoxContainer = null
 var bonus_overlay: Control = null
+var fps_container: PanelContainer = null
+var fps_label: Label = null
+var show_fps: bool = true
+var prof_sim_us: float = 0.0
+var prof_cam_us: float = 0.0
+var prof_audio_us: float = 0.0
+var prof_actors_us: float = 0.0
+var prof_hud_us: float = 0.0
+var prof_total_script_us: float = 0.0
+var prof_last_steps: int = 0
 var display_font: Font = null
 var body_font: Font = null
 
@@ -191,14 +201,15 @@ func start_game(players: int) -> void:
 func _process(delta: float) -> void:
 	if simulation == null:
 		return
+	var t_start: int = Time.get_ticks_usec()
 	presentation_delta = clampf(delta, 0.0, 0.1)
+	var steps: int = 0
 	if review != "":
 		if review_capture_pending:
 			return
 		step_review()
 	elif not paused:
 		accumulator = minf(accumulator + delta, 0.066)
-		var steps: int = 0
 		while accumulator >= FRAME_SECONDS and steps < 4:
 			steps += 1
 			var input_val: int = read_direction() if started else 0
@@ -208,14 +219,35 @@ func _process(delta: float) -> void:
 			simulation.step(input_val)
 			observe_frame()
 			accumulator -= FRAME_SECONDS
+	var t_sim: int = Time.get_ticks_usec()
 	update_frog_motion()
 	update_camera(delta)
+	var t_cam: int = Time.get_ticks_usec()
 	feed_audio()
+	var t_audio: int = Time.get_ticks_usec()
 	update_actors()
+	var t_actors: int = Time.get_ticks_usec()
 	update_hud()
+	var t_hud: int = Time.get_ticks_usec()
 	if water != null:
 		water.set_shader_parameter("clock", float(state.get("frame", 0)) * FRAME_SECONDS)
 	update_review_camera()
+
+	if show_fps:
+		var sim_us: float = float(t_sim - t_start)
+		var cam_us: float = float(t_cam - t_sim)
+		var audio_us: float = float(t_audio - t_cam)
+		var actors_us: float = float(t_actors - t_audio)
+		var hud_us: float = float(t_hud - t_actors)
+		var total_us: float = float(t_hud - t_start)
+		prof_sim_us = lerpf(prof_sim_us, sim_us, 0.1)
+		prof_cam_us = lerpf(prof_cam_us, cam_us, 0.1)
+		prof_audio_us = lerpf(prof_audio_us, audio_us, 0.1)
+		prof_actors_us = lerpf(prof_actors_us, actors_us, 0.1)
+		prof_hud_us = lerpf(prof_hud_us, hud_us, 0.1)
+		prof_total_script_us = lerpf(prof_total_script_us, total_us, 0.1)
+		prof_last_steps = steps
+
 	if review != "":
 		capture_review()
 	elif screenshot != "":
@@ -431,6 +463,7 @@ func load_preferences() -> void:
 	if c.load("user://settings.cfg") == OK:
 		high_score = int(c.get_value("play", "high_score", 0))
 		muted = bool(c.get_value("play", "muted", false))
+		show_fps = bool(c.get_value("play", "show_fps", true))
 		shadows_enabled = bool(c.get_value("play", "shadows_enabled", true))
 		antialiasing_enabled = bool(c.get_value("play", "antialiasing_enabled", true))
 		var version: int = int(c.get_value("play", "defaults_version", 0))
@@ -449,6 +482,8 @@ func load_preferences() -> void:
 		save_preferences()
 	apply_fullscreen()
 	apply_antialiasing()
+	if fps_container != null:
+		fps_container.visible = show_fps
 	if sun != null:
 		sun.shadow_enabled = shadows_enabled
 
@@ -460,6 +495,7 @@ func save_preferences() -> void:
 	c.set_value("play", "high_score", high_score)
 	c.set_value("play", "modern_collision", modern)
 	c.set_value("play", "muted", muted)
+	c.set_value("play", "show_fps", show_fps)
 	c.set_value("play", "shadows_enabled", shadows_enabled)
 	c.set_value("play", "antialiasing_enabled", antialiasing_enabled)
 	c.set_value("play", "perspective_view", perspective_view)
@@ -509,6 +545,26 @@ func setup_ui() -> void:
 	body_font = load("res://Fonts/Silkscreen-Regular.ttf")
 	var ui := CanvasLayer.new()
 	add_child(ui)
+
+	fps_container = PanelContainer.new()
+	var fps_style := StyleBoxFlat.new()
+	fps_style.bg_color = Color(0.06, 0.09, 0.14, 0.85)
+	fps_style.set_corner_radius_all(6)
+	fps_style.content_margin_left = 10
+	fps_style.content_margin_right = 10
+	fps_style.content_margin_top = 6
+	fps_style.content_margin_bottom = 6
+	fps_container.add_theme_stylebox_override("panel", fps_style)
+	fps_container.position = Vector2(16, 16)
+	fps_container.visible = show_fps
+	ui.add_child(fps_container)
+
+	fps_label = Label.new()
+	fps_label.add_theme_font_override("font", body_font)
+	fps_label.add_theme_font_size_override("font_size", 13)
+	fps_label.add_theme_color_override("font_color", Color("55ff77"))
+	fps_container.add_child(fps_label)
+
 	var root := Control.new()
 	ui.add_child(root)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -683,6 +739,16 @@ func show_menu(resume: bool) -> void:
 		save_preferences())
 	menu_items.add_child(aa_btn)
 
+	var fps_btn := CheckButton.new()
+	fps_btn.text = "FPS Counter"
+	fps_btn.button_pressed = show_fps
+	fps_btn.toggled.connect(func(val):
+		show_fps = val
+		if fps_container != null:
+			fps_container.visible = show_fps
+		save_preferences())
+	menu_items.add_child(fps_btn)
+
 	var sound_btn := CheckButton.new()
 	sound_btn.text = "Sound"
 	sound_btn.button_pressed = not muted
@@ -733,6 +799,21 @@ func update_hud() -> void:
 		else:
 			message_label.text = ""
 	message_panel.visible = message_label.text.length() > 0
+	if fps_label != null and show_fps:
+		var fps: float = Engine.get_frames_per_second()
+		var frame_ms: float = presentation_delta * 1000.0
+		var sim_ms: float = prof_sim_us / 1000.0
+		var audio_ms: float = prof_audio_us / 1000.0
+		var actors_ms: float = prof_actors_us / 1000.0
+		var script_ms: float = prof_total_script_us / 1000.0
+		var gpu_ms: float = maxf(0.0, frame_ms - script_ms)
+		fps_label.text = "FPS: %3d (%4.1f ms)\nSim:   %4.1f ms (%d step%s)\nAudio: %4.1f ms\nActors:%4.1f ms\nGPU:   %4.1f ms" % [
+			int(fps), frame_ms,
+			sim_ms, prof_last_steps, ("s" if prof_last_steps != 1 else " "),
+			audio_ms,
+			actors_ms,
+			gpu_ms
+		]
 
 func bcd_score(addr: int) -> int:
 	var low: int = BoardVisuals.at(state, addr)
