@@ -1,64 +1,31 @@
 {
   "wrapping": true,
   "deaths": [
-    {
-      "water": false,
-      "frames": 95,
-      "subcounterResets": 5,
-      "monotonic": true
-    },
-    {
-      "water": true,
-      "frames": 79,
-      "subcounterResets": 4,
-      "monotonic": true
-    }
+    {"water": false, "frames": 95, "subcounterResets": 5, "monotonic": true},
+    {"water": true, "frames": 79, "subcounterResets": 4, "monotonic": true}
   ],
   "bonuses": [
-    {
-      "bug": false,
-      "rider": false,
-      "fifth": false,
-      "events": 1
-    },
-    {
-      "bug": true,
-      "rider": false,
-      "fifth": false,
-      "events": 2
-    },
-    {
-      "bug": false,
-      "rider": true,
-      "fifth": false,
-      "events": 2
-    },
-    {
-      "bug": true,
-      "rider": true,
-      "fifth": false,
-      "events": 3
-    },
-    {
-      "bug": true,
-      "rider": true,
-      "fifth": true,
-      "events": 3
-    }
+    {"bug": false, "rider": false, "fifth": false, "events": 1},
+    {"bug": true, "rider": false, "fifth": false, "events": 2},
+    {"bug": false, "rider": true, "fifth": false, "events": 2},
+    {"bug": true, "rider": true, "fifth": false, "events": 3},
+    {"bug": true, "rider": true, "fifth": true, "events": 3}
   ],
-  "turtleMaximumStep": 0.02622816,
-  "turtleJumps": [],
+  "turtleMaximumStep": 0.0262282,
+  "turtleJumps": [
+
+  ],
   "heldInputFrames": 96,
   "singlePressX": 144,
   "repressedX": 160,
   "frogNativeStalls": 87,
   "frogVisualMovesDuringStalls": 12,
-  "maxFrogLag": 0.83999634,
+  "maxFrogLag": 0.839996,
   "lowerGrassRow": 240,
   "nativeObjectMoves": 702,
   "nativeObjectStalls": 1088,
   "subpixelMovesDuringNativeStalls": 1066,
-  "maxVisualLag": 1.189311,
+  "maxVisualLag": 1.18931,
   "exportedModelBoundsVerified": 6,
   "vehicleFrontAndBackEdgesVerified": 5,
   "modelCollisionLiveSides": 2

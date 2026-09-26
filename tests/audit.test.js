@@ -11,7 +11,7 @@ test('both ROM images match the native compiler input hashes; a one-byte mutatio
  }
 });
 test('no recovered main routine is missing from native address dispatch',()=>{
- const code=readFileSync('godot/Scripts/Generated/MainProgram.cs','utf8');
+ const code=readFileSync('src/Generated/MainProgram.cpp','utf8');
  assert.equal(Object.keys(ROUTINES).length,165);
  for(const address of Object.keys(ROUTINES))assert.ok(code.includes(`case 0x${Number(address).toString(16).padStart(4,'0')}:`));
 });

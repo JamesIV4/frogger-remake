@@ -5,7 +5,7 @@
     "ghidraFunction": "0000",
     "ghidraDecompiled": true,
     "firstInstruction": "3a0040",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0000",
     "equivalenceFixture": "equivalence-0000.test.js",
     "checked": true
@@ -16,7 +16,7 @@
     "ghidraFunction": "0018",
     "ghidraDecompiled": true,
     "firstInstruction": "4f",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0018",
     "equivalenceFixture": "equivalence-0018.test.js",
     "checked": true
@@ -27,7 +27,7 @@
     "ghidraFunction": "0028",
     "ghidraDecompiled": true,
     "firstInstruction": "1a",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0028",
     "equivalenceFixture": "equivalence-0028.test.js",
     "checked": true
@@ -38,7 +38,7 @@
     "ghidraFunction": "0038",
     "ghidraDecompiled": true,
     "firstInstruction": "111020",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0038",
     "equivalenceFixture": "equivalence-0038.test.js",
     "checked": true
@@ -49,7 +49,7 @@
     "ghidraFunction": "0066",
     "ghidraDecompiled": true,
     "firstInstruction": "f5",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0066",
     "equivalenceFixture": "equivalence-0066.test.js",
     "checked": true
@@ -60,7 +60,7 @@
     "ghidraFunction": "0292",
     "ghidraDecompiled": true,
     "firstInstruction": "2a9d82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0292",
     "equivalenceFixture": "equivalence-0292.test.js",
     "checked": true
@@ -71,7 +71,7 @@
     "ghidraFunction": "02a3",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x02a3",
     "equivalenceFixture": "equivalence-02a3.test.js",
     "checked": true
@@ -82,7 +82,7 @@
     "ghidraFunction": "0341",
     "ghidraDecompiled": true,
     "firstInstruction": "3ad683",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0341",
     "equivalenceFixture": "shared fixture",
     "checked": true
@@ -93,7 +93,7 @@
     "ghidraFunction": "0368",
     "ghidraDecompiled": true,
     "firstInstruction": "2ac783",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0368",
     "equivalenceFixture": "shared fixture",
     "checked": true
@@ -104,7 +104,7 @@
     "ghidraFunction": "040b",
     "ghidraDecompiled": true,
     "firstInstruction": "3aea83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x040b",
     "equivalenceFixture": "equivalence-040b.test.js",
     "checked": true
@@ -115,7 +115,7 @@
     "ghidraFunction": "0457",
     "ghidraDecompiled": true,
     "firstInstruction": "cd1f0b",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0457",
     "equivalenceFixture": "equivalence-0457.test.js",
     "checked": true
@@ -126,7 +126,7 @@
     "ghidraFunction": "048f",
     "ghidraDecompiled": true,
     "firstInstruction": "cd590f",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x048f",
     "equivalenceFixture": "equivalence-048f.test.js",
     "checked": true
@@ -137,7 +137,7 @@
     "ghidraFunction": "04f3",
     "ghidraDecompiled": true,
     "firstInstruction": "21ca83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x04f3",
     "equivalenceFixture": "equivalence-04f3.test.js",
     "checked": true
@@ -148,7 +148,7 @@
     "ghidraFunction": "0534",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0534",
     "equivalenceFixture": "equivalence-0534.test.js",
     "checked": true
@@ -159,7 +159,7 @@
     "ghidraFunction": "0547",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0547",
     "equivalenceFixture": "equivalence-0547.test.js",
     "checked": true
@@ -170,7 +170,7 @@
     "ghidraFunction": "0557",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0557",
     "equivalenceFixture": "equivalence-0557.test.js",
     "checked": true
@@ -181,7 +181,7 @@
     "ghidraFunction": "0567",
     "ghidraDecompiled": true,
     "firstInstruction": "ff",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0567",
     "equivalenceFixture": "equivalence-0567.test.js",
     "checked": true
@@ -192,7 +192,7 @@
     "ghidraFunction": "05d3",
     "ghidraDecompiled": true,
     "firstInstruction": "3e01",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x05d3",
     "equivalenceFixture": "equivalence-05d3.test.js",
     "checked": true
@@ -203,7 +203,7 @@
     "ghidraFunction": "05f0",
     "ghidraDecompiled": true,
     "firstInstruction": "3e10",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x05f0",
     "equivalenceFixture": "equivalence-05f0.test.js",
     "checked": true
@@ -214,7 +214,7 @@
     "ghidraFunction": "0629",
     "ghidraDecompiled": true,
     "firstInstruction": "cde607",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0629",
     "equivalenceFixture": "equivalence-0629.test.js",
     "checked": true
@@ -225,7 +225,7 @@
     "ghidraFunction": "064b",
     "ghidraDecompiled": true,
     "firstInstruction": "210c80",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x064b",
     "equivalenceFixture": "equivalence-064b.test.js",
     "checked": true
@@ -236,7 +236,7 @@
     "ghidraFunction": "0670",
     "ghidraDecompiled": true,
     "firstInstruction": "2164ab",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0670",
     "equivalenceFixture": "equivalence-0670.test.js",
     "checked": true
@@ -247,7 +247,7 @@
     "ghidraFunction": "0695",
     "ghidraDecompiled": true,
     "firstInstruction": "3e10",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0695",
     "equivalenceFixture": "equivalence-0695.test.js",
     "checked": true
@@ -258,7 +258,7 @@
     "ghidraFunction": "06a2",
     "ghidraDecompiled": true,
     "firstInstruction": "fec0",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x06a2",
     "equivalenceFixture": "equivalence-06a2.test.js",
     "checked": true
@@ -269,7 +269,7 @@
     "ghidraFunction": "06ee",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x06ee",
     "equivalenceFixture": "equivalence-06ee.test.js",
     "checked": true
@@ -280,7 +280,7 @@
     "ghidraFunction": "0726",
     "ghidraDecompiled": true,
     "firstInstruction": "21ff80",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0726",
     "equivalenceFixture": "equivalence-0726.test.js",
     "checked": true
@@ -291,7 +291,7 @@
     "ghidraFunction": "0766",
     "ghidraDecompiled": true,
     "firstInstruction": "2102a8",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0766",
     "equivalenceFixture": "equivalence-0766.test.js",
     "checked": true
@@ -302,7 +302,7 @@
     "ghidraFunction": "0779",
     "ghidraDecompiled": true,
     "firstInstruction": "01100a",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0779",
     "equivalenceFixture": "equivalence-0779.test.js",
     "checked": true
@@ -313,7 +313,7 @@
     "ghidraFunction": "0781",
     "ghidraDecompiled": true,
     "firstInstruction": "2108a8",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0781",
     "equivalenceFixture": "equivalence-0781.test.js",
     "checked": true
@@ -324,7 +324,7 @@
     "ghidraFunction": "0794",
     "ghidraDecompiled": true,
     "firstInstruction": "3200d0",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0794",
     "equivalenceFixture": "equivalence-0794.test.js",
     "checked": true
@@ -335,7 +335,7 @@
     "ghidraFunction": "07ac",
     "ghidraDecompiled": true,
     "firstInstruction": "210083",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x07ac",
     "equivalenceFixture": "equivalence-07ac.test.js",
     "checked": true
@@ -346,7 +346,7 @@
     "ghidraFunction": "07c1",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x07c1",
     "equivalenceFixture": "equivalence-07c1.test.js",
     "checked": true
@@ -357,7 +357,7 @@
     "ghidraFunction": "07ce",
     "ghidraDecompiled": true,
     "firstInstruction": "3a6d82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x07ce",
     "equivalenceFixture": "equivalence-07ce.test.js",
     "checked": true
@@ -368,7 +368,7 @@
     "ghidraFunction": "07d9",
     "ghidraDecompiled": true,
     "firstInstruction": "210083",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x07d9",
     "equivalenceFixture": "equivalence-07d9.test.js",
     "checked": true
@@ -379,7 +379,7 @@
     "ghidraFunction": "07e6",
     "ghidraDecompiled": true,
     "firstInstruction": "3afe83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x07e6",
     "equivalenceFixture": "equivalence-07e6.test.js",
     "checked": true
@@ -390,7 +390,7 @@
     "ghidraFunction": "07eb",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x07eb",
     "equivalenceFixture": "equivalence-07eb.test.js",
     "checked": true
@@ -401,7 +401,7 @@
     "ghidraFunction": "0804",
     "ghidraDecompiled": true,
     "firstInstruction": "214480",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0804",
     "equivalenceFixture": "equivalence-0804.test.js",
     "checked": true
@@ -412,7 +412,7 @@
     "ghidraFunction": "0822",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0822",
     "equivalenceFixture": "equivalence-0822.test.js",
     "checked": true
@@ -423,7 +423,7 @@
     "ghidraFunction": "085b",
     "ghidraDecompiled": true,
     "firstInstruction": "2151aa",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x085b",
     "equivalenceFixture": "equivalence-085b.test.js",
     "checked": true
@@ -434,7 +434,7 @@
     "ghidraFunction": "0870",
     "ghidraDecompiled": true,
     "firstInstruction": "3acd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0870",
     "equivalenceFixture": "equivalence-0870.test.js",
     "checked": true
@@ -445,7 +445,7 @@
     "ghidraFunction": "08c5",
     "ghidraDecompiled": true,
     "firstInstruction": "3ae083",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x08c5",
     "equivalenceFixture": "equivalence-08c5.test.js",
     "checked": true
@@ -456,7 +456,7 @@
     "ghidraFunction": "08e0",
     "ghidraDecompiled": true,
     "firstInstruction": "3afe83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x08e0",
     "equivalenceFixture": "equivalence-08e0.test.js",
     "checked": true
@@ -467,7 +467,7 @@
     "ghidraFunction": "0942",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0942",
     "equivalenceFixture": "equivalence-0942.test.js",
     "checked": true
@@ -478,7 +478,7 @@
     "ghidraFunction": "09aa",
     "ghidraDecompiled": true,
     "firstInstruction": "214480",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x09aa",
     "equivalenceFixture": "equivalence-09aa.test.js",
     "checked": true
@@ -489,7 +489,7 @@
     "ghidraFunction": "09db",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x09db",
     "equivalenceFixture": "equivalence-09db.test.js",
     "checked": true
@@ -500,7 +500,7 @@
     "ghidraFunction": "0a16",
     "ghidraDecompiled": true,
     "firstInstruction": "3ae483",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0a16",
     "equivalenceFixture": "equivalence-0a16.test.js",
     "checked": true
@@ -511,7 +511,7 @@
     "ghidraFunction": "0a48",
     "ghidraDecompiled": true,
     "firstInstruction": "3ab783",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0a48",
     "equivalenceFixture": "equivalence-0a48.test.js",
     "checked": true
@@ -522,7 +522,7 @@
     "ghidraFunction": "0a5f",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0a5f",
     "equivalenceFixture": "equivalence-0a5f.test.js",
     "checked": true
@@ -533,7 +533,7 @@
     "ghidraFunction": "0a84",
     "ghidraDecompiled": true,
     "firstInstruction": "0605",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0a84",
     "equivalenceFixture": "equivalence-0a84.test.js",
     "checked": true
@@ -544,7 +544,7 @@
     "ghidraFunction": "0aba",
     "ghidraDecompiled": true,
     "firstInstruction": "3a2d84",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0aba",
     "equivalenceFixture": "equivalence-0aba.test.js",
     "checked": true
@@ -555,7 +555,7 @@
     "ghidraFunction": "0aee",
     "ghidraDecompiled": true,
     "firstInstruction": "e5",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0aee",
     "equivalenceFixture": "equivalence-0aee.test.js",
     "checked": true
@@ -566,7 +566,7 @@
     "ghidraFunction": "0b0a",
     "ghidraDecompiled": true,
     "firstInstruction": "210000",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0b0a",
     "equivalenceFixture": "equivalence-0b0a.test.js",
     "checked": true
@@ -577,7 +577,7 @@
     "ghidraFunction": "0b1f",
     "ghidraDecompiled": true,
     "firstInstruction": "11e22e",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0b1f",
     "equivalenceFixture": "equivalence-0b1f.test.js",
     "checked": true
@@ -588,7 +588,7 @@
     "ghidraFunction": "0b67",
     "ghidraDecompiled": true,
     "firstInstruction": "3ab483",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0b67",
     "equivalenceFixture": "equivalence-0b67.test.js",
     "checked": true
@@ -599,7 +599,7 @@
     "ghidraFunction": "0b95",
     "ghidraDecompiled": true,
     "firstInstruction": "cd9b0b",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0b95",
     "equivalenceFixture": "equivalence-0b95.test.js",
     "checked": true
@@ -610,7 +610,7 @@
     "ghidraFunction": "0b9b",
     "ghidraDecompiled": true,
     "firstInstruction": "7a",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0b9b",
     "equivalenceFixture": "equivalence-0b9b.test.js",
     "checked": true
@@ -621,7 +621,7 @@
     "ghidraFunction": "0ba0",
     "ghidraDecompiled": true,
     "firstInstruction": "4f",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0ba0",
     "equivalenceFixture": "equivalence-0ba0.test.js",
     "checked": true
@@ -632,7 +632,7 @@
     "ghidraFunction": "0ba9",
     "ghidraDecompiled": true,
     "firstInstruction": "e60f",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0ba9",
     "equivalenceFixture": "equivalence-0ba9.test.js",
     "checked": true
@@ -643,7 +643,7 @@
     "ghidraFunction": "0bb3",
     "ghidraDecompiled": true,
     "firstInstruction": "21d883",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0bb3",
     "equivalenceFixture": "equivalence-0bb3.test.js",
     "checked": true
@@ -654,7 +654,7 @@
     "ghidraFunction": "0c17",
     "ghidraDecompiled": true,
     "firstInstruction": "114d2f",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0c17",
     "equivalenceFixture": "equivalence-0c17.test.js",
     "checked": true
@@ -665,7 +665,7 @@
     "ghidraFunction": "0c3d",
     "ghidraDecompiled": true,
     "firstInstruction": "2680",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0c3d",
     "equivalenceFixture": "equivalence-0c3d.test.js",
     "checked": true
@@ -676,7 +676,7 @@
     "ghidraFunction": "0c4a",
     "ghidraDecompiled": true,
     "firstInstruction": "7a",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0c4a",
     "equivalenceFixture": "equivalence-0c4a.test.js",
     "checked": true
@@ -687,7 +687,7 @@
     "ghidraFunction": "0c6d",
     "ghidraDecompiled": true,
     "firstInstruction": "21d883",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0c6d",
     "equivalenceFixture": "equivalence-0c6d.test.js",
     "checked": true
@@ -698,7 +698,7 @@
     "ghidraFunction": "0d11",
     "ghidraDecompiled": true,
     "firstInstruction": "3ad883",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0d11",
     "equivalenceFixture": "equivalence-0d11.test.js",
     "checked": true
@@ -709,7 +709,7 @@
     "ghidraFunction": "0d4c",
     "ghidraDecompiled": true,
     "firstInstruction": "cde607",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0d4c",
     "equivalenceFixture": "equivalence-0d4c.test.js",
     "checked": true
@@ -720,7 +720,7 @@
     "ghidraFunction": "0db9",
     "ghidraDecompiled": true,
     "firstInstruction": "3ae183",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0db9",
     "equivalenceFixture": "equivalence-0db9.test.js",
     "checked": true
@@ -731,7 +731,7 @@
     "ghidraFunction": "0de0",
     "ghidraDecompiled": true,
     "firstInstruction": "3e03",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0de0",
     "equivalenceFixture": "equivalence-0de0.test.js",
     "checked": true
@@ -742,7 +742,7 @@
     "ghidraFunction": "0e74",
     "ghidraDecompiled": true,
     "firstInstruction": "3e05",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0e74",
     "equivalenceFixture": "equivalence-0e74.test.js",
     "checked": true
@@ -753,7 +753,7 @@
     "ghidraFunction": "0e7a",
     "ghidraDecompiled": true,
     "firstInstruction": "3ae183",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0e7a",
     "equivalenceFixture": "equivalence-0e7a.test.js",
     "checked": true
@@ -764,7 +764,7 @@
     "ghidraFunction": "0f59",
     "ghidraDecompiled": true,
     "firstInstruction": "2150a8",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0f59",
     "equivalenceFixture": "equivalence-0f59.test.js",
     "checked": true
@@ -775,7 +775,7 @@
     "ghidraFunction": "0f69",
     "ghidraDecompiled": true,
     "firstInstruction": "ed5bed83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0f69",
     "equivalenceFixture": "equivalence-0f69.test.js",
     "checked": true
@@ -786,7 +786,7 @@
     "ghidraFunction": "0f8c",
     "ghidraDecompiled": true,
     "firstInstruction": "3a1881",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0f8c",
     "equivalenceFixture": "equivalence-0f8c.test.js",
     "checked": true
@@ -797,7 +797,7 @@
     "ghidraFunction": "0faf",
     "ghidraDecompiled": true,
     "firstInstruction": "2a0080",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0faf",
     "equivalenceFixture": "equivalence-0faf.test.js",
     "checked": true
@@ -808,7 +808,7 @@
     "ghidraFunction": "0fd4",
     "ghidraDecompiled": true,
     "firstInstruction": "217082",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0fd4",
     "equivalenceFixture": "equivalence-0fd4.test.js",
     "checked": true
@@ -819,7 +819,7 @@
     "ghidraFunction": "0ff1",
     "ghidraDecompiled": true,
     "firstInstruction": "e5",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x0ff1",
     "equivalenceFixture": "equivalence-0ff1.test.js",
     "checked": true
@@ -830,7 +830,7 @@
     "ghidraFunction": "1029",
     "ghidraDecompiled": true,
     "firstInstruction": "210080",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1029",
     "equivalenceFixture": "shared fixture",
     "checked": true
@@ -841,7 +841,7 @@
     "ghidraFunction": "1048",
     "ghidraDecompiled": true,
     "firstInstruction": "01ffef",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1048",
     "equivalenceFixture": "equivalence-1048.test.js",
     "checked": true
@@ -852,7 +852,7 @@
     "ghidraFunction": "1058",
     "ghidraDecompiled": true,
     "firstInstruction": "cd8c0f",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1058",
     "equivalenceFixture": "equivalence-1058.test.js",
     "checked": true
@@ -863,7 +863,7 @@
     "ghidraFunction": "107b",
     "ghidraDecompiled": true,
     "firstInstruction": "217682",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x107b",
     "equivalenceFixture": "equivalence-107b.test.js",
     "checked": true
@@ -874,7 +874,7 @@
     "ghidraFunction": "109b",
     "ghidraDecompiled": true,
     "firstInstruction": "217982",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x109b",
     "equivalenceFixture": "equivalence-109b.test.js",
     "checked": true
@@ -885,7 +885,7 @@
     "ghidraFunction": "10bb",
     "ghidraDecompiled": true,
     "firstInstruction": "217c82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x10bb",
     "equivalenceFixture": "equivalence-10bb.test.js",
     "checked": true
@@ -896,7 +896,7 @@
     "ghidraFunction": "10f8",
     "ghidraDecompiled": true,
     "firstInstruction": "218282",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x10f8",
     "equivalenceFixture": "equivalence-10f8.test.js",
     "checked": true
@@ -907,7 +907,7 @@
     "ghidraFunction": "1118",
     "ghidraDecompiled": true,
     "firstInstruction": "218582",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1118",
     "equivalenceFixture": "equivalence-1118.test.js",
     "checked": true
@@ -918,7 +918,7 @@
     "ghidraFunction": "1138",
     "ghidraDecompiled": true,
     "firstInstruction": "218882",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1138",
     "equivalenceFixture": "equivalence-1138.test.js",
     "checked": true
@@ -929,7 +929,7 @@
     "ghidraFunction": "1158",
     "ghidraDecompiled": true,
     "firstInstruction": "218b82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1158",
     "equivalenceFixture": "equivalence-1158.test.js",
     "checked": true
@@ -940,7 +940,7 @@
     "ghidraFunction": "1178",
     "ghidraDecompiled": true,
     "firstInstruction": "218e82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1178",
     "equivalenceFixture": "equivalence-1178.test.js",
     "checked": true
@@ -951,7 +951,7 @@
     "ghidraFunction": "1198",
     "ghidraDecompiled": true,
     "firstInstruction": "1100a8",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1198",
     "equivalenceFixture": "equivalence-1198.test.js",
     "checked": true
@@ -962,7 +962,7 @@
     "ghidraFunction": "11bf",
     "ghidraDecompiled": true,
     "firstInstruction": "3acd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x11bf",
     "equivalenceFixture": "equivalence-11bf.test.js",
     "checked": true
@@ -973,7 +973,7 @@
     "ghidraFunction": "12d0",
     "ghidraDecompiled": true,
     "firstInstruction": "3e01",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x12d0",
     "equivalenceFixture": "equivalence-12d0.test.js",
     "checked": true
@@ -984,7 +984,7 @@
     "ghidraFunction": "12e4",
     "ghidraDecompiled": true,
     "firstInstruction": "3a0480",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x12e4",
     "equivalenceFixture": "equivalence-12e4.test.js",
     "checked": true
@@ -995,7 +995,7 @@
     "ghidraFunction": "14b7",
     "ghidraDecompiled": true,
     "firstInstruction": "3aff80",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x14b7",
     "equivalenceFixture": "equivalence-14b7.test.js",
     "checked": true
@@ -1006,7 +1006,7 @@
     "ghidraFunction": "16f8",
     "ghidraDecompiled": true,
     "firstInstruction": "3a0480",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x16f8",
     "equivalenceFixture": "equivalence-16f8.test.js",
     "checked": true
@@ -1017,7 +1017,7 @@
     "ghidraFunction": "1802",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4f81",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1802",
     "equivalenceFixture": "equivalence-1802.test.js",
     "checked": true
@@ -1028,7 +1028,7 @@
     "ghidraFunction": "1952",
     "ghidraDecompiled": true,
     "firstInstruction": "2143a8",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1952",
     "equivalenceFixture": "equivalence-1952.test.js",
     "checked": true
@@ -1039,7 +1039,7 @@
     "ghidraFunction": "19e2",
     "ghidraDecompiled": true,
     "firstInstruction": "060e",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x19e2",
     "equivalenceFixture": "equivalence-19e2.test.js",
     "checked": true
@@ -1050,7 +1050,7 @@
     "ghidraFunction": "1a02",
     "ghidraDecompiled": true,
     "firstInstruction": "3e05",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1a02",
     "equivalenceFixture": "equivalence-1a02.test.js",
     "checked": true
@@ -1061,7 +1061,7 @@
     "ghidraFunction": "1a55",
     "ghidraDecompiled": true,
     "firstInstruction": "3afe83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1a55",
     "equivalenceFixture": "equivalence-1a55.test.js",
     "checked": true
@@ -1072,7 +1072,7 @@
     "ghidraFunction": "1acb",
     "ghidraDecompiled": true,
     "firstInstruction": "3a6c82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1acb",
     "equivalenceFixture": "equivalence-1acb.test.js",
     "checked": true
@@ -1083,7 +1083,7 @@
     "ghidraFunction": "1b8b",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4780",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1b8b",
     "equivalenceFixture": "equivalence-1b8b.test.js",
     "checked": true
@@ -1094,7 +1094,7 @@
     "ghidraFunction": "1bba",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4c82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1bba",
     "equivalenceFixture": "equivalence-1bba.test.js",
     "checked": true
@@ -1105,7 +1105,7 @@
     "ghidraFunction": "1be4",
     "ghidraDecompiled": true,
     "firstInstruction": "3a5182",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1be4",
     "equivalenceFixture": "equivalence-1be4.test.js",
     "checked": true
@@ -1116,7 +1116,7 @@
     "ghidraFunction": "1c0d",
     "ghidraDecompiled": true,
     "firstInstruction": "cdeb23",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1c0d",
     "equivalenceFixture": "equivalence-1c0d.test.js",
     "checked": true
@@ -1127,7 +1127,7 @@
     "ghidraFunction": "1c41",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4780",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1c41",
     "equivalenceFixture": "equivalence-1c41.test.js",
     "checked": true
@@ -1138,7 +1138,7 @@
     "ghidraFunction": "1c76",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4e82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1c76",
     "equivalenceFixture": "equivalence-1c76.test.js",
     "checked": true
@@ -1149,7 +1149,7 @@
     "ghidraFunction": "1ca0",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4780",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1ca0",
     "equivalenceFixture": "equivalence-1ca0.test.js",
     "checked": true
@@ -1160,7 +1160,7 @@
     "ghidraFunction": "1cd5",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4f82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1cd5",
     "equivalenceFixture": "equivalence-1cd5.test.js",
     "checked": true
@@ -1171,7 +1171,7 @@
     "ghidraFunction": "1cff",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4480",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1cff",
     "equivalenceFixture": "equivalence-1cff.test.js",
     "checked": true
@@ -1182,7 +1182,7 @@
     "ghidraFunction": "1d77",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4780",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1d77",
     "equivalenceFixture": "equivalence-1d77.test.js",
     "checked": true
@@ -1193,7 +1193,7 @@
     "ghidraFunction": "1d87",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1d87",
     "equivalenceFixture": "equivalence-1d87.test.js",
     "checked": true
@@ -1204,7 +1204,7 @@
     "ghidraFunction": "1dd8",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1dd8",
     "equivalenceFixture": "equivalence-1dd8.test.js",
     "checked": true
@@ -1215,7 +1215,7 @@
     "ghidraFunction": "1e29",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1e29",
     "equivalenceFixture": "equivalence-1e29.test.js",
     "checked": true
@@ -1226,7 +1226,7 @@
     "ghidraFunction": "1e7a",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1e7a",
     "equivalenceFixture": "equivalence-1e7a.test.js",
     "checked": true
@@ -1237,7 +1237,7 @@
     "ghidraFunction": "1ecb",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1ecb",
     "equivalenceFixture": "equivalence-1ecb.test.js",
     "checked": true
@@ -1248,7 +1248,7 @@
     "ghidraFunction": "1f1c",
     "ghidraDecompiled": true,
     "firstInstruction": "3a3481",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1f1c",
     "equivalenceFixture": "equivalence-1f1c.test.js",
     "checked": true
@@ -1259,7 +1259,7 @@
     "ghidraFunction": "1fc7",
     "ghidraDecompiled": true,
     "firstInstruction": "3a6c82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1fc7",
     "equivalenceFixture": "equivalence-1fc7.test.js",
     "checked": true
@@ -1270,7 +1270,7 @@
     "ghidraFunction": "1fd6",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4780",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x1fd6",
     "equivalenceFixture": "equivalence-1fd6.test.js",
     "checked": true
@@ -1281,7 +1281,7 @@
     "ghidraFunction": "2005",
     "ghidraDecompiled": true,
     "firstInstruction": "dd217382",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2005",
     "equivalenceFixture": "equivalence-2005.test.js",
     "checked": true
@@ -1292,7 +1292,7 @@
     "ghidraFunction": "20cc",
     "ghidraDecompiled": true,
     "firstInstruction": "2aef13",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x20cc",
     "equivalenceFixture": "equivalence-20cc.test.js",
     "checked": true
@@ -1303,7 +1303,7 @@
     "ghidraFunction": "20fb",
     "ghidraDecompiled": true,
     "firstInstruction": "dd217382",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x20fb",
     "equivalenceFixture": "equivalence-20fb.test.js",
     "checked": true
@@ -1314,7 +1314,7 @@
     "ghidraFunction": "219c",
     "ghidraDecompiled": true,
     "firstInstruction": "dd217c82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x219c",
     "equivalenceFixture": "equivalence-219c.test.js",
     "checked": true
@@ -1325,7 +1325,7 @@
     "ghidraFunction": "223d",
     "ghidraDecompiled": true,
     "firstInstruction": "d9",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x223d",
     "equivalenceFixture": "equivalence-223d.test.js",
     "checked": true
@@ -1336,7 +1336,7 @@
     "ghidraFunction": "230f",
     "ghidraDecompiled": true,
     "firstInstruction": "3ad683",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x230f",
     "equivalenceFixture": "equivalence-230f.test.js",
     "checked": true
@@ -1347,7 +1347,7 @@
     "ghidraFunction": "2341",
     "ghidraDecompiled": true,
     "firstInstruction": "3ad683",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2341",
     "equivalenceFixture": "equivalence-2341.test.js",
     "checked": true
@@ -1358,7 +1358,7 @@
     "ghidraFunction": "236d",
     "ghidraDecompiled": true,
     "firstInstruction": "3a6c82",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x236d",
     "equivalenceFixture": "equivalence-236d.test.js",
     "checked": true
@@ -1369,7 +1369,7 @@
     "ghidraFunction": "23b7",
     "ghidraDecompiled": true,
     "firstInstruction": "214480",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x23b7",
     "equivalenceFixture": "equivalence-23b7.test.js",
     "checked": true
@@ -1380,7 +1380,7 @@
     "ghidraFunction": "23eb",
     "ghidraDecompiled": true,
     "firstInstruction": "3a2381",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x23eb",
     "equivalenceFixture": "equivalence-23eb.test.js",
     "checked": true
@@ -1391,7 +1391,7 @@
     "ghidraFunction": "23fa",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x23fa",
     "equivalenceFixture": "equivalence-23fa.test.js",
     "checked": true
@@ -1402,7 +1402,7 @@
     "ghidraFunction": "2496",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2496",
     "equivalenceFixture": "equivalence-2496.test.js",
     "checked": true
@@ -1413,7 +1413,7 @@
     "ghidraFunction": "2532",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2532",
     "equivalenceFixture": "equivalence-2532.test.js",
     "checked": true
@@ -1424,7 +1424,7 @@
     "ghidraFunction": "25ce",
     "ghidraDecompiled": true,
     "firstInstruction": "3afd83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x25ce",
     "equivalenceFixture": "equivalence-25ce.test.js",
     "checked": true
@@ -1435,7 +1435,7 @@
     "ghidraFunction": "269a",
     "ghidraDecompiled": true,
     "firstInstruction": "215c80",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x269a",
     "equivalenceFixture": "equivalence-269a.test.js",
     "checked": true
@@ -1446,7 +1446,7 @@
     "ghidraFunction": "26a6",
     "ghidraDecompiled": true,
     "firstInstruction": "3a3481",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x26a6",
     "equivalenceFixture": "equivalence-26a6.test.js",
     "checked": true
@@ -1457,7 +1457,7 @@
     "ghidraFunction": "272f",
     "ghidraDecompiled": true,
     "firstInstruction": "213e83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x272f",
     "equivalenceFixture": "equivalence-272f.test.js",
     "checked": true
@@ -1468,7 +1468,7 @@
     "ghidraFunction": "27b3",
     "ghidraDecompiled": true,
     "firstInstruction": "3a3581",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x27b3",
     "equivalenceFixture": "equivalence-27b3.test.js",
     "checked": true
@@ -1479,7 +1479,7 @@
     "ghidraFunction": "27bc",
     "ghidraDecompiled": true,
     "firstInstruction": "214080",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x27bc",
     "equivalenceFixture": "equivalence-27bc.test.js",
     "checked": true
@@ -1490,7 +1490,7 @@
     "ghidraFunction": "27cb",
     "ghidraDecompiled": true,
     "firstInstruction": "214080",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x27cb",
     "equivalenceFixture": "equivalence-27cb.test.js",
     "checked": true
@@ -1501,7 +1501,7 @@
     "ghidraFunction": "27de",
     "ghidraDecompiled": true,
     "firstInstruction": "214080",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x27de",
     "equivalenceFixture": "equivalence-27de.test.js",
     "checked": true
@@ -1512,7 +1512,7 @@
     "ghidraFunction": "27ea",
     "ghidraDecompiled": true,
     "firstInstruction": "3ab783",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x27ea",
     "equivalenceFixture": "equivalence-27ea.test.js",
     "checked": true
@@ -1523,7 +1523,7 @@
     "ghidraFunction": "27fe",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4f81",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x27fe",
     "equivalenceFixture": "equivalence-27fe.test.js",
     "checked": true
@@ -1534,7 +1534,7 @@
     "ghidraFunction": "281b",
     "ghidraDecompiled": true,
     "firstInstruction": "af",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x281b",
     "equivalenceFixture": "equivalence-281b.test.js",
     "checked": true
@@ -1545,7 +1545,7 @@
     "ghidraFunction": "2856",
     "ghidraDecompiled": true,
     "firstInstruction": "3afe83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2856",
     "equivalenceFixture": "equivalence-2856.test.js",
     "checked": true
@@ -1556,7 +1556,7 @@
     "ghidraFunction": "286d",
     "ghidraDecompiled": true,
     "firstInstruction": "210314",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x286d",
     "equivalenceFixture": "equivalence-286d.test.js",
     "checked": true
@@ -1567,7 +1567,7 @@
     "ghidraFunction": "2874",
     "ghidraDecompiled": true,
     "firstInstruction": "3a0181",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2874",
     "equivalenceFixture": "equivalence-2874.test.js",
     "checked": true
@@ -1578,7 +1578,7 @@
     "ghidraFunction": "287e",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4f81",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x287e",
     "equivalenceFixture": "equivalence-287e.test.js",
     "checked": true
@@ -1589,7 +1589,7 @@
     "ghidraFunction": "288c",
     "ghidraDecompiled": true,
     "firstInstruction": "3a4f81",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x288c",
     "equivalenceFixture": "equivalence-288c.test.js",
     "checked": true
@@ -1600,7 +1600,7 @@
     "ghidraFunction": "28b0",
     "ghidraDecompiled": true,
     "firstInstruction": "7e",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x28b0",
     "equivalenceFixture": "equivalence-28b0.test.js",
     "checked": true
@@ -1611,7 +1611,7 @@
     "ghidraFunction": "28bb",
     "ghidraDecompiled": true,
     "firstInstruction": "3a5081",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x28bb",
     "equivalenceFixture": "equivalence-28bb.test.js",
     "checked": true
@@ -1622,7 +1622,7 @@
     "ghidraFunction": "2906",
     "ghidraDecompiled": true,
     "firstInstruction": "3afe83",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2906",
     "equivalenceFixture": "equivalence-2906.test.js",
     "checked": true
@@ -1633,7 +1633,7 @@
     "ghidraFunction": "291d",
     "ghidraDecompiled": true,
     "firstInstruction": "3a0181",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x291d",
     "equivalenceFixture": "equivalence-291d.test.js",
     "checked": true
@@ -1644,7 +1644,7 @@
     "ghidraFunction": "2970",
     "ghidraDecompiled": true,
     "firstInstruction": "3ab783",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2970",
     "equivalenceFixture": "equivalence-2970.test.js",
     "checked": true
@@ -1655,7 +1655,7 @@
     "ghidraFunction": "29b9",
     "ghidraDecompiled": true,
     "firstInstruction": "cd6a2a",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x29b9",
     "equivalenceFixture": "equivalence-29b9.test.js",
     "checked": true
@@ -1666,7 +1666,7 @@
     "ghidraFunction": "29c9",
     "ghidraDecompiled": true,
     "firstInstruction": "dd3508",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x29c9",
     "equivalenceFixture": "equivalence-29c9.test.js",
     "checked": true
@@ -1677,7 +1677,7 @@
     "ghidraFunction": "29f9",
     "ghidraDecompiled": true,
     "firstInstruction": "dd7e06",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x29f9",
     "equivalenceFixture": "equivalence-29f9.test.js",
     "checked": true
@@ -1688,7 +1688,7 @@
     "ghidraFunction": "2a6a",
     "ghidraDecompiled": true,
     "firstInstruction": "3ab783",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2a6a",
     "equivalenceFixture": "equivalence-2a6a.test.js",
     "checked": true
@@ -1699,7 +1699,7 @@
     "ghidraFunction": "2ae6",
     "ghidraDecompiled": true,
     "firstInstruction": "3a7183",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2ae6",
     "equivalenceFixture": "equivalence-2ae6.test.js",
     "checked": true
@@ -1710,7 +1710,7 @@
     "ghidraFunction": "2af3",
     "ghidraDecompiled": true,
     "firstInstruction": "dd7e06",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2af3",
     "equivalenceFixture": "equivalence-2af3.test.js",
     "checked": true
@@ -1721,7 +1721,7 @@
     "ghidraFunction": "2b58",
     "ghidraDecompiled": true,
     "firstInstruction": "dd7e06",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2b58",
     "equivalenceFixture": "equivalence-2b58.test.js",
     "checked": true
@@ -1732,7 +1732,7 @@
     "ghidraFunction": "2b83",
     "ghidraDecompiled": true,
     "firstInstruction": "cd132c",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2b83",
     "equivalenceFixture": "equivalence-2b83.test.js",
     "checked": true
@@ -1743,7 +1743,7 @@
     "ghidraFunction": "2b93",
     "ghidraDecompiled": true,
     "firstInstruction": "dd7e06",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2b93",
     "equivalenceFixture": "equivalence-2b93.test.js",
     "checked": true
@@ -1754,7 +1754,7 @@
     "ghidraFunction": "2bab",
     "ghidraDecompiled": true,
     "firstInstruction": "dd7e06",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2bab",
     "equivalenceFixture": "equivalence-2bab.test.js",
     "checked": true
@@ -1765,7 +1765,7 @@
     "ghidraFunction": "2bfb",
     "ghidraDecompiled": true,
     "firstInstruction": "dd7e06",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2bfb",
     "equivalenceFixture": "equivalence-2bfb.test.js",
     "checked": true
@@ -1776,7 +1776,7 @@
     "ghidraFunction": "2c13",
     "ghidraDecompiled": true,
     "firstInstruction": "3ab783",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2c13",
     "equivalenceFixture": "equivalence-2c13.test.js",
     "checked": true
@@ -1787,7 +1787,7 @@
     "ghidraFunction": "2ca8",
     "ghidraDecompiled": true,
     "firstInstruction": "dd7e06",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2ca8",
     "equivalenceFixture": "equivalence-2ca8.test.js",
     "checked": true
@@ -1798,7 +1798,7 @@
     "ghidraFunction": "2cf0",
     "ghidraDecompiled": true,
     "firstInstruction": "21e283",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2cf0",
     "equivalenceFixture": "equivalence-2cf0.test.js",
     "checked": true
@@ -1809,7 +1809,7 @@
     "ghidraFunction": "2d88",
     "ghidraDecompiled": true,
     "firstInstruction": "21d883",
-    "nativeSource": "godot/Scripts/Generated/MainProgram.cs",
+    "nativeSource": "src/Generated/MainProgram.cpp",
     "nativeEntry": "0x2d88",
     "equivalenceFixture": "equivalence-2d88.test.js",
     "checked": true

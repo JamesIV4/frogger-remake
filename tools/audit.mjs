@@ -12,7 +12,7 @@ const failures=[];
 // Verify every vendored source, not an agent-authored 'done' marker.
 for(const file of upstream.files)if(sha(readFileSync('vendor/arcade-js/'+file.path))!==file.sha256)failures.push('Modified upstream: '+file.path);
 const instructions=new Map(readFileSync('docs/evidence/ghidra-main/instructions.tsv','utf8').trim().split('\n').map(line=>{const [a,bytes]=line.split('\t');return [parseInt(a,16),bytes]}));
-const mainSource=readFileSync('godot/Scripts/Generated/MainProgram.cs','utf8');
+const mainSource=readFileSync('src/Generated/MainProgram.cpp','utf8');
 const inventory=[];
 for(const [address,routine] of Object.entries(ROUTINES)){
  const a=Number(address),hex=a.toString(16).padStart(4,'0');
@@ -21,18 +21,18 @@ for(const [address,routine] of Object.entries(ROUTINES)){
  const ok=Boolean(seed?.instruction&&fn?.decompiled&&existsSync(`docs/evidence/ghidra-main/${fn.address}.c`)&&mainSource.includes(`case 0x${hex}:`));
  if(!ok)failures.push('Unmapped recovered routine '+hex);
  inventory.push({address:'0x'+hex,name:routine.name,ghidraFunction:fn?.address??null,ghidraDecompiled:fn?.decompiled??false,
-   firstInstruction:instructions.get(a),nativeSource:'godot/Scripts/Generated/MainProgram.cs',nativeEntry:'0x'+hex,
+   firstInstruction:instructions.get(a),nativeSource:'src/Generated/MainProgram.cpp',nativeEntry:'0x'+hex,
    equivalenceFixture:existsSync(`vendor/arcade-js/games/frogger/idiomatic/test/equivalence-${hex}.test.js`)?`equivalence-${hex}.test.js`:'shared fixture',checked:ok});
 }
-const audioSource=readFileSync('godot/Scripts/Generated/SoundProgram.cs','utf8');
+const audioSource=readFileSync('src/Generated/SoundProgram.cpp','utf8');
 const audioMap=audio.seeds.map(seed=>{
  const fn=audio.functions.find(f=>f.address===seed.containing_function);
  const ok=Boolean(seed.instruction&&fn?.decompiled&&audioSource.includes(`case 0x${seed.address}:`));
  if(!ok)failures.push('Unmapped sound entry '+seed.address);
- return {...seed,ghidraDecompiled:fn?.decompiled??false,nativeSource:'godot/Scripts/Generated/SoundProgram.cs',checked:ok};
+ return {...seed,ghidraDecompiled:fn?.decompiled??false,nativeSource:'src/Generated/SoundProgram.cpp',checked:ok};
 });
 for(const program of compiled){
- const path=`godot/Scripts/Generated/${program.program}.cs`;
+ const path=`src/Generated/${program.program}.cpp`;
  if(sha(readFileSync(path))!==program.source_sha256)failures.push('Stale generated source '+path);
  const cpu=program.program==='MainProgram'?'maincpu':'audiocpu';
  if(program.rom_sha256!==manifest.images[cpu].sha256)failures.push('ROM mismatch '+cpu);
@@ -54,7 +54,7 @@ const report={mainRecoveredRoutines:inventory.length,mainMapped:inventory.filter
  nativeReferenceFrames:parity.frames,nativeReferenceComparedBytes:parity.comparedBytes,independentMameFunctions:mame.length,
  blenderAssets:assets.length,upstreamCommit:upstream.commit,failures,
  limitations:['A decompiler producing C is not a semantic correctness proof. MAME fixtures and whole-state tests are separate gates.',
- 'The native translation retains address-level arithmetic and control flow; it is not a handwritten idiomatic C# rewrite.',
+ 'The native translation retains address-level arithmetic and control flow; it is not a handwritten idiomatic C++ rewrite.',
  'Native compilation includes all populated byte offsets, including speculative data decodes. These offsets are not counted as recovered functions.',
  'Modern road and river crocodile collision are intentional optional deviations. PSG analogue output is synthesized, not netlist exact.']};
 writeFileSync('docs/evidence/function-map.json',JSON.stringify(inventory,null,2)+'\n');

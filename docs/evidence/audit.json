@@ -15,7 +15,7 @@
   "failures": [],
   "limitations": [
     "A decompiler producing C is not a semantic correctness proof. MAME fixtures and whole-state tests are separate gates.",
-    "The native translation retains address-level arithmetic and control flow; it is not a handwritten idiomatic C# rewrite.",
+    "The native translation retains address-level arithmetic and control flow; it is not a handwritten idiomatic C++ rewrite.",
     "Native compilation includes all populated byte offsets, including speculative data decodes. These offsets are not counted as recovered functions.",
     "Modern road and river crocodile collision are intentional optional deviations. PSG analogue output is synthesized, not netlist exact."
   ]

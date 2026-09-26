@@ -1,76 +1,8 @@
 {
-  "before": {
-    "frame": 310,
-    "x": 80,
-    "code": 33,
-    "color": 4,
-    "row": 96,
-    "latch": 1,
-    "attached": 0,
-    "bonusTimer": 2,
-    "gameState": 1
-  },
-  "timeline": [
-    {
-      "frame": 311,
-      "x": 80,
-      "code": 33,
-      "color": 4,
-      "row": 96,
-      "latch": 1,
-      "attached": 0,
-      "bonusTimer": 2,
-      "gameState": 1
-    },
-    {
-      "frame": 314,
-      "x": 0,
-      "code": 0,
-      "color": 0,
-      "row": 0,
-      "latch": 1,
-      "attached": 0,
-      "bonusTimer": 1,
-      "gameState": 1
-    }
-  ],
-  "cleared": {
-    "frame": 314,
-    "x": 0,
-    "code": 0,
-    "color": 0,
-    "row": 0,
-    "latch": 1,
-    "attached": 0,
-    "bonusTimer": 1,
-    "gameState": 1
-  },
   "spriteWiped": true,
   "clearVisualX": 81,
   "clearVisible": true,
-  "patrolling": {
-    "frame": 315,
-    "x": 81,
-    "code": 0,
-    "color": 0,
-    "row": 0,
-    "latch": 1,
-    "attached": 0,
-    "bonusTimer": 0,
-    "gameState": 1
-  },
   "invisiblePatrol": true,
   "patrolVisualX": 81,
-  "presentationVisible": true,
-  "pickedUp": {
-    "frame": 316,
-    "x": 81,
-    "code": 30,
-    "color": 0,
-    "row": 98,
-    "latch": 1,
-    "attached": 1,
-    "bonusTimer": 0,
-    "gameState": 1
-  }
+  "presentationVisible": true
 }

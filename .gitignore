@@ -31,3 +31,6 @@ __pycache__/
 /snap/
 *.blend1
 *.blend2
+/scratch/
+/src/godot-cpp/
+*.exe

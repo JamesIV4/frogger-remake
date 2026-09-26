@@ -3,7 +3,7 @@
     "program": "MainProgram",
     "rom_sha256": "f8c0a2ef4105769c627b7bbf13d0844ada8bbe43c00d177eb90dd395d1e3a1e5",
     "compiled_entry_offsets": 12288,
-    "source_sha256": "fdefd2864b7a9723fa7f2a192955d0f063d2fc22d9a57d9c567a1c2d7f50012a",
+    "source_sha256": "f0472c5c7141b7990b4964d1d18a124bf13d207f639858f48d2ab3e2c0ba9ed0",
     "instruction_forms": {
       "ld": 4662,
       "nop": 230,
@@ -60,7 +60,7 @@
     "program": "SoundProgram",
     "rom_sha256": "77cee6c5fc88c666f7d41a9d94a92a96bf44800981e537eb5bc626e3485d5935",
     "compiled_entry_offsets": 6144,
-    "source_sha256": "5bc0af02491848801822ecbf5c51824c228815f3165f02d8d3fc92e5b12e7abe",
+    "source_sha256": "abfef59919b8415c89fa4646351b3f4d18695e277732773e29727083a1833489",
     "instruction_forms": {
       "ld": 1797,
       "nop": 181,
