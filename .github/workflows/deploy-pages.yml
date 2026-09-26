@@ -1,0 +1,179 @@
+# Deploys the Godot 4.7 Web export to GitHub Pages for phone testing.
+#
+# Trigger: every push to main, plus a manual "Run workflow" button.
+# Result: https://<owner>.github.io/<repo>/  (enable Pages: Settings ->
+# Pages -> Source: "GitHub Actions").
+#
+# ---------------------------------------------------------------------------
+# COPYRIGHT / ROM WARNING — READ BEFORE PUSHING THE BUTTON
+# ---------------------------------------------------------------------------
+# The exported .pck embeds res://rom/{maincpu,audiocpu,gfx,proms}.bin, which
+# are bytes derived from the copyrighted Frogger arcade ROMs
+# (reference/frogger.zip). Publishing them to a *public* Pages URL is
+# redistributing copyrighted material. Only use this workflow on a PRIVATE
+# repository (Pages on a private repo is visible to collaborators only), or
+# with ROMs you have the rights to distribute, or for a local-only test.
+# The compiled WASM side module (libfrogger_arcade.*.wasm) is your own code
+# and is fine to commit/publish — but the .pck is NOT, while it embeds ROMs.
+# ---------------------------------------------------------------------------
+#
+# How CI gets a ROM: a fresh runner has no reference/frogger.zip (git-ignored
+# on purpose). Provide it as a base64 Actions secret named FROGGER_ZIP_B64:
+#
+#   [Windows]  certutil -encode reference\frogger.zip %TEMP%\fz.b64
+#              (strip the -----BEGIN/END CERTIFICATE----- lines, join to one line)
+#   [mac/Linux] base64 -w0 reference/frogger.zip
+#
+#   Repo -> Settings -> Secrets and variables -> Actions -> New repository
+#   secret:  Name = FROGGER_ZIP_B64, Value = <that one long line>
+#
+# The workflow decodes the secret to reference/frogger.zip, runs
+# tools/prepare_rom.py (which verifies SHA-256 checksums before producing
+# godot/rom/*.bin), then builds and exports. If the secret is absent the job
+# fails with a clear message instead of producing a ROM-less build.
+#
+# Toolchain pins (must match local builds):
+#   Godot 4.7 stable (Standard, non-.NET) + 4.7 export templates.
+#   Emscripten 4.0.20 — required by AGENTS.md for the SIDE_MODULE wasm build
+#     (-sSIDE_MODULE=1 -sWASM_BIGINT -sSUPPORT_LONGJMP=wasm).
+#   godot-cpp at tag 10.0.0-stable (api_version=4.7), i.e. the same commit you
+#   have vendored under src/godot-cpp (which is git-ignored, so CI clones it).
+#
+# Pages + threads note: GitHub Pages cannot send the COOP/COEP headers the
+# threaded (pthread) web build needs (tools/serve_web.py provides those
+# locally; see RunWeb.ps1). So this workflow builds the SINGLE-THREADED
+# variant (variant/thread_support=false) — same as the iOS preset approach —
+# which runs on plain Pages hosting. Desktop/phone browsers then work with no
+# special headers. (Your local threaded build stays untouched.)
+
+name: Deploy Web to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7-stable
+  EMSCRIPTEN_VERSION: 4.0.20
+  GODOT_CPP_TAG: 10.0.0-stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore ROM from secret
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.FROGGER_ZIP_B64 }}" ]; then
+            echo "::error::FROGGER_ZIP_B64 secret is not set. See .github/workflows/deploy-pages.yml header for setup."
+            exit 1
+          fi
+          echo "${{ secrets.FROGGER_ZIP_B64 }}" | base64 -d > reference/frogger.zip
+          python3 tools/prepare_rom.py
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install SCons
+        run: pip install scons
+
+      - name: Cache Emscripten
+        id: emsdk-cache
+        uses: actions/cache@v4
+        with:
+          path: emsdk-cache
+          key: emsdk-${{ env.EMSCRIPTEN_VERSION }}-ubuntu-latest
+
+      - name: Setup Emscripten
+        uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: ${{ env.EMSCRIPTEN_VERSION }}
+          actions-cache-folder: emsdk-cache
+
+      - name: Clone godot-cpp (git-ignored locally)
+        run: |
+          rm -rf src/godot-cpp
+          git clone --depth 1 --branch "${{ env.GODOT_CPP_TAG }}" https://github.com/godotengine/godot-cpp.git src/godot-cpp
+
+      - name: Download Godot 4.7 headless + export templates
+        run: |
+          mkdir -p $HOME/godot $HOME/.local/share/godot/export_templates
+          BASE="https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}"
+          curl -fL -o /tmp/godot.zip "$BASE/Godot_v4.7-stable_linux.x86_64.zip"
+          curl -fL -o /tmp/templates.tpz "$BASE/Godot_v4.7-stable_export_templates.tpz"
+          unzip -q -o /tmp/godot.zip -d $HOME/godot
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.7.stable"
+          unzip -q -o /tmp/templates.tpz -d "$HOME/.local/share/godot/export_templates/4.7.stable"
+          mv "$HOME/.local/share/godot/export_templates/4.7.stable/templates/"* \
+             "$HOME/.local/share/godot/export_templates/4.7.stable/" 2>/dev/null || true
+          ls "$HOME/.local/share/godot/export_templates/4.7.stable"
+          echo "$HOME/godot" >> $GITHUB_PATH
+
+      - name: Build godot-cpp web library (nothreads)
+        working-directory: src/godot-cpp
+        run: scons platform=web target=template_release api_version=4.7
+
+      - name: Compile GDExtension wasm (nothreads side module)
+        run: |
+          em++ -sSIDE_MODULE=1 -sWASM_BIGINT -sSUPPORT_LONGJMP=wasm -O3 -std=c++17 \
+            -DWEB_ENABLED -DUNIX_ENABLED \
+            -Isrc -Isrc/godot-cpp/include -Isrc/godot-cpp/gen/include -Isrc/godot-cpp/gdextension \
+            src/ArcadeSimulation.cpp src/ArcadeSimulationExtension.cpp src/NativeSound.cpp \
+            src/Generated/MainProgram.cpp src/Generated/SoundProgram.cpp src/register_types.cpp \
+            src/godot-cpp/bin/libgodot-cpp.web.template_release.wasm32.a \
+            -o godot/bin/libfrogger_arcade.web.template_release.wasm32.nothreads.wasm
+          cp godot/bin/libfrogger_arcade.web.template_release.wasm32.nothreads.wasm \
+             godot/bin/libfrogger_arcade.web.template_debug.wasm32.nothreads.wasm
+
+      - name: Export Web preset (single-threaded)
+        run: |
+          # Point the nothreads library entries at the nothreads wasm, export,
+          # then restore: keeps your local threaded .gdextension untouched.
+          cp godot/frogger_arcade.gdextension /tmp/frogger_arcade.gdextension.bak
+          sed -i 's|libfrogger_arcade.web.template_\(debug\|release\).wasm32.wasm|libfrogger_arcade.web.template_\1.wasm32.nothreads.wasm|g' \
+            godot/frogger_arcade.gdextension
+          # Single-threaded export needs no COOP/COEP headers -> works on Pages.
+          sed -i 's|^variant/thread_support=.*|variant/thread_support=false|' godot/export_presets.cfg
+          mkdir -p builds/web
+          ~/godot/Godot_v4.7-stable_linux.x86_64 --headless --path godot \
+            --export-release "Web" "$GITHUB_WORKSPACE/builds/web/index.html"
+          cp /tmp/frogger_arcade.gdextension.bak godot/frogger_arcade.gdextension
+          git -C "$GITHUB_WORKSPACE" checkout -- godot/export_presets.cfg || true
+          mkdir -p builds/web/licenses
+          cp LICENSE THIRD_PARTY.md builds/web/licenses/
+          cp godot/Fonts/*-OFL.txt builds/web/licenses/ || true
+          ls builds/web
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: builds/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+
+
