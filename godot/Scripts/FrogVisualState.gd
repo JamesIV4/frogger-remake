@@ -28,8 +28,7 @@ static func player_on_board(s: Dictionary) -> bool:
 	return x >= 8 and x <= 240 and row >= 26 and row <= 240
 
 func observe(s: Dictionary) -> void:
-	var riding_gator: bool = BoardVisuals.at(s, 0x8004) != 0 and BoardVisuals.river_gator_ride(s)
-	var dead: bool = player_on_board(s) and BoardVisuals.at(s, 0x8004) != 0 and BoardVisuals.at(s, 0x83cd) == 0 and not riding_gator
+	var dead: bool = player_on_board(s) and BoardVisuals.at(s, 0x8004) != 0 and BoardVisuals.at(s, 0x83cd) == 0
 	if dead and not dying:
 		death_frame = s.get("frame", 0)
 		death_x = BoardVisuals.at(s, 0x8044)

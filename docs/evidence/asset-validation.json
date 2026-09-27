@@ -52,10 +52,10 @@
   },
   {
     "asset": "gator",
-    "vertices": 4352,
-    "triangles": 1992,
+    "vertices": 4384,
+    "triangles": 2002,
     "bones": 3,
-    "skinned_vertices": 4352,
+    "skinned_vertices": 4384,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -65,10 +65,10 @@
   },
   {
     "asset": "river_gator",
-    "vertices": 4248,
-    "triangles": 1944,
+    "vertices": 4280,
+    "triangles": 1954,
     "bones": 3,
-    "skinned_vertices": 4248,
+    "skinned_vertices": 4280,
     "max_weight_error": 0,
     "clips": [
       "Idle",
@@ -104,14 +104,15 @@
   },
   {
     "asset": "otter",
-    "vertices": 3872,
-    "triangles": 1804,
-    "bones": 3,
-    "skinned_vertices": 3872,
+    "vertices": 5632,
+    "triangles": 2610,
+    "bones": 5,
+    "skinned_vertices": 5632,
     "max_weight_error": 0,
     "clips": [
       "Idle",
-      "Move"
+      "Move",
+      "Attack"
     ],
     "passed": true
   },

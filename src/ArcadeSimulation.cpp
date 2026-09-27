@@ -175,25 +175,20 @@ void ArcadeSimulationCore::ObserveBonusAward() {
 
 RiverGatorZone ArcadeSimulationCore::RiverGatorContact(int frogX, int tipX) {
     int behind = (tipX - frogX + 256) & 255;
-    return behind < 16 ? RiverGatorZone::Snout :
-           (behind <= 57 ? RiverGatorZone::Back : RiverGatorZone::Outside);
+    return behind < 40 ? RiverGatorZone::Snout :
+           (behind <= 71 ? RiverGatorZone::Back : RiverGatorZone::Outside);
 }
 
 bool ArcadeSimulationCore::ResolveModernRiverGator() {
     if (Peek(0x83b7) < 2 || (Peek(0x8150) & 1) == 0 || Peek(0x8101) == 0) return false;
     int row = Peek(0x8047), biased = (row + 8) & 255;
     if (biased < 42 || biased >= 59) return false;
-    if (Peek(0x8004) != 0 && Peek(0x829c) != 0) return true;
+    if (Peek(0x8004) != 0) return false;
     auto zone = RiverGatorContact(Peek(0x8044), Peek(0x8101));
-    if (zone == RiverGatorZone::Snout) {
-        Poke(0x8004, 1);
-        if (row >= 48 && row < 128) Poke(0x829c, 1);
-    } else if (zone == RiverGatorZone::Back) {
-        Poke(0x8004, 1);
-        Poke(0xa846, 0x68); Poke(0xa847, 0x69);
-        Poke(0xa866, 0x6a); Poke(0xa867, 0x6b);
-    }
-    return true;
+    // 0x8004 is death, never a ride latch. Leave head contacts to the ROM,
+    // including its non-drowning bite at tip-39..tip-16. Only the model's
+    // safe back bypasses the byte-boundary-sensitive head comparisons.
+    return zone == RiverGatorZone::Back;
 }
 
 bool ArcadeSimulationCore::ResolveModernRoad() {
@@ -288,4 +283,3 @@ std::string ArcadeSimulationCore::StateBytes() const {
     ss << "]";
     return ss.str();
 }
-

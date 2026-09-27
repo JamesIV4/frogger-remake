@@ -2,11 +2,13 @@ class_name ModelFootprints
 
 const FrogAlongX: float = 8.56170
 const FrogAcrossRow: float = 6.89952
-const RiverGatorLengthTiles: float = 2.153474
+const RiverGatorLengthTiles: float = 2.275091
 const RiverGatorWidthTiles: float = 1.100000
-const RiverGatorFrontTiles: float = 1.030000
-const RiverGatorSnoutTiles: float = 0.605000
+const RiverGatorFrontTiles: float = 1.150847
+const RiverGatorSnoutTiles: float = 0.725847
 const LogTopTiles: float = 0.436645
+const BeaverTopTiles: float = 0.402000
+const BeaverFrontTiles: float = 0.728000
 const SnakeBottomTiles: float = 0.021363
 const LadyBottomTiles: float = -0.006061
 

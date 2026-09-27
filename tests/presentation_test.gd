@@ -10,6 +10,15 @@ func check(condition: bool, message: String) -> void:
 func _initialize() -> void:
 	call_deferred("run")
 
+func posed_model_top(actor: ModelActor) -> float:
+	var top: float = -INF
+	for mesh in actor.mesh_instances:
+		var baked: ArrayMesh = mesh.bake_mesh_from_current_skeleton_pose()
+		for surface in range(baked.get_surface_count()):
+			for vertex in baked.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]:
+				top = maxf(top, (mesh.global_transform * vertex).y)
+	return top
+
 func run() -> void:
 	var game := FroggerGame.new()
 	# Exercise the live scene without changing the user's saved preferences.
@@ -196,6 +205,161 @@ func run() -> void:
 		game.state["frame"] = 40
 		game.update_homes_and_hazards()
 		check((snake.root.basis * Vector3.BACK).x < -0.7, "Bank snake also follows its own direction")
+	# Dispatcher B's state 1 is the beaver approaching the log. It stays
+	# half-submerged and cannot attack. The lethal state-2 overlap gets a bite;
+	# an empty-end descriptor clear gets only grab/look. Both then sink fully.
+	game.clear_presentation()
+	game.simulation.poke(0x83fd, 1)
+	game.simulation.poke(0x8058, 120)
+	game.simulation.poke(0x8059, 1)
+	game.simulation.poke(0x805b, 80)
+	game.simulation.poke(0x8486, 1)
+	game.observe_frame()
+	game.presentation_delta = game.FRAME_SECONDS
+	game.update_homes_and_hazards()
+	var beaver: ModelActor = game.actors["hazard32856"]
+	var water_surface: float = BoardVisuals.WaterSurfaceHeight
+	var swimming_height: float = BoardVisuals.beaver_height(water_surface, game.BeaverScale, 0.0)
+	check(is_equal_approx(beaver.root.position.y, swimming_height), "Approaching beaver stays half-submerged until log contact")
+	check(beaver.root.position.y < water_surface and beaver.root.position.y + game.BeaverScale * ModelFootprints.BeaverTopTiles > water_surface,
+		"Approaching beaver visibly crosses the waterline")
+	check(beaver.current_anim.to_lower().ends_with("move"), "Approaching beaver does not bite before lethal range")
+	var rendered_nose_x: float = 120.0 + 16.0 * (beaver.root.position.x + game.BeaverScale * ModelFootprints.BeaverFrontTiles)
+	check(absf(rendered_nose_x - 140.0) < 0.01, "Beaver nose aligns with the ROM's right-facing lethal probe")
+	game.simulation.poke(0x8059, 0x81)
+	game.observe_frame()
+	game.update_homes_and_hazards()
+	rendered_nose_x = 120.0 + 16.0 * (beaver.root.position.x - game.BeaverScale * ModelFootprints.BeaverFrontTiles)
+	check(absf(rendered_nose_x - 116.0) < 0.01, "Beaver nose aligns with the ROM's left-facing lethal probe")
+	game.simulation.poke(0x8486, 2)
+	game.observe_frame()
+	game.update_homes_and_hazards()
+	check(beaver.current_anim.to_lower().ends_with("attack"), "ROM state 2 selects the beaver log-grab attack")
+	check(is_equal_approx(beaver.root.position.y, swimming_height), "Beaver grabs before beginning its under-log transition")
+	for frame in range(80):
+		if game.beaver_phase == game.BeaverVisualPhase.Bite:
+			break
+		game.update_homes_and_hazards()
+	check(game.beaver_phase == game.BeaverVisualPhase.Bite, "Only the lethal player-overlap branch reaches the bite")
+	for frame in range(80):
+		if game.beaver_phase == game.BeaverVisualPhase.Sink:
+			break
+		game.update_homes_and_hazards()
+	for frame in range(18):
+		game.update_homes_and_hazards()
+	var log_top: float = -0.18 + ModelFootprints.LogTopTiles
+	check(beaver.root.position.y + game.BeaverScale * ModelFootprints.BeaverTopTiles < log_top,
+		"Reached beaver finishes below the log instead of climbing on top")
+	check(beaver.root.position.y + game.BeaverScale * ModelFootprints.BeaverTopTiles <= water_surface - 0.049,
+		"Reached beaver sinks wholly beneath the water instead of phasing through the log")
+	if DisplayServer.get_name() != "headless":
+		await process_frame
+		var bite_top: float = posed_model_top(beaver)
+		check(is_finite(bite_top) and bite_top <= water_surface - 0.049,
+			"Animated bite head stays beneath water troughs at full submersion")
+
+	# No-player arrival: the ROM clears the descriptor at the target. Preserve a
+	# short presentation-only grab/look/sink, but never sample the bite section.
+	game.clear_presentation()
+	game.simulation.poke(0x8058, 120)
+	game.simulation.poke(0x8059, 1)
+	game.simulation.poke(0x805b, 80)
+	game.simulation.poke(0x8486, 1)
+	game.observe_frame()
+	game.presentation_delta = game.FRAME_SECONDS
+	game.update_homes_and_hazards()
+	for address in range(0x8058, 0x805c):
+		game.simulation.poke(address, 0)
+	game.simulation.poke(0x8486, 0)
+	game.observe_frame()
+	game.update_homes_and_hazards()
+	var empty_end_bit: bool = false
+	for frame in range(80):
+		empty_end_bit = empty_end_bit or game.beaver_phase == game.BeaverVisualPhase.Bite
+		if game.beaver_phase == game.BeaverVisualPhase.Sink:
+			break
+		game.update_homes_and_hazards()
+	check(not empty_end_bit and not game.beaver_player_hit, "Empty log end grabs and looks without biting")
+	for frame in range(18):
+		game.update_homes_and_hazards()
+	check(beaver.root.position.y + game.BeaverScale * ModelFootprints.BeaverTopTiles <= water_surface - 0.049,
+		"Empty-end beaver also finishes fully underwater")
+	if DisplayServer.get_name() != "headless":
+		await process_frame
+		var grab_top: float = posed_model_top(beaver)
+		check(is_finite(grab_top) and grab_top <= water_surface - 0.049,
+			"Animated empty-end grab stays beneath water troughs at full submersion")
+	# A live descriptor may drift into the log while its grab/bite pose is held.
+	# Use the actual rendered end caps, including their overhang and smoothing.
+	for heading in [-1, 1]:
+		for hit in [false, true]:
+			game.clear_presentation()
+			game.simulation.poke(0x8112, 1)
+			game.simulation.poke(0x8113, 166)
+			game.simulation.poke(0x8058, 157 if heading < 0 else 44)
+			game.simulation.poke(0x8059, 0x81 if heading < 0 else 1)
+			game.simulation.poke(0x805b, 80)
+			game.simulation.poke(0x8486, 1)
+			game.observe_frame()
+			game.update_actors()
+			game.simulation.poke(0x8486, 2 if hit else 0)
+			game.simulation.poke(0x8058, (137 if heading < 0 else 64) if hit else 0)
+			for frame in range(65):
+				game.simulation.poke(0x8113, 166 + frame / 4)
+				game.observe_frame()
+				game.state["frame"] += frame
+				game.update_actors()
+				if not beaver.is_active:
+					continue
+				var logs: MultiMesh = game.batched_lanes[2].body.multimesh
+				var bounds: AABB = logs.get_instance_transform(0) * logs.mesh.get_aabb()
+				var end_x: float = bounds.end.x if heading < 0 else bounds.position.x
+				var nose_x: float = beaver.root.position.x + heading * game.BeaverScale * ModelFootprints.BeaverFrontTiles
+				check(heading * (nose_x - end_x) <= 0.0001,
+					"Grab/bite/dive stays outside the moving log end in either direction")
+	# Render both incarnations of slot zero while they overlap opposite edges.
+	for outgoing in [false, true]:
+		game.clear_presentation()
+		game.simulation.poke(0x83b7, 2)
+		game.simulation.poke(0x8100, 1)
+		game.simulation.poke(0x8150, 1 if outgoing else 0)
+		game.simulation.poke(0x8101, 254)
+		game.observe_frame()
+		game.simulation.poke(0x8101, 0)
+		game.simulation.poke(0x8150, 0 if outgoing else 1)
+		game.observe_frame()
+		for tip in [0, 1, 16, 40, 80]:
+			game.simulation.poke(0x8101, tip)
+			game.observe_frame()
+			game.moving_visuals.reset()
+			game.update_actors()
+			var right_gators: int = 0
+			var left_gators: int = 0
+			for river_key in game.actors:
+				var prop: ModelActor = game.actors[river_key]
+				if river_key.begins_with("lane0.0.") and prop.root.visible:
+					if prop.root.position.x > 0.0:
+						right_gators += 1
+					else:
+						left_gators += 1
+			check(right_gators == (1 if outgoing and tip <= 48 else 0), "Exiting croc/log retains its own identity through wrap at %d" % tip)
+			if tip >= 40:
+				check(left_gators == (0 if outgoing else 1), "Incoming croc/log has its own identity at %d" % tip)
+	var river_fit: Dictionary = BoardVisuals.fit_river_gator(60)
+	var tip_x: float = 160.0
+	var visible_tip: float = tip_x - 42.0 + river_fit.center_offset_pixels + 16.0 * ModelFootprints.RiverGatorFrontTiles * river_fit.length_scale
+	var head_length: float = 16.0 * ModelFootprints.RiverGatorSnoutTiles * river_fit.length_scale
+	check(absf(visible_tip - (tip_x - 25.0)) < 0.01 and absf(47.0 - 16.0 * ModelFootprints.RiverGatorLengthTiles * river_fit.length_scale) < 0.01, "Crocodile length and leading edge match the ROM sprite")
+	check(absf(visible_tip - head_length - (tip_x - 40.0)) < 0.01, "Rendered back ends at the actual ROM bite boundary")
+	game.simulation.poke(0x8044, 110)
+	game.simulation.poke(0x8047, 48)
+	game.simulation.poke(0x8101, 160)
+	game.simulation.poke(0x8150, 1)
+	game.simulation.poke(0x8004, 1)
+	game.simulation.poke(0x829c, 0)
+	game.simulation.poke(0x83cd, 0)
+	game.observe_frame()
+	check(game.frog_visual.dying, "Death flag on a crocodile is never concealed as a ride")
 	game.free()
 	await process_frame
 	print("PRESENTATION TEST: %s" % ("PASS" if failures.is_empty() else str(failures)))

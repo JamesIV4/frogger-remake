@@ -25,6 +25,7 @@ PALETTE = {
     'grass':'1c501c','grasslight':'2b6c20','grassdark':'123913','sand':'b8a46e',
     'hedge':'216a0a','hedgelight':'70b91c','hedgedark':'082f0d',
     'lady':'ff269c','ladylight':'ff9acb','ladydark':'9b075f',
+    'beaver':'70462f','beaverlight':'a8764a','beaverdark':'35231e',
 }
 MATS={}
 RECORDS=[]
@@ -153,6 +154,9 @@ def muzzle(name,sections,color,bone):
     assert (b-a).cross(c-a).y<0
     faces.extend([rear_cap,front_cap])
     obj=mesh(name,verts,faces,color);obj['rig_bone']=bone
+    for ring in range(len(sections)-1):
+        assert obj.data.polygons[ring*8].normal.z > .5, (name,'inverted upper surface')
+        assert obj.data.polygons[ring*8+4].normal.z < -.5, (name,'inverted underside')
     return obj
 
 def eyes(y,z,x=.19,scale=.11,bone='Head'):
@@ -298,14 +302,42 @@ def turtle():
 def gator(river=False):
     ball('Armored trunk',(0,.15,.17),(.32,.54,.19),'shell',segments=12,rings=7)
     if river:
-        cylinder('Long tapering tail',(0,.51,.17),(0,1.12,.05),.21,'shell',vertices=10,r2=.018)
+        # Match the trunk's dorsal height at the join, then hold that height
+        # across the tail. As the radius narrows, its center rises underneath
+        # the level top instead of sending the safe surface into the water.
+        trunk_tail_top=.17+.19*math.sqrt(1-((.51-.15)/.54)**2)
+        # Retain more of the original round cross-section across the whole
+        # taper; the previous .17 root profile read as overly flattened. Keep
+        # the pointed endpoint so the ROM-matched overall length does not move.
+        tail_root_radius=.19
+        tail_tip_radius=.018
+        # A very slight counter-clockwise side-profile rotation lifts the
+        # body join and lowers the exposed tip without dipping it underwater.
+        tail_root_top=trunk_tail_top+.012
+        tail_tip_top=trunk_tail_top-.012
+        tail=cylinder('Long tapering tail',
+                      (0,.51,tail_root_top-tail_root_radius),
+                      (0,1.12,tail_tip_top-tail_tip_radius),
+                      tail_root_radius,'shell',vertices=10,r2=tail_tip_radius)
+        tail_tip=[tail.matrix_world @ vertex.co for vertex in tail.data.vertices
+                  if (tail.matrix_world @ vertex.co).y>.95]
+        runtime_tip_bottom=-.18+.9*min(point.z for point in tail_tip)
+        maximum_wave_height=-.025+.014+.007
+        assert runtime_tip_bottom>maximum_wave_height,'River gator tail tip would submerge at runtime'
+        root_top=max((tail.matrix_world @ vertex.co).z for vertex in tail.data.vertices
+                     if (tail.matrix_world @ vertex.co).y<.65)
+        tip_top=max(point.z for point in tail_tip)
+        assert abs(root_top-tail_root_top)<.012,'River gator tail root rotation drifted'
+        assert abs(tip_top-tail_tip_top)<.012,'River gator tail tip rotation drifted'
+        assert .015<root_top-tip_top<.035,'River gator tail needs only a slight rotation'
     else:
-        # A straight rearward tail vanishes behind the home bay's back hedge.
-        # Curl the same long tapered silhouette around the gator's right side,
-        # inside the open bay, without pushing its snout into the river.
-        tail_path=[((0,.51,.17),(.31,.49,.19),.21,.16),
-                   ((.31,.49,.19),(.65,.28,.20),.16,.09),
-                   ((.65,.28,.20),(.84,.04,.16),.09,.012)]
+        # Curl the home-bay tail sideways and deeper into the hedge. Every
+        # segment continues rearward (+Y); none doubles back toward the river.
+        tail_path=[((0,.51,.17),(.31,.55,.19),.21,.16),
+                   ((.31,.55,.19),(.60,.61,.20),.16,.09),
+                   ((.60,.61,.20),(.80,.67,.16),.09,.012)]
+        assert all(b[1]>=a[1] for a,b,_,_ in tail_path),\
+            'Home gator tail must not turn back toward the river'
         for a,b,radius,tip_radius in tail_path:
             cylinder('Curved tapering tail',a,b,radius,'shell',vertices=10,r2=tip_radius)
     upper=[(-.425 if river else -.18,.25,.12,.36),
@@ -313,17 +345,28 @@ def gator(river=False):
            (-.78 if river else -.70,.155,.115,.27),
            (-.93 if river else -.91,.192,.11,.27),(-1.03,.147,.12,.235)]
     if river:
-        # The dark bridge belongs visually to the rideable back, ending where
-        # the short 16px snout begins. It closes the eye/body gap.
+        # The bridge ends where the snout begins. The final longitudinal fit
+        # below aligns this boundary with the ROM's lethal head interval.
         muzzle('River cheek and neck bridge',
                [(-.17,.25,.12,.33),(-.43,.25,.12,.36)],'shell','Head')
         muzzle('River throat bridge',
                [(-.17,.215,.055,.13),(-.43,.215,.055,.13)],'cream','Jaw')
-    muzzle('Tapered upper snout',upper,'shell' if river else 'green','Head')
-    muzzle('Lower resting jaw',[
+    # Both crocodile variants use the same armored snout coloration. Their
+    # different silhouettes and tail treatments remain variant-specific.
+    muzzle('Tapered upper snout',upper,'shell','Head')
+    lower = [
         (-.42 if river else -.17,.215,.055,.13),(-.61 if river else -.44,.174,.045,.13),
-        (-.83 if river else -.81,.175,.045,.135),(-.99,.137,.055,.12)],'cream','Jaw')
-    ball('Dark mouth',(0,-.74 if river else -.67,.127),(.165,.25 if river else .36,.018),'ink','Jaw',segments=10,rings=4)
+        (-.83 if river else -.81,.175,.045,.135),(-.99,.137,.055,.12)]
+    muzzle('Lower resting jaw',lower,'cream','Jaw')
+    # The old flattened ellipsoid intersected the jaw floor and poked through
+    # its tapered sides. Keep one upward-facing lining above the actual floor.
+    floor_vertices=[]
+    for y,width,low,high in lower:
+        floor_vertices.extend([(-width*.60,y,high+.006),(width*.60,y,high+.006)])
+    floor_faces=[(2*i,2*i+2,2*i+3,2*i+1) for i in range(len(lower)-1)]
+    lining=mesh('Contoured lower mouth lining',floor_vertices,floor_faces,'ink')
+    lining['rig_bone']='Jaw'
+    assert all(face.normal.z>.9 for face in lining.data.polygons),'Mouth lining must face up'
     # Contour the stripe to the actual snout rings. Winding faces UP so Godot
     # renders it with backface culling, unlike the old Blender-only appearance.
     ridge=[]
@@ -333,29 +376,52 @@ def gator(river=False):
     ridge_faces=[(2*i,2*i+2,2*i+3,2*i+1) for i in range(len(upper)-1)]
     stripe=mesh('Raised center snout accent',ridge,ridge_faces,'lime');stripe['rig_bone']='Head'
     assert all(face.normal.z>.5 for face in stripe.data.polygons),'Snout accent faces must be visible from above'
-    if river:
-        assert 15.5 < (.425-1.03)*-1*(57/2.153474) < 16.5,'River snout must match the 16px ROM kill window'
     for s in [-1,1]:
         for y,width in [(-.39,.19),(-.56,.17),(-.73,.155),(-.87,.185)]:
-            cylinder('Triangular tooth',(s*width,y,.14),(s*width,y,.055),.031,'white','Head',5,r2=0)
+            cylinder('Upper tooth',(s*width,y,.14),(s*width,y,.055),.031,'white','Head',5,r2=0)
+        for y in [-.49,-.65,-.80,-.95]:
+            for rear,front in zip(lower,lower[1:]):
+                if front[0] <= y <= rear[0]:
+                    t=(y-rear[0])/(front[0]-rear[0])
+                    width=rear[1]+(front[1]-rear[1])*t
+                    height=rear[3]+(front[3]-rear[3])*t
+                    cylinder('Lower tooth',(s*width*.68,y,height-.008),
+                             (s*width*.68,y,height+.073),.025,'white','Jaw',5,r2=0)
+                    break
         ball('Raised eye ridge',(s*.18,-.23,.36),(.12,.13,.10),'darkgreen','Head',10,6)
         ball('Golden eye',(s*.19,-.305,.406),(.057,.049,.044),'eye','Head',10,6)
         ball('Narrow pupil',(s*.196,-.34,.414),(.026,.022,.033),'ink','Head',8,4)
         ball('Nostril',(s*.104,-.94,.279),(.035,.045,.019),'darkgreen','Head',8,4)
         for y in [-.11,.38]:
-            ball('Webbed foot',(s*.34,y,.077),(.21,.13,.065),'green')
+            ball('Webbed foot',(s*.34,y,.077),(.21,.13,.065),'shell')
             for t in [-1,0,1]:
                 cylinder('Claw',(s*(.40+t*.045),y-.08,.08),(s*(.44+t*.045),y-.18,.06),.025,'cream',vertices=5,r2=0)
     tail_spikes=[(.03,.32),(.21,.34),(.39,.30)]
-    if river:tail_spikes.extend([(.57,.24),(.74,.17)])
+    if river:tail_spikes.extend([(.57,.27),(.74,.26)])
     for y,z in tail_spikes:
         for x in [-.12,.12]: cylinder('Back spike',(x,y,z),(x,y,z+.15),.067,'darkgreen',vertices=5,r2=0)
     if not river:
-        for x,y,z in [(.25,.50,.22),(.44,.40,.25),(.63,.29,.24),(.77,.14,.19)]:
+        for x,y,z in [(.25,.54,.22),(.43,.58,.25),(.61,.61,.24),(.76,.66,.19)]:
             for offset in [-.05,.05]:
                 cylinder('Curved tail spike',(x+offset,y,z),(x+offset,y,z+.13),.05,'darkgreen',vertices=5,r2=0)
-    return {'Body':((0,0,.1),(0,0,.3),None),'Head':((0,-.1,.2),(0,-.5,.22),'Body'),
-            'Jaw':((0,-.2,.09),(0,-.72,.08),'Body')}
+    specs = {'Body':((0,0,.1),(0,0,.3),None),'Head':((0,-.1,.2),(0,-.5,.22),'Body'),
+             'Jaw':((0,-.2,.09),(0,-.72,.08),'Body')}
+    if river:
+        # 0x28bb kills at tip-39..tip, including its non-drowning bite arm.
+        # The ROM strip at 0x1413 starts with 16 blank pixels. Its occupied
+        # bounds are 47px long, ending 25px behind the lane-table position.
+        # Keep the original 32px body/tail and 15px visible jaw proportions.
+        stretch = ((1.123474 + .425) * 15 / 32) / .605
+        def fit_point(point):
+            x,y,z = point
+            return (x, -.425 + (y + .425)*stretch if y < -.425 else y, z)
+        for obj in bpy.context.scene.objects:
+            if obj.type != 'MESH': continue
+            inverse = obj.matrix_world.inverted()
+            for vertex in obj.data.vertices:
+                vertex.co = inverse @ Vector(fit_point(obj.matrix_world @ vertex.co))
+        specs = {bone:(fit_point(head),fit_point(tail),parent) for bone,(head,tail,parent) in specs.items()}
+    return specs
 
 def fly():
     ball('Body',(0,0,.28),(.15,.24,.13),'ink')
@@ -406,16 +472,116 @@ def snake():
     return specs
 
 def otter():
-    ball('Body',(0,.02,.17),(.21,.46,.17),'wooddark')
-    ball('Head',(0,-.43,.2),(.22,.22,.17),'wooddark','Head')
-    ball('Muzzle',(0,-.58,.16),(.15,.12,.09),'cream','Head')
-    ball('Nose',(0,-.68,.18),(.055,.035,.035),'ink','Head')
-    cylinder('Tail',(0,.38,.13),(0,.91,.035),.11,'wooddark','Tail',8,r2=.024)
+    # This remains named ``otter`` in the runtime because that identifier is
+    # part of the original object/presentation contract. Visually it is the
+    # beaver requested for the remake: a broad paddle tail, grasping forepaws,
+    # webbed hind paws and incisors make the tiny top-down silhouette readable.
+    ball('Body',(0,.02,.18),(.23,.46,.18),'beaver')
+    # A few low, backward-leaning fur facets keep the broad back from reading
+    # as one smooth capsule. They follow the ellipsoid instead of floating over
+    # it, and remain deliberately smaller toward the tail.
+    def beaver_back_height(x,y):
+        radius=(x/.23)**2+((y-.02)/.46)**2
+        assert radius<1,(x,y,radius)
+        return .18+.18*math.sqrt(1-radius)
+    for y,width,lift in [(-.12,.050,.030),(.01,.047,.028),(.14,.041,.024),(.26,.033,.019)]:
+        front_y=y-.025;back_y=y+.050
+        ridge=mesh('Dorsal fur ridge',[
+            (-width,front_y,beaver_back_height(-width,front_y)),
+            (width,front_y,beaver_back_height(width,front_y)),
+            (-width*.65,back_y,beaver_back_height(-width*.65,back_y)),
+            (width*.65,back_y,beaver_back_height(width*.65,back_y)),
+            (0,back_y+.018,beaver_back_height(0,back_y)+lift)],
+            [(0,1,4),(1,3,4),(3,2,4),(2,0,4)],'beaver')
+        ridge['rig_bone']='Body'
+    ball('Head',(0,-.43,.22),(.23,.23,.18),'beaver','Head')
     for s in [-1,1]:
-        ball('Ear',(s*.16,-.30,.32),(.065,.065,.075),'wooddark','Head')
-        ball('Eye',(s*.13,-.57,.28),(.037,.035,.038),'ink','Head',8,4)
-        for y in [-.17,.31]:ball('Paddle foot',(s*.22,y,.06),(.12,.16,.05),'wooddark')
-    return {'Body':((0,0,.07),(0,0,.3),None),'Head':((0,-.25,.2),(0,-.5,.21),'Body'),'Tail':((0,.36,.12),(0,.8,.06),'Body')}
+        ball('Muzzle cheek',(s*.066,-.59,.16),(.105,.115,.085),'cream','Head',10,6)
+    ball('Nose',(0,-.69,.19),(.06,.038,.038),'ink','Head',8,4)
+    for s in [-1,1]:
+        box('Incisor',(s*.027,-.688,.105),(.045,.035,.075),'cream','Head',bevel=.008)
+
+    # A round cone cannot join the tall torso to the very flat paddle without
+    # either pinching in plan view or bulging in profile. This oval loft begins
+    # inside the torso and progressively flattens to the paddle's section. Its
+    # weights blend across the Body/Tail joint so the join stays closed in Move.
+    root_sections=[(.30,.16,.19,.15,0.0),(.40,.13,.17,.10,.45),(.49,.09,.135,.052,1.0)]
+    root_sides=10;root_verts=[];root_weights=[]
+    for y,z,rx,rz,tail_weight in root_sections:
+        for side in range(root_sides):
+            angle=math.tau*side/root_sides
+            root_verts.append((rx*math.cos(angle),y,z+rz*math.sin(angle)))
+            root_weights.append({'Body':1-tail_weight,'Tail':tail_weight})
+    root_faces=[]
+    for section in range(len(root_sections)-1):
+        for side in range(root_sides):
+            next_side=(side+1)%root_sides
+            root_faces.append((section*root_sides+side,(section+1)*root_sides+side,
+                (section+1)*root_sides+next_side,section*root_sides+next_side))
+    root_faces.extend([tuple(range(root_sides)),
+        tuple(reversed([(len(root_sections)-1)*root_sides+side for side in range(root_sides)]))])
+    tail_root=mesh('Blended oval tail root',root_verts,root_faces,'beaver')
+    tail_root['rig_weights_json']=json.dumps(root_weights)
+    ball('Broad paddle tail',(0,.66,.085),(.19,.25,.055),'beaverdark','Tail',10,6)
+    # Low, restrained ridges break up the paddle without turning it into a
+    # striped prop. They also remain visible in the game's elevated camera.
+    for y,width in [(.54,.115),(.65,.155),(.76,.11)]:
+        ridge=mesh('Tail paddle ridge',[(-width,y-.009,.141),(width,y-.009,.141),
+            (width,y+.009,.141),(-width,y+.009,.141)],[(0,1,2,3)],'beaverlight')
+        ridge['rig_bone']='Tail'
+
+    front_reach=[]
+    hind_reach=[]
+    for s in [-1,1]:
+        side='L' if s<0 else 'R'
+        paw_bone=f'Forepaw.{side}'
+        ball('Ear',(s*.17,-.30,.33),(.065,.06,.072),'beaverdark','Head',9,5)
+        ball('Eye',(s*.135,-.57,.29),(.04,.035,.04),'ink','Head',8,4)
+        ball('Eye glint',(s*.145,-.596,.305),(.011,.009,.011),'white','Head',6,3)
+
+        # Small dexterous forepaws sit forward and clear of the cheeks. Four
+        # separate fingers and pale claw tips survive the final game scale.
+        ball('Front forearm',(s*.19,-.18,.105),(.085,.145,.075),'beaver',paw_bone)
+        ball('Front palm',(s*.245,-.285,.065),(.09,.11,.048),'beaverdark',paw_bone,segments=9,rings=5)
+        for index,(offset,length) in enumerate([(-.045,.070),(-.015,.092),(.015,.096),(.045,.076)]):
+            root=(s*.245+offset,-.31,.057)
+            tip=(s*.245+offset*1.25,-.31-length,.045)
+            cylinder('Front finger',root,tip,.016,'beaverdark',paw_bone,vertices=6,r2=.012)
+            direction=(Vector(tip)-Vector(root)).normalized()
+            claw=Vector(tip)+direction*.028
+            cylinder('Front claw',tip,claw,.011,'cream',paw_bone,vertices=5,r2=0)
+            front_reach.append(claw)
+
+        # The hind paws do the swimming. Their fan is wider than the forepaw,
+        # with a membrane beneath five splayed toes instead of one pancake.
+        ball('Hind haunch',(s*.18,.24,.105),(.105,.16,.085),'beaver')
+        ball('Hind palm',(s*.27,.34,.06),(.13,.16,.052),'beaverdark',segments=9,rings=5)
+        tips=[]
+        for outward,back in [(.075,-.105),(.13,-.045),(.155,.025),(.145,.095),(.105,.145)]:
+            tips.append(Vector((s*(.27+outward),.34+back,.05)))
+        center=Vector((s*.245,.34,.048))
+        fan_verts=[tuple(center)]+[tuple(point) for point in tips]
+        fan_faces=[]
+        for index in range(len(tips)-1):
+            face=(0,index+1,index+2)
+            a,b,c=(Vector(fan_verts[i]) for i in face)
+            fan_faces.append(face if (b-a).cross(c-a).z>0 else tuple(reversed(face)))
+        webbing=mesh('Hind paw webbing',fan_verts,fan_faces,'beaverdark')
+        webbing['rig_bone']='Body'
+        for index,tip in enumerate(tips):
+            root=center.lerp(tip,.40)
+            cylinder('Hind toe',root,tip,.018,'beaverdark',vertices=6,r2=.013)
+            direction=(tip-root).normalized();claw=tip+direction*.032
+            cylinder('Hind claw',tip,claw,.011,'cream',vertices=5,r2=0)
+            hind_reach.append(claw)
+
+    assert max(abs(point.x) for point in hind_reach) > max(abs(point.x) for point in front_reach)+.09,\
+        'Beaver hind paws must read as the larger swimming pair'
+    assert max(point.y for point in hind_reach) < .55,'Beaver paws must not merge into the paddle tail'
+    return {'Body':((0,0,.07),(0,0,.3),None),'Head':((0,-.25,.2),(0,-.5,.21),'Body'),
+            'Tail':((0,.36,.12),(0,.8,.06),'Body'),
+            'Forepaw.L':((-.16,-.14,.10),(-.16,-.14,.24),'Body'),
+            'Forepaw.R':((.16,-.14,.10),(.16,-.14,.24),'Body')}
 
 def vehicle(kind):
     # Vehicles are rigid. Godot spins the four wheel pivots around the model X
@@ -605,11 +771,11 @@ def rig_and_clips(specs,kind):
     # Every part now carries its own weights, so collapse one mesh per material
     # before the clips bake: Godot skins a handful of meshes instead of dozens.
     consolidate()
-    clips=['Idle','Hop','Squash','Drown','Celebrate'] if kind in ('frog','lady_frog') else ['Idle','Swim','Dive'] if kind=='turtle' else ['Idle','Bite'] if kind in ('gator','river_gator') else ['Idle','Move']
+    clips=['Idle','Hop','Squash','Drown','Celebrate'] if kind in ('frog','lady_frog') else ['Idle','Swim','Dive'] if kind=='turtle' else ['Idle','Bite'] if kind in ('gator','river_gator') else ['Idle','Move','Attack'] if kind=='otter' else ['Idle','Move']
     bpy.context.scene.render.fps=60
     rig.animation_data_create()
     for clip in clips:
-        duration=10 if clip=='Hop' else 48 if clip=='Squash' else 64 if clip=='Drown' else 60
+        duration=10 if clip=='Hop' else 48 if clip=='Squash' else 64 if clip=='Drown' else 36 if clip=='Attack' else 60
         action=bpy.data.actions.new(clip);action.use_fake_user=True;rig.animation_data.action=action
         for frame in range(duration+1):
             p=frame/duration;cycle=math.sin(p*math.tau);h=math.sin(p*math.pi)
@@ -627,6 +793,20 @@ def rig_and_clips(specs,kind):
                 if 'Segment' in b.name:b.rotation_euler.z=.07*math.sin(p*math.tau+int(b.name[-1]))
                 if b.name=='Head' and clip=='Bite':b.rotation_euler.x=-.55*h
                 if b.name=='Tail':b.rotation_euler.z=.25*cycle
+                if clip=='Attack':
+                    grab=max(0,min(1,p/.55));grab=grab*grab*(3-2*grab)
+                    snap=max(0,min(1,(p-.55)/.30));snap=snap*snap*(3-2*snap)
+                    if b.name=='Body':
+                        b.rotation_euler.x=-.05*grab
+                    if b.name=='Head':
+                        # Presentation samples only the grab portion when the
+                        # log end is empty; the snap portion is reserved for
+                        # the ROM's lethal state-2 overlap.
+                        b.rotation_euler.x=-.18*grab-.22*snap
+                    if b.name.startswith('Forepaw.'):
+                        b.rotation_euler.x=-.48*grab
+                        b.rotation_euler.z=(.16 if b.name.endswith('.L') else -.16)*grab
+                    if b.name=='Tail':b.rotation_euler.z=.06*cycle*(1-grab)
                 if clip=='Squash':
                     # Impact, then HOLD the flattened pose. No bobbing/recovery loop.
                     s=min(1,p/.14);s=s*s*(3-2*s)
@@ -708,8 +888,10 @@ constants=[('FrogAlongX',max(abs(frog['minX']),abs(frog['maxX']))*16,5),
     ('RiverGatorLengthTiles',gator_bounds['maxY']-gator_bounds['minY'],6),
     ('RiverGatorWidthTiles',gator_bounds['maxX']-gator_bounds['minX'],6),
     ('RiverGatorFrontTiles',-gator_bounds['minY'],6),
-    ('RiverGatorSnoutTiles',.605,6),
+    ('RiverGatorSnoutTiles',(1.123474 + .425)*15/32,6),
     ('LogTopTiles',footprints['log']['maxZ'],6),
+    ('BeaverTopTiles',footprints['otter']['maxZ'],6),
+    ('BeaverFrontTiles',-footprints['otter']['minY'],6),
     ('SnakeBottomTiles',footprints['snake']['minZ'],6),
     ('LadyBottomTiles',footprints['lady_frog']['minZ'],6)]
 vehicles={}

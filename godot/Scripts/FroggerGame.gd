@@ -69,7 +69,15 @@ var death_ripple: MeshInstance3D = null
 var ripple_material: StandardMaterial3D = null
 var known_diving_groups: Dictionary = {}
 var turtle_supports: Array = []
+enum BeaverVisualPhase { Hidden, Approach, Grab, Look, Bite, Sink, Done }
+var beaver_phase: BeaverVisualPhase = BeaverVisualPhase.Hidden
+var beaver_phase_seconds: float = 0.0
+var beaver_player_hit: bool = false
+var beaver_last_x: float = 120.0
+var beaver_last_row: float = 80.0
+var beaver_heading: int = 1
 var home_gator_visuals: Array = []
+var river_gator_visual = BoardVisuals.RiverGatorPresentation.new()
 var anchored_death_frame: int = -1
 var last_live_player_frame: int = -1
 var death_initial_height: float = 0.0
@@ -83,6 +91,13 @@ var lady_last_motion_frame: int = -1
 
 const LadyInRiverScale: float = 0.62
 const PassengerScale: float = 0.76
+const BeaverScale: float = 0.75
+const BeaverAttackSeconds: float = 0.60
+const BeaverGrabSeconds: float = 0.42
+const BeaverLookSeconds: float = 0.24
+const BeaverBiteSeconds: float = 0.22
+const BeaverSinkSeconds: float = 0.28
+const BeaverUnderHoldSeconds: float = 0.08
 
 # ROM lane tables. Rigid lanes render through one MultiMesh per lane; lanes with
 # rigged swimmers (turtles) and the river gator keep ModelActor nodes because
@@ -151,6 +166,7 @@ var review_lady_close: bool = false
 var review_turtle_close: bool = false
 var review_gator_close: bool = false
 var review_snake_close: bool = false
+var review_beaver_close: bool = false
 var review_lady_clear_visible: bool = false
 var review_lady_patrol_visible: bool = false
 var review_gator_safe_observed: bool = false
@@ -571,7 +587,7 @@ const WarmupClips: Dictionary = {
 	"turtle": ["Idle", "Swim", "Dive"],
 	"gator": ["Idle", "Bite"],
 	"river_gator": ["Idle", "Bite"],
-	"fly": ["Idle", "Move"], "snake": ["Idle", "Move"], "otter": ["Idle", "Move"],
+	"fly": ["Idle", "Move"], "snake": ["Idle", "Move"], "otter": ["Idle", "Move", "Attack"],
 }
 const WarmupBatched: Array = ["log", "car", "truck", "sport", "dozer", "racecar"]
 
@@ -703,7 +719,7 @@ func setup_world() -> void:
 	plane.subdivide_width = 64
 	plane.subdivide_depth = 32
 	surface.mesh = plane
-	surface.position = Vector3(0, -0.025, -3)
+	surface.position = Vector3(0, BoardVisuals.WaterSurfaceHeight, -3)
 	water = ShaderMaterial.new()
 	water.shader = load("res://Shaders/river.gdshader")
 	water.set_shader_parameter("compatibility_color", RenderingServer.get_current_rendering_method() == "gl_compatibility")
@@ -1508,6 +1524,7 @@ func fit_board_overview(position: Vector3, target: Vector3, view_size: Vector2, 
 
 func observe_frame() -> void:
 	state = simulation.snapshot()
+	river_gator_visual.observe(state)
 	frog_visual.observe(state)
 	lady_visual.observe(state, func(addr): return simulation.peek(addr))
 	track_lady_hop()
@@ -1517,6 +1534,7 @@ func clear_presentation() -> void:
 	lady_visual.reset()
 	home_arrival.reset()
 	moving_visuals.reset()
+	river_gator_visual.reset()
 	frog_motion.reset()
 	for lane in batched_lanes.values():
 		lane.reset()
@@ -1530,6 +1548,12 @@ func clear_presentation() -> void:
 	last_live_player_frame = -1
 	known_diving_groups.clear()
 	known_diving_level = -1
+	beaver_phase = BeaverVisualPhase.Hidden
+	beaver_phase_seconds = 0.0
+	beaver_player_hit = false
+	beaver_last_x = 120.0
+	beaver_last_row = 80.0
+	beaver_heading = 1
 	for p in popups:
 		p.view.queue_free()
 	popups.clear()
@@ -1676,16 +1700,20 @@ func update_lanes(fraction: float) -> void:
 			if is_turtle and BoardVisuals.turtle_phase(state, raw_center, row) > 0:
 				known_diving_groups[group_key] = true
 			var depth: float = BoardVisuals.turtle_depth(state, raw_center, row, fraction, known_diving_groups.has(group_key)) if is_turtle else 0.0
-			var crocodile: bool = (lane == 0 and index == 0 and BoardVisuals.river_gator_active(state))
 			for member in range(members):
 				for wrap in [-1, 0, 1]:
 					var x: float = center + float(wrap) * 256.0 + (float(member) - float(members - 1) / 2.0) * 16.0
+					var crocodile: bool = lane == 0 and index == 0 and river_gator_visual.is_gator(x + 12.0 + float(width) / 2.0)
 					if is_turtle:
 						turtle_supports.append({"x": x, "row": row, "depth": depth})
 					var half_width: float = (float(width) - 3.0) * 0.52 if (lane < 5 and not is_turtle) else (9.0 if is_turtle else (15.0 if lane == 6 else 10.0))
 					var gator_fit = BoardVisuals.fit_river_gator(width) if crocodile else {}
 					var render_x: float = x + (gator_fit.get("center_offset_pixels", 0.0) if crocodile else 0.0)
-					if not BoardVisuals.intersects_playfield(render_x, half_width):
+					var bounds_center: float = render_x
+					if crocodile:
+						half_width = BoardVisuals.RiverGatorLengthPixels / 2.0
+						bounds_center = x + float(width) / 2.0 + 12.0 - BoardVisuals.RiverGatorTipInset - half_width
+					if not BoardVisuals.intersects_playfield(bounds_center, half_width):
 						continue
 					if batch != null and not crocodile:
 						batch.place(batched_lane_transform(lane, width, model, render_x, float(row)))
@@ -1693,7 +1721,7 @@ func update_lanes(fraction: float) -> void:
 					var actor_key: String = "lane%d.%d.%d.%d.%s" % [lane, index, member, wrap, str(crocodile)]
 					var obj = actor(actor_key, "river_gator" if crocodile else model)
 					obj.set_active(true)
-					var straddling_edge: bool = absf(render_x - 120.0) + half_width > 110.0
+					var straddling_edge: bool = absf(bounds_center - 120.0) + half_width > 110.0
 					obj.set_clipped(straddling_edge)
 					obj.root.position = pos3(render_x, float(row), ((-0.22 if is_turtle else -0.18) if lane < 5 else 0.02))
 					if crocodile:
@@ -1759,28 +1787,27 @@ func update_homes_and_hazards() -> void:
 			a.root.scale = Vector3.ONE * 0.6
 			a.play("Bite" if native_gator else "Idle")
 
-	for addr in [0x8048, 0x8050, 0x8058]:
+	for addr in [0x8048, 0x8050]:
 		var x: int = BoardVisuals.at(state, addr)
 		var y: int = BoardVisuals.at(state, addr + 3)
 		if x < 8 or x > 235 or y < 32 or y > 136 or BoardVisuals.at(state, addr + 1) == 0:
 			continue
-		var is_snake: bool = (addr != 0x8058)
-		var a = actor("hazard%d" % addr, "snake" if is_snake else "otter")
+		var a = actor("hazard%d" % addr, "snake")
 		a.set_active(true)
-		var surface: float = -0.18 + ModelFootprints.LogTopTiles if (is_snake and y < 128) else BoardVisuals.surface_height(float(y))
-		var height: float = surface - 0.75 * ModelFootprints.SnakeBottomTiles + 0.008 if is_snake else surface + 0.01
+		var surface: float = -0.18 + ModelFootprints.LogTopTiles if y < 128 else BoardVisuals.surface_height(float(y))
+		var height: float = surface - 0.75 * ModelFootprints.SnakeBottomTiles + 0.008
 		var motion_id: int = 1000 + addr
 		a.root.position = pos3(moving_visuals.step(motion_id, float(x), cur_frame, presentation_delta, paused), float(y), height)
-		var heading: int = 1
-		if is_snake:
-			# ROM 0x2a16..0x2a38 controls travel relative to the log: bit 7
-			# set crawls right, clear crawls left. World velocity includes the
-			# log's drift and can point opposite to the snake's own movement.
-			# The authored head points along +Z, so positive yaw faces right.
-			heading = 1 if (BoardVisuals.at(state, addr + 1) & 0x80) != 0 else -1
+		# ROM 0x2a16..0x2a38 controls travel relative to the log: bit 7
+		# set crawls right, clear crawls left. World velocity includes the
+		# log's drift and can point opposite to the snake's own movement.
+		# The authored head points along +Z, so positive yaw faces right.
+		var heading: int = 1 if (BoardVisuals.at(state, addr + 1) & 0x80) != 0 else -1
 		a.root.rotation = Vector3(0, float(heading) * PI / 2.0, 0)
 		a.root.scale = Vector3.ONE * 0.75
 		a.play("Move")
+
+	update_beaver(cur_frame)
 
 	if lady_visual.visible(ModelFootprints.FrogAlongX * LadyInRiverScale):
 		var a = actor("lady", rescue_frog_model())
@@ -1793,6 +1820,129 @@ func update_homes_and_hazards() -> void:
 			a.pose("Hop", clampf((float(cur_frame - lady_hop_start_frame) + frac) / 12.0, 0.0, 1.0) * (10.0 / 60.0))
 		else:
 			a.play("Idle")
+
+func begin_beaver_log_exit(player_hit: bool) -> void:
+	beaver_phase = BeaverVisualPhase.Grab
+	beaver_phase_seconds = 0.0
+	beaver_player_hit = player_hit
+
+func nearest_log_end(row: float, heading: int, around_x: float) -> Variant:
+	var lane: int = int(roundf(row / 16.0)) - 3
+	if lane < 0 or lane >= LaneModels.size() or LaneModels[lane] != "log":
+		return null
+	var table: int = 0x8100 + lane * 9
+	var width: int = LaneWidths[lane]
+	var half_width: float = (float(width) - 3.0) * 0.5
+	# The authored end caps extend beyond the nominal half-tile log body.
+	var batch: BatchedLane = batched_lanes.get(lane)
+	if batch != null and batch.body != null:
+		var bounds: AABB = batch.body.multimesh.mesh.get_aabb()
+		half_width = (float(width) - 3.0) * maxf(absf(bounds.position.x), absf(bounds.end.x))
+	var best: Variant = null
+	var best_distance: float = 999.0
+	for index in range(mini(8, BoardVisuals.at(state, table))):
+		var center: float = float(BoardVisuals.at(state, table + index + 1) - 12) - float(width) / 2.0
+		var displayed_center: Variant = moving_visuals.display_x(lane * 16 + index)
+		if displayed_center != null:
+			center = float(displayed_center)
+		for wrap in [-1, 0, 1]:
+			var wrapped_center: float = center + float(wrap) * 256.0
+			# A left-facing beaver approaches the right end and vice versa.
+			var end_x: float = wrapped_center + (half_width if heading < 0 else -half_width)
+			var distance: float = absf(end_x - around_x)
+			if distance < best_distance:
+				best_distance = distance
+				best = end_x
+	return best
+
+func update_beaver(cur_frame: int) -> void:
+	var record_base: int = 0x8490 if BoardVisuals.at(state, 0x83fd) == 2 else 0x8480
+	var native_state: int = BoardVisuals.at(state, record_base + 6)
+	var slot_x: int = BoardVisuals.at(state, 0x8058)
+	var slot_y: int = BoardVisuals.at(state, 0x805b)
+	var slot_code: int = BoardVisuals.at(state, 0x8059)
+	var descriptor_visible: bool = slot_x >= 8 and slot_x <= 235 and slot_y >= 32 and slot_y <= 136 and slot_code != 0
+
+	if descriptor_visible:
+		var displayed_slot_x: float = moving_visuals.step(1000 + 0x8058, float(slot_x), cur_frame, presentation_delta, paused)
+		beaver_heading = -1 if (slot_code & 0x80) != 0 else 1
+		# The native lethal probes are slot X+20 facing right and X-4 facing
+		# left. Put the model's nose on that exact point so its torso never
+		# phases into the log while its paws and incisors meet the end.
+		var attack_x: float = displayed_slot_x + (20.0 if beaver_heading > 0 else -4.0)
+		beaver_last_x = attack_x - float(beaver_heading) * 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
+		beaver_last_row = float(slot_y)
+		if beaver_phase in [BeaverVisualPhase.Hidden, BeaverVisualPhase.Done] and native_state == 1:
+			beaver_phase = BeaverVisualPhase.Approach
+			beaver_phase_seconds = 0.0
+
+	if beaver_phase == BeaverVisualPhase.Approach:
+		if native_state >= 2:
+			begin_beaver_log_exit(true)
+		elif native_state == 0:
+			# With no frog at the end the ROM clears the descriptor immediately.
+			# Preserve only a short presentation ghost for grab/look/sink.
+			begin_beaver_log_exit(false)
+
+	if beaver_phase == BeaverVisualPhase.Hidden:
+		if descriptor_visible and native_state >= 2:
+			begin_beaver_log_exit(true)
+		else:
+			return
+	if beaver_phase == BeaverVisualPhase.Done:
+		if native_state == 0:
+			beaver_phase = BeaverVisualPhase.Hidden
+		return
+
+	# Once contact begins, follow the rendered log end even while the native
+	# descriptor remains visible. Native motion and render smoothing can otherwise
+	# carry the held head through the wood before the dive finishes.
+	if beaver_phase in [BeaverVisualPhase.Grab, BeaverVisualPhase.Look, BeaverVisualPhase.Bite, BeaverVisualPhase.Sink]:
+		var front_pixels: float = 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
+		var prior_nose_x: float = beaver_last_x + float(beaver_heading) * front_pixels
+		var tracked_end: Variant = nearest_log_end(beaver_last_row, beaver_heading, prior_nose_x)
+		if tracked_end != null:
+			beaver_last_x = float(tracked_end) - float(beaver_heading) * front_pixels
+
+	var delta: float = 0.0 if paused else presentation_delta
+	if beaver_phase == BeaverVisualPhase.Grab:
+		beaver_phase_seconds += delta
+		if beaver_phase_seconds >= BeaverGrabSeconds:
+			beaver_phase = BeaverVisualPhase.Bite if beaver_player_hit else BeaverVisualPhase.Look
+			beaver_phase_seconds = 0.0
+	elif beaver_phase == BeaverVisualPhase.Look:
+		beaver_phase_seconds += delta
+		if beaver_phase_seconds >= BeaverLookSeconds:
+			beaver_phase = BeaverVisualPhase.Sink
+			beaver_phase_seconds = 0.0
+	elif beaver_phase == BeaverVisualPhase.Bite:
+		beaver_phase_seconds += delta
+		if beaver_phase_seconds >= BeaverBiteSeconds:
+			beaver_phase = BeaverVisualPhase.Sink
+			beaver_phase_seconds = 0.0
+	elif beaver_phase == BeaverVisualPhase.Sink:
+		beaver_phase_seconds += delta
+		if beaver_phase_seconds >= BeaverSinkSeconds + BeaverUnderHoldSeconds:
+			beaver_phase = BeaverVisualPhase.Done
+			return
+
+	var sink_amount: float = clampf(beaver_phase_seconds / BeaverSinkSeconds, 0.0, 1.0) if beaver_phase == BeaverVisualPhase.Sink else 0.0
+	var a = actor("hazard32856", "otter")
+	a.set_active(true)
+	a.root.position = pos3(beaver_last_x, beaver_last_row,
+		BoardVisuals.beaver_height(BoardVisuals.WaterSurfaceHeight, BeaverScale, sink_amount))
+	a.root.rotation = Vector3(0, float(beaver_heading) * PI / 2.0, 0)
+	a.root.scale = Vector3.ONE * BeaverScale
+	var grab_end: float = BeaverAttackSeconds * 0.55
+	match beaver_phase:
+		BeaverVisualPhase.Approach:
+			a.play("Move")
+		BeaverVisualPhase.Grab:
+			a.pose("Attack", grab_end * clampf(beaver_phase_seconds / BeaverGrabSeconds, 0.0, 1.0))
+		BeaverVisualPhase.Bite:
+			a.pose("Attack", grab_end + (BeaverAttackSeconds - grab_end) * clampf(beaver_phase_seconds / BeaverBiteSeconds, 0.0, 1.0))
+		BeaverVisualPhase.Look, BeaverVisualPhase.Sink:
+			a.pose("Attack", BeaverAttackSeconds if beaver_player_hit else grab_end)
 
 func update_bonuses(fraction: float) -> void:
 	var incoming = simulation.get_bonus_awards()
@@ -1914,6 +2064,7 @@ func read_review_args() -> void:
 	review_turtle_close = args.has("--review-turtle-close")
 	review_gator_close = args.has("--review-gator-close")
 	review_snake_close = args.has("--review-snake-close")
+	review_beaver_close = args.has("--review-beaver-close")
 
 func review_frames_list() -> Array:
 	match review:
@@ -1924,6 +2075,7 @@ func review_frames_list() -> Array:
 		"lady-goal-overwrite": return [1, 8]
 		"lady-rom-clear": return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 		"snake", "snake-left": return [1, 8]
+		"beaver", "beaver-empty": return [1, 8, 24, 40, 55, 65]
 		"bottom-grass": return [1, 8]
 		"hop-right": return [1, 6, 12, 24, 48]
 		"log-left", "log-right": return [1, 4, 8, 12, 16, 20, 24, 32, 40, 48]
@@ -1942,6 +2094,7 @@ func review_frames_list() -> Array:
 		"home-gator": return [1, 20, 40, 60, 80, 100]
 		"home-gator-retreat": return [1, 20, 40, 60, 80, 100, 175, 176, 178, 182, 186, 188, 190]
 		"river-gator": return [1, 12, 24]
+		"river-wrap-croc", "river-wrap-log": return [1, 3, 19, 35, 73]
 		"river-back", "river-snout": return [1, 2, 4, 8, 16]
 		"snake-motion": return [1, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80]
 		"wrap": return [1, 2, 8, 24, 48, 72, 96, 120]
@@ -2083,6 +2236,13 @@ func step_review() -> void:
 			btn.button_index = JOY_BUTTON_A
 			btn.pressed = true
 			_unhandled_input(btn)
+	if review in ["river-wrap-croc", "river-wrap-log"]:
+		var tip: int = (253 + review_frame) & 255
+		var outgoing: bool = review == "river-wrap-croc"
+		simulation.poke(0x83b7, 2)
+		simulation.poke(0x8100, 1)
+		simulation.poke(0x8101, tip)
+		simulation.poke(0x8150, int(outgoing if review_frame < 3 else not outgoing))
 	if review in ["river-gator", "river-back", "river-snout"]:
 		var x: int = 120
 		simulation.poke(0x83b7, 2)
@@ -2090,7 +2250,7 @@ func step_review() -> void:
 		simulation.poke(0x8101, x + 12 + 30)
 		simulation.poke(0x8150, 1)
 		if review_frame == 1 and review != "river-gator":
-			set_review_frog(130 if review == "river-back" else 152, 48)
+			set_review_frog(110 if review == "river-back" else 148, 48)
 	if review in ["home-gator", "home-gator-retreat"]:
 		var phase: int = mini(review_frame, 120 if review == "home-gator" else 200)
 		var bay: int = 2
@@ -2156,6 +2316,37 @@ func step_review() -> void:
 		simulation.poke(0x8048, x)
 		simulation.poke(0x8049, 1)
 		simulation.poke(0x804b, 96)
+	if review in ["beaver", "beaver-empty"]:
+		var log_center: float = 120.0
+		var best_distance: float = 999.0
+		var log_count: int = simulation.peek(0x8112)
+		for index in range(mini(8, log_count)):
+			var raw_center: float = float(simulation.peek(0x8113 + index) - 12) - float(LaneWidths[2]) / 2.0
+			for wrap in [-1, 0, 1]:
+				var candidate: float = raw_center + float(wrap) * 256.0
+				var right_end: float = candidate + (float(LaneWidths[2]) - 3.0) * 0.5
+				var distance: float = absf(right_end - 175.0)
+				if right_end >= 48.0 and right_end <= 220.0 and distance < best_distance:
+					best_distance = distance
+					log_center = candidate
+		var log_end: float = log_center + (float(LaneWidths[2]) - 3.0) * 0.5
+		# Face left toward the log's right end. The ROM's lethal/nose probe is
+		# then slot X-4, leaving the torso in open water while only the muzzle
+		# and forepaws meet the end grain.
+		var approach_gap: float = float(maxi(1, 8 - review_frame))
+		if review == "beaver-empty" and review_frame >= 8:
+			for address in range(0x8058, 0x805c):
+				simulation.poke(address, 0)
+			simulation.poke(0x8486, 0)
+		else:
+			var nose_x: float = log_end + (0.0 if review_frame >= 8 else approach_gap)
+			simulation.poke(0x8058, int(roundf(nose_x + 4.0)))
+			simulation.poke(0x8059, 0x81)
+			simulation.poke(0x805b, 80)
+			simulation.poke(0x8486, 2 if review_frame >= 8 else 1)
+			if review == "beaver" and review_frame >= 8:
+				set_review_frog(int(roundf(log_end)), 80)
+		presentation_delta = FRAME_SECONDS
 	observe_frame()
 	accumulator = 0.0
 
@@ -2177,11 +2368,11 @@ func capture_review() -> void:
 	var free_lady: ModelActor = actors.get("lady")
 	var snake: ModelActor = actors.get("hazard32840")
 	var home_gator: ModelActor = actors.get("homegator2")
-	var river_gator: ModelActor = actors.get("lane0.0.0.0.True")
+	var river_gator: ModelActor = actors.get("lane0.0.0.0.%s" % str(true))
 	var rider: ModelActor = actors.get("passenger")
 
 	var rider_visible: bool = (rider != null and rider.root.is_visible_in_tree())
-	if review == "river-back" and BoardVisuals.at(state, 0x8004) != 0 and not frog_visual.dying:
+	if review == "river-back" and BoardVisuals.at(state, 0x8004) == 0 and not frog_visual.dying:
 		review_gator_safe_observed = true
 	if review == "river-snout" and BoardVisuals.at(state, 0x829c) != 0 and frog_visual.dying:
 		review_gator_snout_death_observed = true
@@ -2365,7 +2556,7 @@ func capture_review() -> void:
 	review_capture_pending = false
 
 func update_review_camera() -> void:
-	if not review_close and not review_lady_close and not review_turtle_close and not review_gator_close and not review_snake_close:
+	if not review_close and not review_lady_close and not review_turtle_close and not review_gator_close and not review_snake_close and not review_beaver_close:
 		return
 	var player = actor("player", player_frog)
 	var target: Vector3
@@ -2373,6 +2564,9 @@ func update_review_camera() -> void:
 		target = pos3(134.0, 48.0, 0.0) if review in ["river-gator", "river-back", "river-snout"] else Vector3(0, 0.30, -6.3)
 	elif review_snake_close and actors.has("hazard32840"):
 		target = actors["hazard32840"].root.position + Vector3.UP * 0.1
+	elif review_beaver_close and actors.has("hazard32856"):
+		target = actors["hazard32856"].root.position
+		target.y = 0.30
 	elif review_turtle_close and turtle_supports.any(func(t): return t["x"] >= 24.0 and t["x"] <= 216.0):
 		var valid_turtles = turtle_supports.filter(func(t): return t["x"] >= 24.0 and t["x"] <= 216.0)
 		valid_turtles.sort_custom(func(a, b): return a["depth"] > b["depth"])

@@ -52,10 +52,10 @@ static void Check(bool condition, const std::string& message) {
 struct ModelFootprints {
     static constexpr float FrogAlongX = 8.56170f;
     static constexpr float FrogAcrossRow = 6.89952f;
-    static constexpr float RiverGatorLengthTiles = 2.153474f;
+    static constexpr float RiverGatorLengthTiles = 2.274321f;
     static constexpr float RiverGatorWidthTiles = 1.100000f;
-    static constexpr float RiverGatorFrontTiles = 1.030000f;
-    static constexpr float RiverGatorSnoutTiles = 0.605000f;
+    static constexpr float RiverGatorFrontTiles = 1.150847f;
+    static constexpr float RiverGatorSnoutTiles = 0.725847f;
     static constexpr float LogTopTiles = 0.436645f;
     static constexpr float SnakeBottomTiles = 0.021363f;
     static constexpr float LadyBottomTiles = -0.006061f;
@@ -100,8 +100,8 @@ struct RiverGatorFit {
 struct BoardVisuals {
     static constexpr float LeftEdge = 8.0f;
     static constexpr float RightEdge = 232.0f;
-    static constexpr int RiverGatorVisiblePixels = 57;
-    static constexpr int RiverGatorDangerPixels = 16;
+    static constexpr int RiverGatorVisiblePixels = 71;
+    static constexpr int RiverGatorDangerPixels = 40;
     static constexpr int LadyFrogRow = 96;
 
     static RiverGatorZone RiverGatorContact(int frogX, int tipX) {
@@ -115,20 +115,14 @@ struct BoardVisuals {
         return state.At(0x83b7) >= 2 && (state.At(0x8150) & 1) != 0 && state.At(0x8101) != 0;
     }
 
-    static bool RiverGatorRide(const FrameState& state) {
-        return RiverGatorActive(state) && state.At(0x829c) == 0 &&
-               ((state.At(0x8047) + 8) & 255) >= 42 && ((state.At(0x8047) + 8) & 255) < 59 &&
-               RiverGatorContact(state.At(0x8044), state.At(0x8101)) == RiverGatorZone::Back;
-    }
-
     static float LadyFrogHeight(float scale) {
         return -0.18f + ModelFootprints::LogTopTiles - scale * ModelFootprints::LadyBottomTiles + 0.012f;
     }
 
     static RiverGatorFit FitRiverGator(int nativeWidth) {
-        float lengthScale = (nativeWidth - 3.0f) / (16.0f * ModelFootprints::RiverGatorLengthTiles);
+        float lengthScale = 47.0f / (16.0f * ModelFootprints::RiverGatorLengthTiles);
         float widthScale = 14.0f / (16.0f * ModelFootprints::RiverGatorWidthTiles);
-        float centerOffset = nativeWidth / 2.0f + 12.0f - 16.0f * ModelFootprints::RiverGatorFrontTiles * lengthScale;
+        float centerOffset = nativeWidth / 2.0f - 13.0f - 16.0f * ModelFootprints::RiverGatorFrontTiles * lengthScale;
         return {centerOffset, widthScale, lengthScale};
     }
 
@@ -343,8 +337,7 @@ public:
     }
 
     void Observe(const FrameState& s) {
-        bool ridingGator = s.At(0x8004) != 0 && BoardVisuals::RiverGatorRide(s);
-        bool dead = PlayerOnBoard(s) && s.At(0x8004) != 0 && s.At(0x83cd) == 0 && !ridingGator;
+        bool dead = PlayerOnBoard(s) && s.At(0x8004) != 0 && s.At(0x83cd) == 0;
         if (dead && !Dying) {
             DeathFrame = s.frame;
             DeathX = s.At(0x8044);
@@ -832,9 +825,9 @@ static void RunFeedbackTests(const std::vector<uint8_t>& rom) {
     float nativeTip = 162.0f, rawCenter = nativeTip - 12.0f - 60.0f / 2.0f;
     float visualTip = rawCenter + riverFit.centerOffsetPixels + 16.0f * ModelFootprints::RiverGatorFrontTiles * riverFit.lengthScale;
     float visualSnout = 16.0f * ModelFootprints::RiverGatorSnoutTiles * riverFit.lengthScale;
-    Check(std::abs(visualTip - nativeTip) < 0.01f && std::abs(visualSnout - 16.0f) < 0.35f,
-          "river gator snout missed the ROM's 16px kill interval");
-    Check(std::abs(16.0f * ModelFootprints::RiverGatorLengthTiles * riverFit.lengthScale - 57.0f) < 0.01f &&
+    Check(std::abs(visualTip - (nativeTip - 25.0f)) < 0.01f && std::abs(visualSnout - 15.0f) < 0.01f,
+          "river gator back extends into the ROM head kill interval");
+    Check(std::abs(16.0f * ModelFootprints::RiverGatorLengthTiles * riverFit.lengthScale - 47.0f) < 0.01f &&
           std::abs(16.0f * ModelFootprints::RiverGatorWidthTiles * riverFit.widthScale - 14.0f) < 0.01f,
           "river gator no longer fits its ROM log slot");
 
@@ -897,55 +890,73 @@ static void RunFeedbackTests(const std::vector<uint8_t>& rom) {
 
     // VerifyOriginalRiverGator
     struct CrocProbe { int x; int hold; int drown; int rideTile; bool visualDying; };
-    auto Probe = [&](int x) -> CrocProbe {
-        ArcadeSimulationCore game(rom);
+    auto Probe = [&](int x, bool modern) -> CrocProbe {
+        ArcadeSimulationCore game(rom, modern);
         game.Poke(0x8150, 1); game.Poke(0x83b7, 2);
         game.Poke(0x8044, x); game.Poke(0x8047, 48); game.Poke(0x8101, 160);
-        game.Poke(0x8004, 0); game.Poke(0x829c, 0); game.Poke(0x83cd, 0);
-        game.Cpu.PC = 0x28bb; game.Cpu.SP = 0x87f0;
-        game.Poke(0x87f0, 0x34); game.Poke(0x87f1, 0x12);
-        int steps = 0;
-        while (game.Cpu.PC != 0x1234 && steps++ < 300) game.Cpu.StepInstruction();
-        Check(game.Cpu.PC == 0x1234, "native crocodile test did not return");
+        if (!modern || !game.ResolveModernRiverGator()) {
+            game.Cpu.PC = 0x28bb; game.Cpu.SP = 0x87f0;
+            game.Poke(0x87f0, 0x34); game.Poke(0x87f1, 0x12);
+            int guard = 0;
+            while (game.Cpu.PC != 0x1234 && ++guard < 1000) game.Cpu.StepInstruction();
+            Check(game.Cpu.PC == 0x1234, "native crocodile test did not return");
+        }
         FrogVisualState visual;
         visual.Observe(game.Snapshot());
         return {x, game.Peek(0x8004), game.Peek(0x829c), game.Peek(0xa846), visual.Dying};
     };
-
-    int probeXCases[] = {103, 110, 120, 130, 143, 144, 145, 152, 160, 161};
-    std::vector<CrocProbe> cases;
-    for (int px : probeXCases) cases.push_back(Probe(px));
-    Check(cases[0].hold == 0 && cases[1].hold == 0 && cases[2].hold == 0, "classic crocodile window extends into the visible tail");
-    Check(cases[3].rideTile == 104 && cases[4].rideTile == 104 && cases[5].rideTile == 104 &&
-          !cases[3].visualDying && !cases[4].visualDying && !cases[5].visualDying,
-          "classic safe crocodile back is incorrectly shown as a death");
-    Check(cases[6].drown == 1 && cases[7].drown == 1 && cases[8].drown == 1 && cases[8].visualDying && cases[9].hold == 0,
-          "classic snout danger no longer matches ROM 0x28BB");
-    Check(BoardVisuals::RiverGatorContact(250, 10) == RiverGatorZone::Back &&
-          BoardVisuals::RiverGatorContact(251, 10) == RiverGatorZone::Snout,
+    std::vector<CrocProbe> cases, modernCases;
+    for (int x : {90, 91, 103, 110, 120, 121, 130, 144, 145, 152, 160, 161}) {
+        cases.push_back(Probe(x, false));
+        modernCases.push_back(Probe(x, true));
+        for (const auto& probe : {cases.back(), modernCases.back()}) {
+            const bool dead = x >= 121 && x <= 160;
+            Check(probe.hold == int(dead) && probe.visualDying == dead,
+                  "crocodile back/head boundary or death presentation differs from the ROM");
+            Check(probe.drown == int(x >= 145 && x <= 160), "crocodile bite/drown distinction changed");
+        }
+    }
+    Check(BoardVisuals::RiverGatorContact(226, 10) == RiverGatorZone::Back &&
+          BoardVisuals::RiverGatorContact(227, 10) == RiverGatorZone::Snout,
           "crocodile contact failed across the 8-bit screen wrap");
 
-    auto ModernProbe = [&](int x) -> CrocProbe {
-        ArcadeSimulationCore game(rom, true);
-        game.Poke(0x8150, 1); game.Poke(0x83b7, 2);
-        game.Poke(0x8044, x); game.Poke(0x8047, 48); game.Poke(0x8101, 160);
-        Check(game.ResolveModernRiverGator(), "modern crocodile hook did not handle an armed river row");
-        FrogVisualState visual;
-        visual.Observe(game.Snapshot());
-        return {x, game.Peek(0x8004), game.Peek(0x829c), game.Peek(0xa846), visual.Dying};
-    };
-
-    int modernXCases[] = {102, 103, 110, 120, 130, 144, 145, 152, 160, 161};
-    std::vector<CrocProbe> modernCases;
-    for (int px : modernXCases) modernCases.push_back(ModernProbe(px));
-    Check(modernCases[0].hold == 0 && modernCases[9].hold == 0, "modern croc contact extends beyond its model");
-    for (size_t i = 1; i <= 5; i++) {
-        Check(modernCases[i].hold == 1 && modernCases[i].drown == 0 && modernCases[i].rideTile == 104 && !modernCases[i].visualDying,
-              "modern croc back killed the frog");
-    }
-    for (size_t i = 6; i <= 8; i++) {
-        Check(modernCases[i].hold == 1 && modernCases[i].drown == 1 && modernCases[i].rideTile == 0 && modernCases[i].visualDying,
-              "modern croc snout was not fatal");
+    // A single call cannot prove survival: 0x8004 starts a death sequence even
+    // when 0x829c is clear. Reach a naturally spawned croc and ride for >96 NMIs.
+    for (bool modern : {false, true}) {
+        auto game = StartedSim(rom);
+        game->Modern(modern);
+        game->Poke(0x83b7, 2);
+        int guard = 0;
+        auto approachSupported = [&]() {
+            int x = game->Peek(0x8101) - 50;
+            for (int i = 0; i < game->Peek(0x8109); i++) {
+                int behind = (game->Peek(0x810a + i) - x) & 255;
+                if (behind >= 12 && behind < 43) return true;
+            }
+            return false;
+        };
+        while (!(game->Peek(0x8150) & 1) || game->Peek(0x8101) < 140 || game->Peek(0x8101) > 170 || !approachSupported()) {
+            game->Step();
+            Check(++guard < 2000, "natural river crocodile did not arrive");
+        }
+        game->Poke(0x8044, game->Peek(0x8101) - 50);
+        game->Poke(0x8047, 64);
+        game->Poke(0x8004, 0); game->Poke(0x829c, 0); game->Poke(0x83cd, 0);
+        for (int frame = 0; frame < 12; frame++) {
+            game->Step(1);
+            Check(game->Peek(0x8004) == 0, "jump from turtles onto crocodile back killed the frog");
+        }
+        Check(game->Peek(0x8047) == 48, "upward hop did not land on the crocodile row");
+        int startX = game->Peek(0x8044);
+        for (int frame = 0; frame < 100; frame++) {
+            game->Step();
+            Check(game->Peek(0x8004) == 0 && game->Peek(0x81b2) == 0 && game->Peek(0x8047) == 48,
+                  "crocodile back started a death or respawn during a sustained ride");
+        }
+        Check(game->Peek(0x8044) > startX, "safe crocodile did not carry the frog");
+        for (int frame = 0; frame < 12; frame++) game->Step(4);
+        Check(game->Peek(0x8004) == 0 && game->Peek(0x8044) < startX + 40,
+              "frog could not hop on the safe crocodile back");
     }
 
     auto WriteCrocJson = [](const std::string& path, const std::vector<CrocProbe>& cpList) {
@@ -1182,7 +1193,7 @@ int main() {
                 }
             }
         }
-        if (fixtures.size() != 5) throw std::runtime_error("Expected five independent MAME fixtures");
+        if (fixtures.size() != 8) throw std::runtime_error("Expected eight independent MAME fixtures");
         std::sort(fixtures.begin(), fixtures.end(), [](const auto& a, const auto& b){ return a.address < b.address; });
 
         {
@@ -1200,7 +1211,7 @@ int main() {
             ss << "]\n";
             WriteFileText("docs/evidence/native-vs-mame.json", ss.str());
         }
-        std::cout << "Five MAME function fixtures: exact RAM and register match" << std::endl;
+        std::cout << "Eight MAME function fixtures: exact RAM and register match" << std::endl;
 
         // Native Sound
         auto audioRom = ReadFileBytes("godot/rom/audiocpu.bin");

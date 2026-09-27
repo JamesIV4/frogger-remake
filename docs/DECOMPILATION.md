@@ -30,7 +30,7 @@ Headless Ghidra can return exit code 0 even when a Java post-script fails. `tool
 | --- | --- | --- |
 | ROM provenance | Assembled input hashes | Exact pinned set |
 | Native whole-program replay | Every main RAM, VRAM and object-RAM byte over 460 frames: boot, coin, start, hop | 1,530,880 bytes, zero differences, zero masked bytes |
-| MAME function fixtures | Before/after snapshots of ROM 0x11bf, 0x14b7, 0x08e0, 0x1cff, 0x16f8; native execution starts from MAME's captured entry registers and RAM | Five functions match all 3,328 state bytes and all captured registers |
+| MAME function fixtures | Before/after snapshots of ROM 0x11bf, 0x14b7, 0x08e0, 0x1cff, 0x16f8 and three contacts at 0x28bb; native execution starts from MAME's captured entry registers and RAM | Eight executions of six functions match all 3,328 state bytes and all captured registers |
 | Recovered-reference suite | Function equivalence, mutation controls, board hardware and new provenance checks | 439 pass, 0 fail; one optional recorded-audio-file check skipped |
 | Lifecycle scenarios | 9,000-frame idle run through timer deaths and game-over; two-player hand-off; five forced safe home entries followed by ordinary board progression | Passed; next board reached |
 | Native sound | Original sound CPU and commands running through the compiled program | 1,425,600 samples in the 1,800-frame test; non-silent output; full command sweep expands executed-code coverage |
@@ -46,13 +46,13 @@ $env:FROGGER_EVIDENCE = "$PWD/docs/evidence/mame-functions"
 ./tools/verify.ps1
 ```
 
-The equivalence gate has limits: 460 frames and five independent function fixtures are concrete evidence, not an exhaustive proof over every possible machine state. Ghidra producing C is a weaker, separate fact. `docs/evidence/audit.json` records these distinctions.
+The equivalence gate has limits: 460 frames and eight independent function fixtures are concrete evidence, not an exhaustive proof over every possible machine state. Ghidra producing C is a weaker, separate fact. `docs/evidence/audit.json` records these distinctions.
 
 ## Presentation and intentional differences
 
 The game uses original object lists and sprite/VRAM state to place Blender models. Turtle submergence and home creatures are read from the original tile state, not independent random timers. A framebuffer is never drawn as the game world. The bank at row 0 remains open; grass is flat surface detail. The visual layer smooths stepped object positions and finishes hop/drowning poses without modifying the recovered RAM or timing.
 
-The default model-sized road hook at **0x11bf** uses vehicle front, rear and lateral bounds generated from actual Blender vertices, rotated into each lane's direction. It tests the whole frog footprint on both sides and sweeps relative vehicle/frog movement between original NMIs. A separate Modern collision hook at **0x28bb** retains the ROM's lethal 16-pixel crocodile snout interval while extending the safe ride from the original 24-pixel back window to the full visible model back. The menu's **Classic collision (original ROM)** option executes both original routines unchanged and is used for reference comparisons. These hooks intentionally change contact decisions and instruction timing; other river supports, diving, hazards, goals, RNG, scores, timers and progression remain in the recovered program. Held movement is forwarded without a synthetic release frame, allowing the ROM's directional latch to enforce one hop per press. Stick hysteresis prevents axis jitter from looking like a release and re-press.
+The default model-sized road hook at **0x11bf** uses vehicle front, rear and lateral bounds generated from actual Blender vertices, rotated into each lane's direction. It tests the whole frog footprint on both sides and sweeps relative vehicle/frog movement between original NMIs. The Modern collision hook at **0x28bb** recognizes the visible safe back across byte-coordinate wrapping and delegates head contacts to the original routine. Neither mode sets a death flag for a safe back landing. The menu's **Classic collision (original ROM)** option executes both original routines unchanged and is used for reference comparisons. These hooks intentionally change contact decisions and instruction timing; other river supports, diving, hazards, goals, RNG, scores, timers and progression remain in the recovered program. Held movement is forwarded without a synthetic release frame, allowing the ROM's directional latch to enforce one hop per press. Stick hysteresis prevents axis jitter from looking like a release and re-press.
 
 Both CPUs execute native code. `NativeSound.cs` models the AY tone/noise/envelope output and DC filtering. The analogue amplifier/filter network is **not** MAME netlist exact. Recorded MAME WAVs in the ignored local audio folder were research artifacts; the game has no dependency on them.
 
@@ -66,3 +66,13 @@ Both CPUs execute native code. `NativeSound.cs` models the AY tone/noise/envelop
 ```
 
 Ghidra projects and original images remain local under ignored `reference/`. The exported C, inventories, function map, generator, fixtures and verification reports remain reviewable in the repository. Vendor hashes are checked so silent edits to the reference cannot make both sides agree on a new mistake.
+
+### River crocodile correction
+
+MAME captures from `tools/mame_river.lua` verify three executions of **0x28bb** with the lane-table position at 160: X=110 leaves the frog alive, X=130 sets death without drowning, and X=152 sets death with drowning. All three match native RAM and registers. Run the script with the same MAME command above, replacing the autoboot script path, to regenerate the `28bb-*` fixtures.
+
+The former "ride/hold" interpretation was incorrect: **0x8004** starts the death sequence at **0x16f8**, including the branch that stamps tiles 0x68..0x6b. The full lethal head interval is table-position minus 39 through table-position, not just the final 16 pixels. The crocodile tile strip at **0x1413** begins with 16 blank pixels. Its occupied graphic is 47 pixels long, with its leading edge 25 pixels behind the table position. The model matches those bounds with 15 pixels of jaw and 32 pixels of back/tail; its back ends at table-position minus 40. The lethal interval extends ahead of the visible jaw, so fitting the jaw to the whole collision interval would make it too long. The generated ROM instructions and vendored oracle are unchanged.
+
+The incoming and outgoing copies of slot zero retain separate visual identities when **0x8150** changes at the **0x8101** wrap. Native regressions jump from turtles onto a naturally spawned crocodile, ride it for 100 frames and hop again in both modes. Godot presentation tests exercise both croc-to-log and log-to-croc transitions while opposite edge copies are visible.
+
+The river model length is checked against the occupied pixels decoded by `python tools/inspect_graphics.py`. Both crocodile variants have upper and lower tooth rows. Their lower mouth lining follows the jaw surface, avoiding the former intersecting ellipsoid; generated jaw surfaces and lining have outward/upward normal assertions. The rebuilt assets were checked in Godot captures.

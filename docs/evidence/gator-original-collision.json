@@ -1,5 +1,19 @@
 [
   {
+    "X": 90,
+    "Hold": 0,
+    "Drown": 0,
+    "RideTile": 0,
+    "VisualDying": false
+  },
+  {
+    "X": 91,
+    "Hold": 0,
+    "Drown": 0,
+    "RideTile": 0,
+    "VisualDying": false
+  },
+  {
     "X": 103,
     "Hold": 0,
     "Drown": 0,
@@ -21,25 +35,25 @@
     "VisualDying": false
   },
   {
+    "X": 121,
+    "Hold": 1,
+    "Drown": 0,
+    "RideTile": 104,
+    "VisualDying": true
+  },
+  {
     "X": 130,
     "Hold": 1,
     "Drown": 0,
     "RideTile": 104,
-    "VisualDying": false
-  },
-  {
-    "X": 143,
-    "Hold": 1,
-    "Drown": 0,
-    "RideTile": 104,
-    "VisualDying": false
+    "VisualDying": true
   },
   {
     "X": 144,
     "Hold": 1,
     "Drown": 0,
     "RideTile": 104,
-    "VisualDying": false
+    "VisualDying": true
   },
   {
     "X": 145,

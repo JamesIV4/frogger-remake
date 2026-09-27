@@ -4,11 +4,13 @@ public readonly record struct ModelFootprint(float MinAlongX,float MaxAlongX,flo
 public static class ModelFootprints {
     public const float FrogAlongX=8.56170f;
     public const float FrogAcrossRow=6.89952f;
-    public const float RiverGatorLengthTiles=2.153474f;
+    public const float RiverGatorLengthTiles=2.275091f;
     public const float RiverGatorWidthTiles=1.100000f;
-    public const float RiverGatorFrontTiles=1.030000f;
-    public const float RiverGatorSnoutTiles=0.605000f;
+    public const float RiverGatorFrontTiles=1.150847f;
+    public const float RiverGatorSnoutTiles=0.725847f;
     public const float LogTopTiles=0.436645f;
+    public const float BeaverTopTiles=0.402000f;
+    public const float BeaverFrontTiles=0.728000f;
     public const float SnakeBottomTiles=0.021363f;
     public const float LadyBottomTiles=-0.006061f;
     // Vehicles rotate their local length axis into the ROM X direction.

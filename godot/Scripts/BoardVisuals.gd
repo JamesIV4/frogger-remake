@@ -4,9 +4,12 @@ enum RiverGatorZone { Outside, Back, Snout }
 
 const LeftEdge: float = 8.0
 const RightEdge: float = 232.0
-const RiverGatorVisiblePixels: int = 57
-const RiverGatorDangerPixels: int = 16
+const RiverGatorVisiblePixels: int = 71
+const RiverGatorLengthPixels: float = 47.0
+const RiverGatorTipInset: float = 25.0
+const RiverGatorDangerPixels: int = 40
 const LadyFrogRow: int = 96
+const WaterSurfaceHeight: float = -0.025
 
 static func river_gator_contact(frog_x: int, tip_x: int) -> RiverGatorZone:
 	var behind: int = (tip_x - frog_x + 256) & 255
@@ -19,21 +22,26 @@ static func river_gator_contact(frog_x: int, tip_x: int) -> RiverGatorZone:
 static func river_gator_active(state: Dictionary) -> bool:
 	return at(state, 0x83b7) >= 2 and (at(state, 0x8150) & 1) != 0 and at(state, 0x8101) != 0
 
-static func river_gator_ride(state: Dictionary) -> bool:
-	if not river_gator_active(state) or at(state, 0x829c) != 0:
-		return false
-	var biased: int = (at(state, 0x8047) + 8) & 255
-	if biased < 42 or biased >= 59:
-		return false
-	return river_gator_contact(at(state, 0x8044), at(state, 0x8101)) == RiverGatorZone.Back
-
 static func lady_frog_height(scale_val: float) -> float:
 	return -0.18 + ModelFootprints.LogTopTiles - scale_val * ModelFootprints.LadyBottomTiles + 0.012
 
+static func beaver_height(surface: float, scale_val: float, under_log: float) -> float:
+	# State 1 swims with the waterline halfway up the model. The ROM advances
+	# the object to state 2 only when it reaches the log-end contact; only then
+	# may presentation sink it below the log's authored top surface.
+	var swimming: float = surface - scale_val * ModelFootprints.BeaverTopTiles * 0.5
+	# Attack raises the head up to 0.095 tiles above the rest-pose footprint.
+	# Include that rise when diving so the held bite pose clears even wave troughs.
+	var posed_top: float = scale_val * (ModelFootprints.BeaverTopTiles + 0.10)
+	var below_log: float = -0.18 + ModelFootprints.LogTopTiles - posed_top - 0.04
+	var below_water: float = surface - posed_top - 0.05
+	var hidden: float = minf(below_log, below_water)
+	return mix(swimming, hidden, smooth_val(under_log))
+
 static func fit_river_gator(native_width: int) -> Dictionary:
-	var length_scale: float = (float(native_width) - 3.0) / (16.0 * ModelFootprints.RiverGatorLengthTiles)
+	var length_scale: float = RiverGatorLengthPixels / (16.0 * ModelFootprints.RiverGatorLengthTiles)
 	var width_scale: float = 14.0 / (16.0 * ModelFootprints.RiverGatorWidthTiles)
-	var center_offset: float = float(native_width) / 2.0 + 12.0 - 16.0 * ModelFootprints.RiverGatorFrontTiles * length_scale
+	var center_offset: float = float(native_width) / 2.0 + 12.0 - RiverGatorTipInset - 16.0 * ModelFootprints.RiverGatorFrontTiles * length_scale
 	return {
 		"center_offset_pixels": center_offset,
 		"width_scale": width_scale,
@@ -130,6 +138,30 @@ static func turtle_phase(state: Dictionary, x: float, row: int) -> int:
 	if blank:
 		return 2
 	return 0
+
+
+class RiverGatorPresentation:
+	var previous_tip: int = -1
+	var current_gator: bool = false
+	var exiting_gator: bool = false
+
+	func reset() -> void:
+		previous_tip = -1
+		current_gator = false
+		exiting_gator = false
+
+	func observe(state: Dictionary) -> void:
+		var tip: int = BoardVisuals.at(state, 0x8101)
+		if previous_tip >= 0 and previous_tip - tip > 128:
+			exiting_gator = current_gator
+		# The ROM rearms the incoming slot at zero; the exiting copy keeps
+		# its own identity until its tail has cleared the right edge.
+		current_gator = BoardVisuals.at(state, 0x83b7) >= 2 and (BoardVisuals.at(state, 0x8150) & 1) != 0
+		previous_tip = tip
+
+	func is_gator(display_tip: float) -> bool:
+		# Smoothing may put the outgoing tip just below 256 on the wrap frame.
+		return exiting_gator if previous_tip < 128 and display_tip > 128.0 else current_gator
 
 
 class LadyFrogPresentation:

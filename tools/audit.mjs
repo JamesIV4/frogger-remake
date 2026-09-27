@@ -40,7 +40,7 @@ for(const program of compiled){
 const parity=read('docs/evidence/native-vs-oracle.json');
 if(parity.differentBytes!==0||parity.frames<460||parity.maskedBytes!==0)failures.push('Native full-state oracle gate');
 const mame=read('docs/evidence/native-vs-mame.json');
-if(mame.length!==5||mame.some(f=>f.diff||f.registerDifferences))failures.push('Independent MAME gate');
+if(mame.length!==8||mame.some(f=>f.diff||f.registerDifferences))failures.push('Independent MAME gate');
 const assets=read('docs/evidence/asset-validation.json');
 const requiredAssets=['frog','lady_frog','turtle','gator','river_gator','fly','snake','otter','log','car','truck','racecar','dozer','sport','board'];
 const validated=new Set(assets.map(a=>a.asset));
@@ -51,7 +51,7 @@ if(![0,1,2].every(p=>presentation.turtlePhases.includes(p)))failures.push('Nativ
 const report={mainRecoveredRoutines:inventory.length,mainMapped:inventory.filter(r=>r.checked).length,
  ghidraMainCandidates:main.function_count,ghidraMainDecompiled:main.decompiled_count,
  ghidraAudioCandidates:audio.function_count,ghidraAudioDecompiled:audio.decompiled_count,audioRecoveredEntries:audioMap.length,audioMapped:audioMap.filter(x=>x.checked).length,
- nativeReferenceFrames:parity.frames,nativeReferenceComparedBytes:parity.comparedBytes,independentMameFunctions:mame.length,
+ nativeReferenceFrames:parity.frames,nativeReferenceComparedBytes:parity.comparedBytes,independentMameFunctions:new Set(mame.map(f=>f.address)).size,independentMameExecutions:mame.length,
  blenderAssets:assets.length,upstreamCommit:upstream.commit,failures,
  limitations:['A decompiler producing C is not a semantic correctness proof. MAME fixtures and whole-state tests are separate gates.',
  'The native translation retains address-level arithmetic and control flow; it is not a handwritten idiomatic C++ rewrite.',

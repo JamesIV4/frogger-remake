@@ -33,5 +33,26 @@
     "bytes": 3328,
     "diff": 0,
     "registerDifferences": 0
+  },
+  {
+    "address": "28bb",
+    "instructions": 24,
+    "bytes": 3328,
+    "diff": 0,
+    "registerDifferences": 0
+  },
+  {
+    "address": "28bb",
+    "instructions": 40,
+    "bytes": 3328,
+    "diff": 0,
+    "registerDifferences": 0
+  },
+  {
+    "address": "28bb",
+    "instructions": 40,
+    "bytes": 3328,
+    "diff": 0,
+    "registerDifferences": 0
   }
 ]

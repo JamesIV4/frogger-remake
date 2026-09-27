@@ -65,7 +65,7 @@
   },
   {
     "asset": "gator",
-    "triangles": 1992,
+    "triangles": 2002,
     "bones": 3,
     "clips": [
       "Idle",
@@ -75,16 +75,16 @@
     "glb": "godot/Models/gator.glb",
     "footprintTiles": {
       "minX": -0.55,
-      "maxX": 0.867553,
+      "maxX": 0.857553,
       "minY": -1.03,
-      "maxY": 0.709576,
-      "minZ": -0.039566,
+      "maxY": 0.70861,
+      "minZ": -0.039571,
       "maxZ": 0.49
     }
   },
   {
     "asset": "river_gator",
-    "triangles": 1944,
+    "triangles": 1954,
     "bones": 3,
     "clips": [
       "Idle",
@@ -95,9 +95,9 @@
     "footprintTiles": {
       "minX": -0.55,
       "maxX": 0.55,
-      "minY": -1.03,
-      "maxY": 1.123474,
-      "minZ": -0.036051,
+      "minY": -1.150847,
+      "maxY": 1.124244,
+      "minZ": -0.051026,
       "maxZ": 0.49
     }
   },
@@ -141,21 +141,22 @@
   },
   {
     "asset": "otter",
-    "triangles": 1804,
-    "bones": 3,
+    "triangles": 2610,
+    "bones": 5,
     "clips": [
       "Idle",
-      "Move"
+      "Move",
+      "Attack"
     ],
     "source": "art/source/otter.blend",
     "glb": "godot/Models/otter.glb",
     "footprintTiles": {
-      "minX": -0.34,
-      "maxX": 0.34,
-      "minY": -0.715,
-      "maxY": 0.914234,
+      "minX": -0.456694,
+      "maxX": 0.456694,
+      "minY": -0.728,
+      "maxY": 0.91,
       "minZ": 0.0,
-      "maxZ": 0.395
+      "maxZ": 0.402
     }
   },
   {
