@@ -159,26 +159,26 @@ func run() -> void:
 	await process_frame
 	check(game.message_hint.global_position.y >= game.message_label.get_global_rect().end.y + 18.0, "Restart hint has padding below GAME OVER")
 	var time_bonus := PanelContainer.new()
+	time_bonus.custom_minimum_size = Vector2(230.0, 106.0)
 	game.bonus_overlay.add_child(time_bonus)
 	game.popups.append(FroggerGame.BonusPopup.new({"kind": 2, "frame": game.state["frame"]}, time_bonus, Vector2(0.5, 0.33), "TIME BONUS +100"))
-	game.touch_device = false
-	game.update_bonuses(0.0)
-	check(is_equal_approx(time_bonus.position.y, game.hud_header.get_global_rect().end.y + 16.0), "Desktop follow Time Bonus sits below the HUD with padding")
-	check(is_equal_approx(time_bonus.position.x + time_bonus.size.x * 0.5, game.get_viewport().get_visible_rect().size.x * 0.5), "Time Bonus stays horizontally centered")
-	game.follow_camera = false
-	game.touch_device = false
-	game.top_down_camera = false
-	game.update_bonuses(0.0)
-	check(is_equal_approx(time_bonus.position.y + time_bonus.size.y * 0.5, game.get_viewport().get_visible_rect().size.y * 2.0 / 3.0), "Non-follow Time Bonus is centered at two-thirds screen height")
-	game.touch_device = true
-	for perspective_mode in [false, true]:
-		game.perspective_view = perspective_mode
-		for top_down_mode in [false, true]:
-			game.top_down_camera = top_down_mode
-			for follow_mode in [false, true]:
-				game.follow_camera = follow_mode
-				game.update_bonuses(0.0)
-				check((time_bonus.position + time_bonus.size * 0.5).is_equal_approx(game.get_viewport().get_visible_rect().size * 0.5), "Mobile Time Bonus is centered in every camera mode")
+	for touch_mode in [false, true]:
+		game.touch_device = touch_mode
+		for perspective_mode in [false, true]:
+			game.perspective_view = perspective_mode
+			for top_down_mode in [false, true]:
+				game.top_down_camera = top_down_mode
+				for follow_mode in [false, true]:
+					game.follow_camera = follow_mode
+					game.update_bonuses(0.0)
+					var center := time_bonus.position + time_bonus.size * 0.5
+					check(time_bonus.size.is_equal_approx(time_bonus.get_combined_minimum_size()), "Time Bonus uses its content-driven minimum size")
+					check(time_bonus.size.x < 370.0, "Time Bonus is not held to the old fixed width")
+					check(is_equal_approx(center.x, game.get_viewport().get_visible_rect().size.x * 0.5), "Time Bonus stays horizontally centered on every platform")
+					if follow_mode:
+						check(is_equal_approx(time_bonus.position.y, game.hud_header.get_global_rect().end.y + 16.0), "Follow Time Bonus sits below the HUD with padding on every platform")
+					else:
+						check(center.is_equal_approx(game.get_viewport().get_visible_rect().size * 0.5), "Non-follow Time Bonus is centered on every platform")
 	game.touch_device = false
 	game.top_down_camera = false
 	game.perspective_view = true

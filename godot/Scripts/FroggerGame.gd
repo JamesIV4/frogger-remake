@@ -1998,7 +1998,7 @@ func update_bonuses(fraction: float) -> void:
 			home_arrival.begin(award, rescued, frog_visual.hop_seconds(award.get("frame", 0), 0.0))
 			display_text = "TIME BONUS +%d" % amount
 			var panel := PanelContainer.new()
-			panel.size = Vector2(minf(370.0, viewport_size.x - 24.0), 106)
+			panel.custom_minimum_size.y = 106.0
 			panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			var st = style_box(Color(0.06, 0.10, 0.20, 0.94), 12, 2)
 			st.border_color = Color("ffce57")
@@ -2013,10 +2013,11 @@ func update_bonuses(fraction: float) -> void:
 			heading.add_theme_font_override("font", display_font)
 			content.add_child(heading)
 			content.add_child(make_text("+%d" % amount, 29, Color("7beaff")))
+			panel.size = panel.get_combined_minimum_size()
 			view = panel
-			screen = Vector2(viewport_size.x * 0.5, hud_header.get_global_rect().end.y + 16.0 + panel.size.y * 0.5)
-			if not follow_camera:
-				screen.y = viewport_size.y * 2.0 / 3.0
+			screen = viewport_size * 0.5
+			if follow_camera:
+				screen.y = hud_header.get_global_rect().end.y + 16.0 + panel.size.y * 0.5
 		else:
 			display_text = "+%d" % amount
 			var label = make_text(display_text, 28, Color("ff75da") if kind == 1 else Color("fff32f"))
@@ -2043,15 +2044,12 @@ func update_bonuses(fraction: float) -> void:
 			popups.remove_at(i)
 			continue
 		if time_bonus:
-			popup.view.size = Vector2(minf(370.0, viewport_size.x - 24.0), 106)
+			popup.view.size = popup.view.get_combined_minimum_size()
 		var origin: Vector2 = popup.anchor_uv * viewport_size
 		popup.view.position = origin - popup.view.size * 0.5 + (Vector2.ZERO if time_bonus else Vector2(0, -age * 36.0))
 		if time_bonus:
-			if touch_device:
-				popup.view.position = (viewport_size - popup.view.size) * 0.5
-			else:
-				var top: float = hud_header.get_global_rect().end.y + 16.0 if follow_camera else viewport_size.y * 2.0 / 3.0 - popup.view.size.y * 0.5
-				popup.view.position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
+			var top: float = hud_header.get_global_rect().end.y + 16.0 if follow_camera else (viewport_size.y - popup.view.size.y) * 0.5
+			popup.view.position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
 		var opacity: float = minf(1.0, age / 0.08) if time_bonus else 1.0
 		opacity *= clampf((lifetime - age) / (0.22 if time_bonus else 0.35), 0.0, 1.0)
 		popup.view.modulate = Color(1, 1, 1, opacity)

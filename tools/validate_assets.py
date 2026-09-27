@@ -24,6 +24,10 @@ for contract in json.loads((ROOT/'art/models.json').read_text()):
     assert all(math.isfinite(footprint[axis]) for axis in ('minX','maxX','minY','maxY','minZ','maxZ'))
     assert footprint['minX']<footprint['maxX'] and footprint['minY']<footprint['maxY'] and footprint['minZ']<footprint['maxZ']
     data=(ROOT/contract['glb']).read_bytes()
+    import_text=(ROOT/(contract['glb']+'.import')).read_text()
+    for setting in ('array_mesh/deduplicate_surfaces=true','meshes/generate_lods=true',
+                    'meshes/create_shadow_meshes=true','meshes/force_disable_compression=false'):
+        assert setting in import_text,(contract['asset'],'missing Godot mesh optimization',setting)
     magic,version,length=struct.unpack_from('<III',data)
     assert magic==0x46546c67 and version==2 and length==len(data)
     size=struct.unpack_from('<I',data,12)[0];doc=json.loads(data[20:20+size]);binary=data[28+size:]
@@ -48,13 +52,20 @@ for contract in json.loads((ROOT/'art/models.json').read_text()):
     mesh_nodes={}
     for index,node in enumerate(doc['nodes']):
         if 'mesh' in node and node['mesh'] not in mesh_nodes:mesh_nodes[node['mesh']]=index
-    vertices=0;skinned=0;triangles=0;max_error=0
+    vertices=0;skinned=0;blended=0;triangles=0;max_error=0;material_surfaces=0
+    skinned_materials=set()
     exported_x=[];exported_y=[];exported_z=[]
     for index,mesh in enumerate(doc['meshes']):
         node_index=mesh_nodes.get(index)
         node=doc['nodes'][node_index] if node_index is not None else {}
         node_space=identity if 'skin' in node else world_matrices.get(node_index,identity)
+        if 'skin' in node:
+            signature=tuple(sorted(doc['materials'][p['material']]['name'] for p in mesh['primitives']))
+            overlap=skinned_materials.intersection(signature)
+            assert not overlap,(contract['asset'],'unconsolidated skinned mesh materials',sorted(overlap))
+            skinned_materials.update(signature)
         for p in mesh['primitives']:
+            material_surfaces+=1
             positions=values(p['attributes']['POSITION']);vertices+=len(positions)
             assert all(math.isfinite(v) for row in positions for v in row)
             world=[apply(node_space,row) for row in positions]
@@ -65,6 +76,7 @@ for contract in json.loads((ROOT/'art/models.json').read_text()):
             if 'WEIGHTS_0' in p['attributes']:
                 weights=values(p['attributes']['WEIGHTS_0']);skinned+=len(weights)
                 for row in weights:
+                    if sum(weight>.001 for weight in row)>1:blended+=1
                     assert min(row)>=0;error=abs(sum(row)-1);max_error=max(max_error,error);assert error<.005
     clips={a['name']:a for a in doc.get('animations',[])}
     bones=max([len(s['joints']) for s in doc.get('skins',[])],default=0)
@@ -98,7 +110,13 @@ for contract in json.loads((ROOT/'art/models.json').read_text()):
         assert len(sockets)==1,'Missing passenger attachment'
         parent=next(n for n in doc['nodes'] if sockets[0] in n.get('children',[]))
         assert parent['name']=='Body','Passenger must inherit the animated body bone'
-    result={'asset':contract['asset'],'vertices':vertices,'triangles':triangles,'bones':bones,'skinned_vertices':skinned,'max_weight_error':max_error,'clips':list(clips),'passed':True}
+    if contract['asset'] in ('snake','otter'):
+        assert blended>0,(contract['asset'],'custom blended skin weights were lost during mesh consolidation')
+    result={'asset':contract['asset'],'vertices':vertices,'triangles':triangles,
+        'mesh_instances':sum('mesh' in node for node in doc['nodes']),'material_surfaces':material_surfaces,
+        'godot_mesh_optimizations':True,'bones':bones,'skinned_vertices':skinned,
+        'blended_skin_vertices':blended,
+        'max_weight_error':max_error,'clips':list(clips),'passed':True}
     if contract['asset'] in ('frog','lady_frog'):
         result['front_leg_span']=round(front*2,5)
         result['rear_leg_span']=round(rear*2,5)
@@ -106,4 +124,4 @@ for contract in json.loads((ROOT/'art/models.json').read_text()):
         result['max_dive_bed_clearance']=round((-.22-.70+footprint['minZ'])-(-1.20),5)
     results.append(result)
 (ROOT/'docs/evidence/asset-validation.json').write_text(json.dumps(results,indent=2)+'\n')
-print(f'{len(results)} Blender exports validated: finite geometry, triangle counts, all vertices bound, normalized weights, expected joints and moving clips.')
+print(f'{len(results)} Blender exports validated: finite geometry, triangle counts, consolidated meshes, Godot mesh optimizations, all vertices bound, normalized weights, expected joints and moving clips.')

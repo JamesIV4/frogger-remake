@@ -106,18 +106,22 @@ def consolidate(rigid=False):
 
     Godot imports every Blender object as its own MeshInstance3D, so the parts
     below would become hundreds of nodes, transforms and draw calls. Joining the
-    parts that already carry their rig weights (the snake's hand-weighted tube is
-    left alone) keeps every silhouette and deformation while collapsing a model
-    to one mesh per material. Rigid models have no rig at all, so they bake their
-    transforms and merge into a single multi-material mesh; a MultiMesh lane can
+    parts after they carry their rig weights keeps every silhouette and
+    deformation while collapsing a model to one mesh per material signature.
+    The snake's hand-weighted, multi-material tube remains one unit. Rigid
+    models have no rig at all, so they bake their transforms and merge into a
+    single multi-material mesh; a MultiMesh lane can
     then draw every instance of the board, a log or a vehicle body from one mesh
     resource. Wheel objects stay separate: Godot spins them as pivots.
     """
     groups={}
     for obj in list(bpy.context.scene.objects):
-        if obj.type!='MESH' or obj.get('rig_wheel') or 'rig_weights_json' in obj:continue
+        if obj.type!='MESH' or obj.get('rig_wheel'):continue
         groups.setdefault(tuple(sorted(material.name for material in obj.data.materials)),[]).append(obj)
     joined=[join_objects(parts) for parts in groups.values()]
+    signatures=[tuple(sorted(material.name for material in obj.data.materials)) for obj in joined]
+    material_names=[name for signature in signatures for name in signature]
+    assert len(material_names)==len(set(material_names)),f'Unconsolidated mesh materials: {signatures}'
     if not rigid:return None
     # Bake into world space so the exported nodes stay untransformed and the
     # authored bounds remain readable straight from the vertex data.
