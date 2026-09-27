@@ -1115,6 +1115,7 @@ func setup_ui() -> void:
 		root.size = viewport_size
 		var panel_width: float = minf(870.0, viewport_size.x)
 		var narrow: bool = viewport_size.x < 650.0
+		var portrait_footer: bool = touch_device and viewport_size.x < viewport_size.y
 		var h: float = root.size.y
 		header.size = Vector2(panel_width, 94)
 		header.position = Vector2((viewport_size.x - panel_width) / 2.0, 0)
@@ -1126,9 +1127,12 @@ func setup_ui() -> void:
 		lives_label.add_theme_font_size_override("font_size", 10 if narrow else 19)
 		time_label.visible = not narrow
 		extra_life_label.add_theme_font_size_override("font_size", 10 if narrow else 12)
-		foot.add_theme_constant_override("separation", 4 if narrow else 12)
+		foot.add_theme_constant_override("separation", 0 if portrait_footer else (4 if narrow else 12))
 		lives_box.add_theme_constant_override("separation", 4 if narrow else 10)
 		lives_box.custom_minimum_size.x = 116.0 if narrow else 0.0
+		for footer_spacer in [before_extra, before_lives, before_timer]:
+			footer_spacer.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if portrait_footer else Control.SIZE_EXPAND_FILL
+		timer_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL if portrait_footer else Control.SIZE_SHRINK_BEGIN
 		timer_box.custom_minimum_size.x = 70.0 if narrow else panel_width * 0.32
 		bottom.size = Vector2(panel_width, 80)
 		bottom.position = Vector2((viewport_size.x - panel_width) / 2.0, h - bottom.size.y)

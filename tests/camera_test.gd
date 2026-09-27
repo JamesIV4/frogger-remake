@@ -52,6 +52,8 @@ func run() -> void:
 		var timer_rect: Rect2 = timer_box.get_global_rect()
 		check(footer_rect.encloses(gear_rect) and footer_rect.encloses(extra_rect) and footer_rect.encloses(lives_rect) and footer_rect.encloses(timer_rect), "Portrait footer keeps every group inside the screen at %d reserve lives" % reserve_lives)
 		check(gear_rect.end.x <= extra_rect.position.x and extra_rect.end.x <= lives_rect.position.x and lives_rect.end.x <= timer_rect.position.x, "Portrait footer groups remain ordered without overlap at %d reserve lives" % reserve_lives)
+		check(absf(gear_rect.end.x - extra_rect.position.x) < 0.1 and absf(extra_rect.end.x - lives_rect.position.x) < 0.1 and absf(lives_rect.end.x - timer_rect.position.x) < 0.1, "Portrait footer collapses all inter-group space before shrinking the timer")
+		check(timer_rect.size.x >= 120.0, "Portrait footer gives remaining width to the time bar")
 		check(lives_box.size.x >= 116.0, "Portrait reserves a visible life-meter slot even with no icons")
 		check(game.lives_label.visible == (reserve_lives <= 2), "Portrait labels an empty life meter and yields label space to three icons")
 	for size in [Vector2i(320, 932), Vector2i(390, 844), Vector2i(430, 932), Vector2i(768, 1024)]:
