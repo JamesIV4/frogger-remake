@@ -48,6 +48,7 @@ var frog_visual: FrogVisualState = FrogVisualState.new()
 var lady_visual: BoardVisuals.LadyFrogPresentation = BoardVisuals.LadyFrogPresentation.new()
 var home_arrival: FrogVisualState.HomeArrivalVisual = FrogVisualState.HomeArrivalVisual.new()
 var moving_visuals: PresentationMotion = PresentationMotion.new()
+var snake_visuals: Dictionary = {}
 var frog_motion: PresentationMotion = PresentationMotion.new(4, 0.35, 72.0)
 var presentation_delta: float = 0.0
 var displayed_frog_x: float = 0.0
@@ -1534,6 +1535,7 @@ func clear_presentation() -> void:
 	lady_visual.reset()
 	home_arrival.reset()
 	moving_visuals.reset()
+	snake_visuals.clear()
 	river_gator_visual.reset()
 	frog_motion.reset()
 	for lane in batched_lanes.values():
@@ -1760,6 +1762,29 @@ func turtle_ride_depth(x: float, row: float) -> float:
 			depth = support["depth"]
 	return depth if nearest <= 10.0 else 0.0
 
+func snake_support(x: float, row: int) -> Vector4:
+	# Center and local end points of the same inset, smoothed log drawn by
+	# update_lanes. Store the trail in that coordinate system so drift cannot
+	# pull the turning tail off its support.
+	if row >= 128:
+		return Vector4(120.0, -112.0, 112.0, 120.0)
+	var lane: int = clampi(row / 16 - 3, 0, 4)
+	var width: float = float(LaneWidths[lane])
+	var table: int = 0x8100 + lane * 9
+	var nearest: float = INF
+	var center: float = x
+	var raw_center: float = x
+	for index in range(mini(8, BoardVisuals.at(state, table))):
+		var native_center: float = float(BoardVisuals.at(state, table + index + 1) - 12) - width / 2.0
+		var displayed = moving_visuals.display_x(lane * 16 + index)
+		var candidate: float = native_center if displayed == null else float(displayed)
+		candidate += 256.0 * roundf((x - candidate) / 256.0)
+		if absf(candidate - x) < nearest:
+			nearest = absf(candidate - x)
+			center = candidate
+			raw_center = native_center + 256.0 * roundf((x - native_center) / 256.0)
+	return Vector4(center, -(width - 3.0) / 2.0, (width - 3.0) / 2.0, raw_center)
+
 func update_homes_and_hazards() -> void:
 	var home_base: int = 0x8263 if BoardVisuals.at(state, 0x83fd) == 2 else 0x825e
 	var cur_frame: int = state.get("frame", 0)
@@ -1791,21 +1816,33 @@ func update_homes_and_hazards() -> void:
 		var x: int = BoardVisuals.at(state, addr)
 		var y: int = BoardVisuals.at(state, addr + 3)
 		if x < 8 or x > 235 or y < 32 or y > 136 or BoardVisuals.at(state, addr + 1) == 0:
+			snake_visuals.erase(addr)
 			continue
 		var a = actor("hazard%d" % addr, "snake")
 		a.set_active(true)
-		var surface: float = -0.18 + ModelFootprints.LogTopTiles if y < 128 else BoardVisuals.surface_height(float(y))
+		# Spawn rows 0x4e/0x7e (ROM 0x2ace/0x2aaa) are the sprite's
+		# inset row; the log and bank surfaces are centered at 0x50/0x80.
+		var snake_row: float = float(y + 2)
+		var surface: float = -0.18 + ModelFootprints.LogTopTiles if snake_row < 128.0 else BoardVisuals.surface_height(snake_row)
 		var height: float = surface - 0.75 * ModelFootprints.SnakeBottomTiles + 0.008
 		var motion_id: int = 1000 + addr
-		a.root.position = pos3(moving_visuals.step(motion_id, float(x), cur_frame, presentation_delta, paused), float(y), height)
 		# ROM 0x2a16..0x2a38 controls travel relative to the log: bit 7
 		# set crawls right, clear crawls left. World velocity includes the
 		# log's drift and can point opposite to the snake's own movement.
 		# The authored head points along +Z, so positive yaw faces right.
 		var heading: int = 1 if (BoardVisuals.at(state, addr + 1) & 0x80) != 0 else -1
-		a.root.rotation = Vector3(0, float(heading) * PI / 2.0, 0)
-		a.root.scale = Vector3.ONE * 0.75
-		a.play("Move")
+		# ROM 0x2b23..0x2b30 places a second, tail sprite 15 pixels from
+		# this head slot. Anchor the model's HEAD here; its tail follows the
+		# head's trail on the moving log, curling around when the ROM turns.
+		var head_x: float = moving_visuals.step(motion_id, float(x), cur_frame, presentation_delta, paused)
+		var support: Vector4 = snake_support(head_x, int(snake_row))
+		if not snake_visuals.has(addr):
+			snake_visuals[addr] = SnakeVisual.new()
+		var visual: SnakeVisual = snake_visuals[addr]
+		var relative_x: float = float(x) - support.w
+		relative_x -= 256.0 * roundf(relative_x / 256.0)
+		visual.update(a, relative_x / 16.0, heading, pos3(support.x, snake_row, height),
+			support.y / 16.0, support.z / 16.0, (float(cur_frame) + frac) * FRAME_SECONDS, snake_row < 128.0)
 
 	update_beaver(cur_frame)
 
@@ -2075,6 +2112,7 @@ func review_frames_list() -> Array:
 		"lady-goal-overwrite": return [1, 8]
 		"lady-rom-clear": return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 		"snake", "snake-left": return [1, 8]
+		"snake-bank-turn": return [1, 24, 32, 40, 48, 64, 96, 120]
 		"beaver", "beaver-empty": return [1, 8, 24, 40, 55, 65]
 		"bottom-grass": return [1, 8]
 		"hop-right": return [1, 6, 12, 24, 48]
@@ -2316,6 +2354,13 @@ func step_review() -> void:
 		simulation.poke(0x8048, x)
 		simulation.poke(0x8049, 1)
 		simulation.poke(0x804b, 96)
+	if review == "snake-bank-turn":
+		var direction: int = 1 if review_frame < 32 else -1
+		var x: int = 110 + review_frame if review_frame < 32 else 174 - review_frame
+		simulation.poke(0x8048, x)
+		simulation.poke(0x8049, 0x2c | (0x80 if direction > 0 else 0))
+		simulation.poke(0x804b, 126)
+		simulation.poke(0x804c, (x - direction * 15) & 255)
 	if review in ["beaver", "beaver-empty"]:
 		var log_center: float = 120.0
 		var best_distance: float = 999.0
@@ -2454,6 +2499,10 @@ func capture_review() -> void:
 		"snakeRow": BoardVisuals.at(state, 0x804b),
 		"snakeCode": BoardVisuals.at(state, 0x8049),
 		"snakeYaw": snake.root.global_rotation.y if snake != null else 0.0,
+		"snakeTailX": BoardVisuals.at(state, 0x804c),
+		"snakeDisplayX": snake.root.position.x * 16.0 + 120.0 if snake != null else 0.0,
+		"snakeHeadDisplayX": snake.root.to_global(Vector3(0.0, 0.0, SnakeVisual.HeadZ)).x * 16.0 + 120.0 if snake != null else 0.0,
+		"snakeLogTips": [BoardVisuals.at(state, 0x8113), BoardVisuals.at(state, 0x8114), BoardVisuals.at(state, 0x8115)],
 		"homeGatorVisible": home_gator.root.is_visible_in_tree() if home_gator != null else false,
 		"homeGatorZ": home_gator.root.global_position.z if home_gator != null else 0.0,
 		"homeGatorY": home_gator.root.global_position.y if home_gator != null else 0.0,
@@ -2542,8 +2591,8 @@ func capture_review() -> void:
 			push_error("Snake failed to face its leftward travel")
 			get_tree().quit(1)
 			return
-		if review == "snake-motion" and snake != null and signf(snake.root.rotation.y) != (1.0 if (BoardVisuals.at(state, 0x8049) & 0x80) != 0 else -1.0):
-			push_error("Snake failed to face its own movement relative to the log")
+		if review == "snake-motion" and snake != null and snake_visuals[0x8048].heading != (1 if (BoardVisuals.at(state, 0x8049) & 0x80) != 0 else -1):
+			push_error("Snake failed to turn toward its own movement relative to the log")
 			get_tree().quit(1)
 			return
 		var json_str = JSON.stringify(review_measurements, "\t")

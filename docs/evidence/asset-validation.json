@@ -91,11 +91,11 @@
   },
   {
     "asset": "snake",
-    "vertices": 724,
-    "triangles": 352,
-    "bones": 8,
-    "skinned_vertices": 724,
-    "max_weight_error": 1.4901161193847656e-08,
+    "vertices": 1588,
+    "triangles": 832,
+    "bones": 15,
+    "skinned_vertices": 1588,
+    "max_weight_error": 2.9802322387695312e-08,
     "clips": [
       "Idle",
       "Move"

@@ -19,6 +19,40 @@ func posed_model_top(actor: ModelActor) -> float:
 				top = maxf(top, (mesh.global_transform * vertex).y)
 	return top
 
+func snake_skin_landmarks(actor: ModelActor) -> Array[Vector3]:
+	var head := Vector3.ZERO
+	var tail := Vector3.ZERO
+	var head_count: int = 0
+	var tail_count: int = 0
+	var low := Vector3(INF, INF, INF)
+	var high := Vector3(-INF, -INF, -INF)
+	for mesh in actor.mesh_instances:
+		# CPU skinning also works with Godot's headless dummy renderer.
+		var skin: Skin = mesh.skin
+		for surface in range(mesh.mesh.get_surface_count()):
+			var arrays: Array = mesh.mesh.surface_get_arrays(surface)
+			var rest = arrays[Mesh.ARRAY_VERTEX]
+			var bones = arrays[Mesh.ARRAY_BONES]
+			var weights = arrays[Mesh.ARRAY_WEIGHTS]
+			for i in range(rest.size()):
+				var posed := Vector3.ZERO
+				for influence in range(4):
+					var bind: int = bones[i * 4 + influence]
+					var bone: int = actor.skeleton.find_bone(skin.get_bind_name(bind))
+					if bone < 0:
+						bone = skin.get_bind_bone(bind)
+					posed += weights[i * 4 + influence] * (actor.skeleton.global_transform * actor.skeleton.get_bone_global_pose(bone) * skin.get_bind_pose(bind) * rest[i])
+				low = low.min(posed)
+				high = high.max(posed)
+				if rest[i].z > 0.67:
+					head += posed
+					head_count += 1
+				if rest[i].z < -0.85:
+					tail += posed
+					tail_count += 1
+	check(head_count > 0 and tail_count > 0, "Snake mesh includes head and tail-tip vertices")
+	return [head / maxi(1, head_count), tail / maxi(1, tail_count), low, high]
+
 func run() -> void:
 	var game := FroggerGame.new()
 	# Exercise the live scene without changing the user's saved preferences.
@@ -180,12 +214,15 @@ func run() -> void:
 		check(rescue.root.scene_file_path.ends_with("/%s.glb" % game.rescue_frog_model()), "Log rescue frog must use the other color")
 		check(rescue.root.scale.is_equal_approx(Vector3.ONE * game.LadyInRiverScale), "Log rescue frog retains smaller scale")
 	# Log drift can carry a left-crawling snake right in world space. Its
-	# heading must follow the ROM direction, including an immediate turn.
+	# heading must follow the ROM direction through an animated turn.
 	game.clear_presentation()
 	for address in [0x8048, 0x8050]:
+		game.snake_visuals.erase(address)
 		game.simulation.poke(address + 1, 1)
 		game.simulation.poke(address + 3, 78)
 		for frame in range(1, 41):
+			game.simulation.poke(0x8112, 1)
+			game.simulation.poke(0x8113, (158 + frame * 2) & 255)
 			game.simulation.poke(address, 100 + frame)
 			game.observe_frame()
 			game.state["frame"] = frame
@@ -198,13 +235,117 @@ func run() -> void:
 		game.observe_frame()
 		game.state["frame"] = 40
 		game.update_homes_and_hazards()
-		check((snake.root.basis * Vector3.BACK).x > 0.7, "Snake turns immediately with its own direction")
+		check((snake.root.basis * Vector3.BACK).x < -0.7, "Snake starts its turn without flipping instantly")
+		for frame in range(41, 64):
+			game.simulation.poke(address, 140 + (frame - 40) * 3)
+			game.simulation.poke(0x8113, (238 + (frame - 40) * 2) & 255)
+			game.observe_frame()
+			game.state["frame"] = frame
+			game.update_homes_and_hazards()
+		check((snake.root.basis * Vector3.BACK).x > 0.7, "Snake completes its head turn toward its own direction")
 		game.simulation.poke(address + 1, 1)
 		game.simulation.poke(address + 3, 126)
+		game.simulation.poke(address, 180)
 		game.observe_frame()
 		game.state["frame"] = 40
 		game.update_homes_and_hazards()
 		check((snake.root.basis * Vector3.BACK).x < -0.7, "Bank snake also follows its own direction")
+		check(absf(snake.root.position.z) < 0.09, "Bank snake sits on row 128, not the river")
+		check(absf(snake.root.position.y + 0.75 * ModelFootprints.SnakeBottomTiles - 0.008 - BoardVisuals.surface_height(128.0)) < 0.001,
+			"Bank snake rests on grass instead of floating at log height")
+		await process_frame
+		var bank_tail: Vector3 = snake_skin_landmarks(snake)[1]
+		game.simulation.poke(address + 1, 0x81)
+		game.observe_frame()
+		game.state["frame"] = 41
+		game.update_homes_and_hazards()
+		await process_frame
+		check((snake.root.basis * Vector3.BACK).x < -0.7, "Bank reversal also begins with an animated head turn")
+		check(snake_skin_landmarks(snake)[1].distance_to(bank_tail) < 0.08, "Bank reversal retains the trailing tail instead of flipping it across the head")
+		for frame in range(42, 64):
+			game.simulation.poke(address, 180 + (frame - 41) / 2)
+			game.observe_frame()
+			game.state["frame"] = frame
+			game.update_homes_and_hazards()
+		check((snake.root.basis * Vector3.BACK).x > 0.7, "Bank snake completes the same head turn as a log snake")
+		for heading in [-1, 1]:
+			for head_x in [95, 120, 145]:
+				game.moving_visuals.reset()
+				game.snake_visuals.erase(address)
+				game.simulation.poke(0x8112, 1)
+				game.simulation.poke(0x8113, 178)
+				game.simulation.poke(address, head_x)
+				game.simulation.poke(address + 1, 0x2c | (0x80 if heading > 0 else 0))
+				game.simulation.poke(address + 3, 78)
+				game.simulation.poke(address + 4, (head_x - heading * 15) & 255)
+				game.observe_frame()
+				game.update_homes_and_hazards()
+				var head: Vector3 = snake.root.to_global(Vector3(0.0, 0.0, SnakeVisual.HeadZ))
+				check(absf(head.x * 16.0 + 120.0 - head_x) < 0.001,
+					"Both snake heads align with the first ROM sprite in either direction")
+				check(absf(head.z + 3.0) < 0.09, "River snake stays across its log row")
+	# Sample the imported, skinned mesh rather than only checking animation
+	# channels: lost weights or a wrong bone axis can leave a moving rig rigid.
+	var wave_snake: ModelActor = game.actors["hazard32840"]
+	wave_snake.skeleton.clear_bones_global_pose_override()
+	wave_snake.root.transform = Transform3D.IDENTITY
+	var wave_head := Vector3.ZERO
+	var wave_start := Vector3.ZERO
+	var tail_min: float = INF
+	var tail_max: float = -INF
+	for sample in range(25):
+		wave_snake.pose("Move", float(sample) * 1.2 / 24.0)
+		await process_frame
+		var landmarks := snake_skin_landmarks(wave_snake)
+		if sample == 0:
+			wave_head = landmarks[0]
+			wave_start = landmarks[1]
+		check(landmarks[0].distance_to(wave_head) < 0.001, "Snake head stays anchored throughout the tail wave")
+		check(absf(landmarks[1].y - wave_start.y) < 0.001, "Snake tail swishes along the surface instead of lifting off it")
+		tail_min = minf(tail_min, landmarks[1].x)
+		tail_max = maxf(tail_max, landmarks[1].x)
+		if sample == 24:
+			check(landmarks[1].distance_to(wave_start) < 0.001, "Snake tail loop closes without a pop")
+	check(tail_min < -0.08 and tail_max > 0.08, "Skinned snake tail visibly coils to both sides")
+	for approach in [-1, 1]:
+		var turn_visual := SnakeVisual.new()
+		var previous_tip := Vector3.ZERO
+		for frame in range(161):
+			var direction: int = approach if frame < 30 else -approach
+			var head_x: float = approach * (2.1 + 0.015 * minf(frame, 30.0) - 0.017 * maxf(0.0, frame - 30.0))
+			turn_visual.update(wave_snake, head_x, direction, Vector3.ZERO, -2.8, 2.8, frame / 60.0)
+			await process_frame
+			var points := snake_skin_landmarks(wave_snake)
+			check(points[2].x >= -2.8 and points[3].x <= 2.8, "Entire snake skin stays on the log through either U-turn")
+			if frame > 0:
+				check(points[1].distance_to(previous_tip) < 0.12, "Turning tail moves continuously without a side swap")
+			previous_tip = points[1]
+			if frame == 31:
+				check(approach * (points[1].x - points[0].x) < -0.6, "Tail still trails the original approach as the head begins to turn")
+			if frame == 160:
+				check(approach * (points[1].x - points[0].x) > 0.6, "Tail follows around to the opposite side after the turn")
+				turn_visual.update(wave_snake, head_x, direction, Vector3.ZERO, -2.8, 2.8, frame / 60.0)
+				await process_frame
+				check(snake_skin_landmarks(wave_snake)[1].distance_to(points[1]) < 0.0001, "Paused simulation holds the turning tail")
+				turn_visual.update(wave_snake, head_x, direction, Vector3.ZERO, -2.8, 2.8, frame / 60.0 - 0.01)
+				await process_frame
+				check(snake_skin_landmarks(wave_snake)[1].distance_to(points[1]) < 0.0001, "Removing the fractional frame on pause does not reset the tail")
+	# Terrain may change height, never the shared turn shape or head facing.
+	var land_turn := SnakeVisual.new()
+	var log_turn := SnakeVisual.new()
+	var log_snake: ModelActor = game.actors["hazard32848"]
+	for frame in range(100):
+		var direction: int = 1 if frame < 30 else -1
+		var head_x: float = 2.0 + 0.015 * minf(frame, 30.0) - 0.025 * maxf(0.0, frame - 30.0)
+		land_turn.update(wave_snake, head_x, direction, Vector3.ZERO, -2.8, 2.8, frame / 60.0, false)
+		log_turn.update(log_snake, head_x, direction, Vector3.ZERO, -2.8, 2.8, frame / 60.0, true)
+		await process_frame
+		var land_points := snake_skin_landmarks(wave_snake)
+		var log_points := snake_skin_landmarks(log_snake)
+		for point in [0, 1]:
+			check(Vector2(land_points[point].x, land_points[point].z).distance_to(Vector2(log_points[point].x, log_points[point].z)) < 0.0001,
+				"Land and log snakes use identical head and tail turn paths")
+		check(is_equal_approx(wave_snake.root.rotation.y, log_snake.root.rotation.y), "Land and logs use identical head facing through the turn")
 	# Dispatcher B's state 1 is the beaver approaching the log. It stays
 	# half-submerged and cannot attack. The lethal state-2 overlap gets a bite;
 	# an empty-end descriptor clear gets only grab/look. Both then sink fully.

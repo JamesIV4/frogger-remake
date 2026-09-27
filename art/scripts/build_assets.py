@@ -29,6 +29,13 @@ PALETTE = {
 }
 MATS={}
 RECORDS=[]
+LOG_PROFILE=[(-.5,-.006,.213,.22),(-.39,.008,.235,.25),
+             (-.2,-.012,.25,.268),(.02,.014,.245,.263),
+             (.23,-.005,.24,.255),(.40,.004,.228,.242),(.5,-.008,.208,.218)]
+SNAKE_PROFILE=[(-.92,.072,.055),(-.85,.13,.095),(-.76,.17,.13),
+               (-.67,.16,.12),(-.58,.125,.10),(-.43,.12,.095),
+               (-.25,.118,.09),(-.06,.113,.085),(.13,.105,.08),
+               (.32,.095,.075),(.51,.078,.068),(.70,.055,.052),(.88,.02,.025)]
 
 def material(key):
     if key in MATS: return MATS[key]
@@ -434,24 +441,29 @@ def fly():
 
 def snake():
     specs={'Body':((0,0,.06),(0,0,.2),None)}
-    for i in range(8):
-        y=i*.19-.6;x=math.sin(i*.9)*.14
-        if i:specs[f'Segment{i}']=((x,y,.13),(x,y+.19,.13),'Body' if i==1 else f'Segment{i-1}')
-    # One watertight, skinned tube: its rings bend on the eight original rig
-    # sections, while alternating material bands keep segmentation legible.
-    stations=[(-.92,.072,.055),(-.85,.13,.095),(-.76,.17,.13),
-              (-.67,.16,.12),(-.58,.125,.10),(-.43,.12,.095),
-              (-.25,.118,.09),(-.06,.113,.085),(.13,.105,.08),
-              (.32,.095,.075),(.51,.078,.068),(.70,.055,.052),(.88,.02,.025)]
+    for i in range(1,15):
+        y=i*.095-.6
+        specs[f'Segment{i}']=((0,y,.13),(0,y+.095,.13),'Body' if i==1 else f'Segment{i-1}')
+    # A continuous tube with enough joints/rings for a tight log-end U-turn;
+    # material bands keep the original low-poly segmentation legible.
+    stations=SNAKE_PROFILE
+    bands=[];dense=[]
+    for ring in range(len(stations)-1):
+        for step in range(3):
+            dense.append(tuple(a+(b-a)*step/3 for a,b in zip(stations[ring],stations[ring+1])))
+            bands.append(2 if ring<4 else 1 if ring%2 else 0)
+    dense.append(stations[-1]);stations=dense
     sides=10;verts=[];weights=[];faces=[];materials=[]
     def skin_at(y):
-        index=max(0,min(7,int(math.floor((y+.6)/.19))))
-        if index==7:return {'Segment7':1.0}
-        mix=max(0,min(1,(y+.6)/.19-index))
+        index=max(0,min(14,int(math.floor((y+.6)/.095))))
+        if index==14:return {'Segment14':1.0}
+        mix=max(0,min(1,(y+.6)/.095-index))
         first='Body' if index==0 else f'Segment{index}'
         return {first:1-mix,f'Segment{index+1}':mix} if mix>.0001 else {first:1.0}
     for y,width,height in stations:
-        drift=0 if y<-.58 else math.sin((y+.58)*4.5)*.14
+        # A neutral straight bind pose lets the traveling wave coil equally
+        # to either side instead of barely wobbling a permanently bent tail.
+        drift=0
         for side in range(sides):
             angle=math.tau*side/sides
             verts.append((drift+width*math.cos(angle),y,.145+height*math.sin(angle)))
@@ -461,7 +473,7 @@ def snake():
             next_side=(side+1)%sides
             faces.append((ring*sides+side,(ring+1)*sides+side,
                           (ring+1)*sides+next_side,ring*sides+next_side))
-            materials.append(2 if ring<4 else 1 if ring%2 else 0)
+            materials.append(bands[ring])
     faces.append(tuple(range(sides)));materials.append(2)
     faces.append(tuple(reversed([(len(stations)-1)*sides+i for i in range(sides)])));materials.append(0)
     tube=mesh('Continuous segmented snake',verts,faces,'wooddark')
@@ -624,9 +636,7 @@ def vehicle(kind):
 def log():
     # Faceted trunk with subtle bends and taper. Its authored length remains
     # one tile, so the lane's ROM-sized width scale still fits every log.
-    stations=[(-.5,-.006,.213,.22),(-.39,.008,.235,.25),
-              (-.2,-.012,.25,.268),(.02,.014,.245,.263),
-              (.23,-.005,.24,.255),(.40,.004,.228,.242),(.5,-.008,.208,.218)]
+    stations=LOG_PROFILE
     sides=10
     def profile(x):
         for index in range(len(stations)-1):
@@ -775,7 +785,7 @@ def rig_and_clips(specs,kind):
     bpy.context.scene.render.fps=60
     rig.animation_data_create()
     for clip in clips:
-        duration=10 if clip=='Hop' else 48 if clip=='Squash' else 64 if clip=='Drown' else 36 if clip=='Attack' else 60
+        duration=(72 if clip=='Move' else 96) if kind=='snake' else 10 if clip=='Hop' else 48 if clip=='Squash' else 64 if clip=='Drown' else 36 if clip=='Attack' else 60
         action=bpy.data.actions.new(clip);action.use_fake_user=True;rig.animation_data.action=action
         for frame in range(duration+1):
             p=frame/duration;cycle=math.sin(p*math.tau);h=math.sin(p*math.pi)
@@ -790,7 +800,17 @@ def rig_and_clips(specs,kind):
                 if 'Arm.' in b.name:b.rotation_euler.x=(-.45*h if clip=='Hop' else .08*cycle if clip=='Celebrate' else .015*cycle)
                 if 'Wing' in b.name:b.rotation_euler.x=.7*math.sin(p*math.tau*4)
                 if 'Front' in b.name or 'Back' in b.name:b.rotation_euler.z=.22*cycle
-                if 'Segment' in b.name:b.rotation_euler.z=.07*math.sin(p*math.tau+int(b.name[-1]))
+                if kind=='snake' and b.name.startswith('Segment'):
+                    index=int(b.name[len('Segment'):])
+                    # Prescribe world-space tangents, then subtract the parent
+                    # tangent for this connected chain. Increasing curl and a
+                    # delayed phase send an S-wave from neck to tail; rotating
+                    # every joint by the full angle would accumulate a spiral.
+                    def tangent(segment):
+                        if segment==0:return 0
+                        amplitude=(.32+.07*segment)*(1 if clip=='Move' else .65)
+                        return amplitude*math.sin(p*math.tau-(segment-1)*.525)
+                    b.rotation_euler.z=tangent(index)-tangent(index-1)
                 if b.name=='Head' and clip=='Bite':b.rotation_euler.x=-.55*h
                 if b.name=='Tail':b.rotation_euler.z=.25*cycle
                 if clip=='Attack':
@@ -917,6 +937,9 @@ source+=['        _=>throw new System.ArgumentOutOfRangeException(nameof(lane))'
 # numbers instead of letting the two drift apart.
 godot=['class_name ModelFootprints','']
 godot+=[f'const {name}: float = {value:.{places}f}' for name,value,places in constants]
+godot+=['', '# Authored support/underside profiles for the snake to follow the faceted log.',
+        'const LogProfile: Array[Vector4] = ['+', '.join('Vector4('+', '.join(map(str,p))+')' for p in LOG_PROFILE)+']',
+        'const SnakeProfile: Array[Vector3] = ['+', '.join('Vector3('+', '.join(map(str,p))+')' for p in SNAKE_PROFILE)+']']
 godot+=['','static func vehicle(lane: int) -> Dictionary:','\tmatch lane:']
 godot+=[f'\t\t{lane}: return {{"min_along_x": {min_x}, "max_along_x": {max_x}, "across_row": {cross}}}' for lane,(min_x,max_x,cross,kind) in vehicles.items()]
 godot+=['\t\t_: push_error("Invalid lane: %d" % lane); return {}']

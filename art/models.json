@@ -122,8 +122,8 @@
   },
   {
     "asset": "snake",
-    "triangles": 352,
-    "bones": 8,
+    "triangles": 832,
+    "bones": 15,
     "clips": [
       "Idle",
       "Move"
@@ -131,8 +131,8 @@
     "source": "art/source/snake.blend",
     "glb": "godot/Models/snake.glb",
     "footprintTiles": {
-      "minX": -0.215411,
-      "maxX": 0.257485,
+      "minX": -0.17,
+      "maxX": 0.17,
       "minY": -0.92,
       "maxY": 0.88,
       "minZ": 0.021363,
