@@ -93,6 +93,7 @@ const LevelIntroFadeIn: float = 0.25
 const LevelIntroFadeOut: float = 0.20
 const ModalVerticalPadding: float = 24.0
 const ModalGap: float = 12.0
+const PortraitFooterGap: float = 8.0
 var lady_facing: int = 2
 var lady_hop_start_frame: int = -1
 var lady_last_motion_frame: int = -1
@@ -1132,6 +1133,7 @@ func setup_ui() -> void:
 		lives_box.custom_minimum_size.x = 116.0 if narrow else 0.0
 		for footer_spacer in [before_extra, before_lives, before_timer]:
 			footer_spacer.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if portrait_footer else Control.SIZE_EXPAND_FILL
+			footer_spacer.custom_minimum_size.x = PortraitFooterGap if portrait_footer else 0.0
 		timer_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL if portrait_footer else Control.SIZE_SHRINK_BEGIN
 		timer_box.custom_minimum_size.x = 70.0 if narrow else panel_width * 0.32
 		bottom.size = Vector2(panel_width, 80)
