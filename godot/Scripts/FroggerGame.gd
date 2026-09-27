@@ -1431,10 +1431,6 @@ func update_camera(delta: float) -> void:
 	camera.position = camera.position.lerp(desired, responsiveness)
 	camera_look_target = camera_look_target.lerp(desired_look, responsiveness)
 	if portrait_follow:
-		# Follow the already-interpolated frog vertically, including the end rows.
-		# Keep its apparent size stable without compensating for board edges.
-		camera.position.z = desired.z
-		camera_look_target.z = desired_look.z
 		var pan_limit: float = portrait_follow_pan_limit(camera.position, camera_look_target, followed_row)
 		camera.position.x = clampf(camera.position.x, -pan_limit, pan_limit)
 		camera_look_target.x = clampf(camera_look_target.x, -pan_limit, pan_limit)

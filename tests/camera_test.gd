@@ -203,10 +203,7 @@ func run() -> void:
 				var reference_offsets: Array[Vector2] = []
 				for row in [-6.0, 0.0, 7.0]:
 					place_frog(game, 0.0, row)
-					if reference_offsets.is_empty():
-						settle(game)
-					else:
-						game.update_camera(1.0 / 60.0)
+					settle(game)
 					var frog_center := camera.unproject_position(Vector3(0, 0.3, row))
 					var offsets: Array[Vector2] = []
 					for corner in [Vector3(-0.4, 0, -0.4), Vector3(0.4, 0.5, 0.4), Vector3(0.4, 0, -0.4)]:
@@ -219,6 +216,16 @@ func run() -> void:
 					check(absf(game.camera_look_target.z - row) < 0.01, "Portrait camera stays centered on the followed row")
 					check(absf(camera.unproject_position(Vector3(0, 0, row)).y - size.y * 0.5) < 0.05, "Portrait frog stays vertically centered at the top and bottom")
 					check(camera.frustum_offset == Vector2.ZERO and is_zero_approx(camera.v_offset), "Portrait follow has no image panning")
+	# A diagonal step should trail by the same amount on both axes.
+	game.set_follow_zoom_percent(0.0)
+	place_frog(game, 0.0, 0.0)
+	settle(game)
+	var before_step: Vector3 = camera.position
+	place_frog(game, 1.0, 1.0)
+	game.update_camera(1.0 / 60.0)
+	var step_motion: Vector3 = camera.position - before_step
+	check(step_motion.z > 0.0 and step_motion.z < 1.0, "Vertical follow trails a hop instead of snapping")
+	check(absf(step_motion.x - step_motion.z) < 0.001, "Vertical and horizontal follow use the same smoothing")
 	# The ROM resets to the starting bank before the visible home hop ends.
 	# Keep following that visible arrival until its presentation releases it.
 	place_frog(game, 0.0, 7.0)
@@ -227,11 +234,12 @@ func run() -> void:
 	for elapsed_frames in [0, 3, 6, 12, 20]:
 		game.state["frame"] = home_frame + elapsed_frames
 		game.update_player(0.0)
+		var previous_row: float = game.camera_look_target.z
 		game.update_camera(1.0 / 60.0)
 		var visible_row: float = game.pos3(120, game.home_arrival.visual_row(game.state["frame"])).z
-		check(absf(game.camera_look_target.z - visible_row) < 0.01, "Camera stays with the visible frog through home arrival despite the ROM reset")
+		check(absf(game.camera_look_target.z - lerpf(previous_row, visible_row, 1.0 - exp(-6.0 / 60.0))) < 0.01, "Camera smoothly follows the visible home arrival despite the ROM reset")
 	game.home_arrival.reset()
-	game.update_camera(1.0 / 60.0)
+	settle(game)
 	check(absf(game.camera_look_target.z - 7.0) < 0.01, "Camera follows the new frog when home presentation ends")
 	game.touch_device = false
 	game.update_camera(1.0 / 60.0)
