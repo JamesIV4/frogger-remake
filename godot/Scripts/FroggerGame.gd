@@ -88,8 +88,10 @@ var level_intro_home_counts: Dictionary = {}
 var level_intro_number: int = 0
 var level_intro_waiting: bool = false
 var level_intro_fade: float = 0.0
+var level_intro_go_hold: float = 0.0
 var level_intro_player: int = 0
 const LevelIntroFadeIn: float = 0.25
+const LevelIntroGoHold: float = 0.25
 const LevelIntroFadeOut: float = 0.20
 const ModalVerticalPadding: float = 24.0
 const ModalGap: float = 12.0
@@ -1407,13 +1409,18 @@ func observe_level_intro() -> void:
 		level_intro_number = level + 1
 		level_intro_waiting = true
 		level_intro_fade = 0.0
+		level_intro_go_hold = 0.0
 	level_intro_home_counts[player] = homes
 	if level_intro_waiting and player == level_intro_player and level == level_intro_number:
-		# This is the former show trigger. Do not wait for respawn timers.
+		# This is the former show trigger. Hold GO fully visible before its
+		# quick fade, without waiting for any respawn timer.
 		level_intro_waiting = false
+		level_intro_fade = 1.0
+		level_intro_go_hold = LevelIntroGoHold
 	if player != level_intro_player:
 		level_intro_waiting = false
 		level_intro_fade = 0.0
+		level_intro_go_hold = 0.0
 
 func update_level_intro() -> void:
 	if not started or paused:
@@ -1421,7 +1428,15 @@ func update_level_intro() -> void:
 	if level_intro_waiting:
 		level_intro_fade = minf(1.0, level_intro_fade + presentation_delta / LevelIntroFadeIn)
 	else:
-		level_intro_fade = maxf(0.0, level_intro_fade - presentation_delta / LevelIntroFadeOut)
+		var fade_delta: float = presentation_delta
+		if level_intro_go_hold > 0.0:
+			level_intro_go_hold -= presentation_delta
+			level_intro_fade = 1.0
+			if level_intro_go_hold >= 0.0:
+				return
+			fade_delta = -level_intro_go_hold
+			level_intro_go_hold = 0.0
+		level_intro_fade = maxf(0.0, level_intro_fade - fade_delta / LevelIntroFadeOut)
 
 func update_hud() -> void:
 	# Keep the gear interactive and in place during pause so it can resume play.
@@ -1681,6 +1696,7 @@ func clear_presentation() -> void:
 	level_intro_home_counts.clear()
 	level_intro_waiting = false
 	level_intro_fade = 0.0
+	level_intro_go_hold = 0.0
 	beaver_phase = BeaverVisualPhase.Hidden
 	beaver_phase_seconds = 0.0
 	beaver_player_hit = false

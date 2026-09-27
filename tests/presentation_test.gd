@@ -555,6 +555,8 @@ func run() -> void:
 		game.simulation.poke(0x8135, 0)
 		var saw_ready: bool = false
 		var saw_go: bool = false
+		var saw_go_fade: bool = false
+		var go_start_frame: int = -1
 		for frame in range(500):
 			game.simulation.step()
 			game.observe_frame()
@@ -574,10 +576,17 @@ func run() -> void:
 						check(game.message_panel.size.y < 150.0 and game.message_panel.size.x < 400.0, "Intro fits text and padding in both dimensions")
 			if game.message_hint.text == "GO":
 				saw_go = true
-				check(current_level == 2 and not game.level_intro_waiting, "Level increment immediately starts GO fade")
+				if go_start_frame < 0:
+					go_start_frame = frame
+				check(current_level == 2 and not game.level_intro_waiting, "Level increment starts the GO phase")
+				var go_age: float = float(frame - go_start_frame + 1) * game.FRAME_SECONDS
+				if go_age <= game.LevelIntroGoHold:
+					check(is_equal_approx(game.level_intro_fade, 1.0), "GO remains fully visible for 250 ms")
+				elif game.level_intro_fade < 1.0:
+					saw_go_fade = true
 			if saw_go and frame > 450:
 				check(not game.message_panel.visible, "GO disappears without waiting for respawn timers")
-		check(saw_ready and saw_go, "Both real player board transitions exercise READY and GO")
+		check(saw_ready and saw_go and saw_go_fade, "Both real player board transitions exercise READY, the GO hold, and its fade")
 	game.free()
 	await process_frame
 	print("PRESENTATION TEST: %s" % ("PASS" if failures.is_empty() else str(failures)))
