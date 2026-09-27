@@ -105,6 +105,16 @@ try {
 
     # Cloudflare Pages 25 MiB file size limit: split index.side.wasm if > 25MB
     $sideWasm = Join-Path $FroggerRoot "builds/web/index.side.wasm"
+    $sideWasmPart0 = Join-Path $FroggerRoot "builds/web/index.side.part0.wasm"
+    $sideWasmPart1 = Join-Path $FroggerRoot "builds/web/index.side.part1.wasm"
+    # Clear both the current names and the old extension-less names. Ending the
+    # deployed chunks in .wasm gives Pages the application/wasm content type,
+    # which allows Cloudflare's automatic Brotli/Gzip delivery to engage.
+    foreach ($oldPart in @($sideWasmPart0, $sideWasmPart1, "$sideWasm.part0", "$sideWasm.part1")) {
+        if (Test-Path -LiteralPath $oldPart) {
+            Remove-Item -LiteralPath $oldPart -Force
+        }
+    }
     if (Test-Path -LiteralPath $sideWasm) {
         $size = (Get-Item $sideWasm).Length
         if ($size -gt 25MB) {
@@ -115,19 +125,43 @@ try {
             $part1 = [byte[]]::new($bytes.Length - $half)
             [System.Array]::Copy($bytes, 0, $part0, 0, $half)
             [System.Array]::Copy($bytes, $half, $part1, 0, $bytes.Length - $half)
-            [System.IO.File]::WriteAllBytes("$sideWasm.part0", $part0)
-            [System.IO.File]::WriteAllBytes("$sideWasm.part1", $part1)
+            [System.IO.File]::WriteAllBytes($sideWasmPart0, $part0)
+            [System.IO.File]::WriteAllBytes($sideWasmPart1, $part1)
             Remove-Item -LiteralPath $sideWasm -Force
-            Write-Host "Created index.side.wasm.part0 and index.side.wasm.part1 (< 25 MiB each)"
+            Write-Host "Created index.side.part0.wasm and index.side.part1.wasm (< 25 MiB each)"
         }
     }
+
+    # Version the browser's IndexedDB asset cache by commit and by the exact
+    # exported bytes. The content suffix protects dirty local deployments from
+    # reusing binaries produced from an earlier build of the same commit.
+    $commitHash = (& git rev-parse --short=12 HEAD 2>$null | Out-String).Trim()
+    if (-not $commitHash) { $commitHash = 'no-git' }
+    $cacheAssetPaths = @(
+        'builds/web/index.pck',
+        'builds/web/index.wasm',
+        'builds/web/index.side.part0.wasm',
+        'builds/web/index.side.part1.wasm',
+        'builds/web/libfrogger_arcade.web.template_release.wasm32.wasm'
+    ) | Where-Object { Test-Path -LiteralPath $_ }
+    $assetHashText = ($cacheAssetPaths | Sort-Object | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }) -join ''
+    $hashAlgorithm = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $contentDigest = ([System.BitConverter]::ToString($hashAlgorithm.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($assetHashText))) -replace '-', '').ToLowerInvariant().Substring(0, 12)
+    } finally {
+        $hashAlgorithm.Dispose()
+    }
+    $cacheVersion = "$commitHash-$contentDigest"
+    $cacheScript = [System.IO.File]::ReadAllText((Join-Path $FroggerRoot 'tools/web_cache.js')).Replace('__FROGGER_CACHE_VERSION__', $cacheVersion)
+    [System.IO.File]::WriteAllText((Join-Path $FroggerRoot 'builds/web/frogger-cache.js'), $cacheScript)
+    Write-Host "IndexedDB asset cache version: $cacheVersion"
 
     # Inject side wasm chunk loader into index.html
     $indexHtmlPath = Join-Path $FroggerRoot "builds/web/index.html"
     if (Test-Path -LiteralPath $indexHtmlPath) {
         $html = [System.IO.File]::ReadAllText($indexHtmlPath)
         # Register the first-gesture audio handler before loading the engine.
-        $html = $html.Replace('<script src="index.js"></script>', '<script src="frogger-audio.js"></script><script src="index.js"></script>')
+        $html = $html.Replace('<script src="index.js"></script>', '<script src="frogger-cache.js"></script><script src="frogger-audio.js"></script><script src="index.js"></script>')
         # The browser PCM transport owns the sole audio context. Use Godot's
         # supported Dummy driver rather than leaving a second silent worklet alive.
         $audioStartup = "engine.startGame({"
@@ -137,12 +171,13 @@ try {
 		<script>
 (function() {
 	const origFetch = window.fetch;
+	const cachedFetch = window.FroggerAssetCache ? window.FroggerAssetCache.fetch : origFetch;
 	window.fetch = async function(resource, init) {
 		const url = (typeof resource === 'string') ? resource : (resource && resource.url) ? resource.url : '';
 		if (url.endsWith('.side.wasm')) {
 			const [r0, r1] = await Promise.all([
-				origFetch(url + '.part0', init),
-				origFetch(url + '.part1', init)
+				cachedFetch(url.replace(/\.side\.wasm$/, '.side.part0.wasm'), init),
+				cachedFetch(url.replace(/\.side\.wasm$/, '.side.part1.wasm'), init)
 			]);
 			if (!r0.ok || !r1.ok) {
 				throw new Error('Failed to load side wasm parts: ' + r0.status + ' / ' + r1.status);
@@ -161,12 +196,12 @@ try {
 				}
 			});
 		}
-		return origFetch(resource, init);
+		return cachedFetch(resource, init);
 	};
 })();
 		</script>
 "@
-        if ($html -notmatch 'side\.wasm\.part0') {
+        if ($html -notmatch 'side\.part0\.wasm') {
             $html = $html.Replace('<script src="index.js"></script>', "$chunkScript`r`n		<script src=`"index.js`"></script>")
         }
         if ($html -notmatch 'manifest\.webmanifest') {
