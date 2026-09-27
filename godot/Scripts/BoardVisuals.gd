@@ -128,7 +128,7 @@ static func turtle_phase(state: Dictionary, x: float, row: int) -> int:
 	for offset in [-4, 0, 4]:
 		for col in [0, 1]:
 			var tile: int = tile_at(state, x + offset, row, col)
-			surface = surface or (tile >= 0x70 and tile <= 0x87)
+			surface = surface or ((tile >= 0x38 and tile <= 0x3f) or (tile >= 0x70 and tile <= 0x87))
 			bubbles = bubbles or (tile >= 0x94 and tile <= 0x9b)
 			blank = blank and (tile == 0x10)
 	if surface:

@@ -244,19 +244,18 @@ self.addEventListener('fetch', (event) => {
 "@
     Set-Content -LiteralPath $swPath -Value $swContent -Encoding ascii
 
-    # Generate PWA 192 and 512 icons if missing
+    # Refresh PWA icons on every export so SVG changes cannot leave stale icons.
     $icon192 = Join-Path $FroggerRoot "builds/web/icon-192.png"
     $icon512 = Join-Path $FroggerRoot "builds/web/icon-512.png"
     $appleIcon = Join-Path $FroggerRoot "builds/web/index.apple-touch-icon.png"
     if (Test-Path -LiteralPath $appleIcon) {
-        if (-not (Test-Path -LiteralPath $icon192) -or -not (Test-Path -LiteralPath $icon512)) {
-            python -c "
+        python -c "
 from PIL import Image
 im = Image.open(r'$appleIcon')
 im.resize((192, 192), Image.Resampling.LANCZOS).save(r'$icon192')
 im.resize((512, 512), Image.Resampling.LANCZOS).save(r'$icon512')
 " | Out-Null
-        }
+        Assert-FroggerExit 'Generate PWA icons'
     }
 
     $headersPath = Join-Path $FroggerRoot "builds/web/_headers"

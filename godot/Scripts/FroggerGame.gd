@@ -68,7 +68,6 @@ class BonusPopup:
 var popups: Array = []
 var death_ripple: MeshInstance3D = null
 var ripple_material: StandardMaterial3D = null
-var known_diving_groups: Dictionary = {}
 var turtle_supports: Array = []
 enum BeaverVisualPhase { Hidden, Approach, Grab, Look, Bite, Sink, Done }
 var beaver_phase: BeaverVisualPhase = BeaverVisualPhase.Hidden
@@ -85,7 +84,10 @@ var death_initial_height: float = 0.0
 var last_live_player_height: float = 0.0
 var last_live_player_x: float = 0.0
 var last_live_player_row: float = 0.0
-var known_diving_level: int = -1
+var level_intro_seen: Dictionary = {}
+var level_intro_number: int = 0
+var level_intro_waiting: bool = false
+var level_intro_fade: float = 0.0
 var lady_facing: int = 2
 var lady_hop_start_frame: int = -1
 var lady_last_motion_frame: int = -1
@@ -537,12 +539,22 @@ func toggle_pause_from_gear() -> void:
 		show_menu(true)
 
 func actor(key: String, model: String) -> ModelActor:
+	if actors.has(key) and not actors[key].root.scene_file_path.ends_with("/%s.glb" % model):
+		actors[key].root.queue_free()
+		actors.erase(key)
+		if key == "player":
+			actors.erase("passenger")
 	if not actors.has(key):
 		actors[key] = ModelActor.new(self, model)
 	return actors[key]
 
+func active_frog_model() -> String:
+	if BoardVisuals.at(state, 0x83fd) == 2:
+		return "frog" if player_frog == "lady_frog" else "lady_frog"
+	return player_frog
+
 func rescue_frog_model() -> String:
-	return "frog" if player_frog == "lady_frog" else "lady_frog"
+	return "frog" if active_frog_model() == "lady_frog" else "lady_frog"
 
 func select_player_frog(model: String) -> void:
 	if model == player_frog or model not in ["frog", "lady_frog"]:
@@ -1085,11 +1097,8 @@ func setup_ui() -> void:
 		time_label.visible = not narrow
 		bottom.size = Vector2(panel_width, 80)
 		bottom.position = Vector2((viewport_size.x - panel_width) / 2.0, h - 80)
-		var message_width: float = clampf(viewport_size.x - 48.0, 120.0, 840.0)
-		message_panel.size = Vector2(message_width, 180)
-		message_panel.position = Vector2((viewport_size.x - message_width) / 2.0, (h - 180.0) / 2.0)
-		message_label.custom_minimum_size = Vector2(message_width - 44.0, 0.0)
 		message_label.add_theme_font_size_override("font_size", 18 if viewport_size.x < 620 else (24 if viewport_size.x < 900 else 30))
+		update_message_layout()
 		var menu_height: float = clampf(menu_items.get_combined_minimum_size().y + 28.0, 220.0, 620.0)
 		menu.size = Vector2(minf(480.0 if touch_device else 520.0, viewport_size.x - 24.0), minf(menu_height, h - 40.0))
 		menu.position = (viewport_size - menu.size) / 2.0
@@ -1304,6 +1313,36 @@ func add_button(text_val: String, action: Callable) -> void:
 	if btn_count == 1:
 		b.grab_focus()
 
+func update_message_layout() -> void:
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var text_width: float = 0.0
+	for label in [message_label, message_hint]:
+		var font: Font = label.get_theme_font("font")
+		text_width = maxf(text_width, font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size")).x)
+	var width: float = minf(text_width + 44.0, viewport_size.x - 48.0)
+	message_panel.size = Vector2(width, 180.0)
+	message_panel.position = (viewport_size - message_panel.size) * 0.5
+
+func update_level_intro() -> void:
+	if review not in ["", "level-start", "two-player", "default-view"]:
+		return
+	if not started or paused or BoardVisuals.at(state, 0x83fe) == 0:
+		return
+	var player: int = BoardVisuals.at(state, 0x83fd)
+	var level: int = BoardVisuals.at(state, 0x83b7)
+	if level > 0 and level_intro_seen.get(player, 0) != level:
+		level_intro_seen[player] = level
+		level_intro_number = level
+		level_intro_waiting = true
+		level_intro_fade = 0.0
+		return
+	if level_intro_waiting:
+		if FrogVisualState.player_on_board(state) and BoardVisuals.at(state, 0x83ae) == 0 and BoardVisuals.at(state, 0x83d2) == 0 and BoardVisuals.at(state, 0x83d3) == 0 and BoardVisuals.at(state, 0x8004) == 0:
+			level_intro_waiting = false
+			level_intro_fade = 0.45
+	else:
+		level_intro_fade = maxf(0.0, level_intro_fade - presentation_delta)
+
 func update_hud() -> void:
 	# Keep the gear interactive and in place during pause so it can resume play.
 	gameplay_options_button.visible = started
@@ -1326,22 +1365,29 @@ func update_hud() -> void:
 			icon.texture = frog_icon_texture
 			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			icon.custom_minimum_size = Vector2(18, 18)
+			icon.custom_minimum_size = Vector2(36, 36)
 			lives_icons.add_child(icon)
 		for i in range(lives_icons.get_child_count()):
 			lives_icons.get_child(i).visible = (i < count)
 	timer_bar.value = clampf(float(BoardVisuals.at(state, 0x83dd)) / 60.0, 0.0, 1.0) * 100.0
 	message_hint.text = ""
+	message_panel.modulate.a = 1.0
+	update_level_intro()
 	if started and not paused:
 		if BoardVisuals.at(state, 0x83fe) == 0:
 			message_label.text = "GAME OVER"
 			message_hint.text = restart_prompt()
 		elif BoardVisuals.at(state, 0x8297) > 0 and BoardVisuals.at(state, 0x842f) >= 5:
 			message_label.text = "ALL FROGS HOME!"
+		elif level_intro_waiting or level_intro_fade > 0.0:
+			message_label.text = "LEVEL %d" % level_intro_number
+			message_hint.text = "GET READY" if level_intro_waiting else "GO"
+			message_panel.modulate.a = 1.0 if level_intro_waiting else level_intro_fade / 0.45
 		else:
 			message_label.text = ""
 	message_panel.visible = message_label.text.length() > 0
 	message_hint.visible = not message_hint.text.is_empty()
+	update_message_layout()
 	if fps_label != null and show_fps:
 		var fps: float = Engine.get_frames_per_second()
 		var frame_ms: float = presentation_delta * 1000.0
@@ -1548,8 +1594,9 @@ func clear_presentation() -> void:
 	lady_last_motion_frame = -1
 	anchored_death_frame = -1
 	last_live_player_frame = -1
-	known_diving_groups.clear()
-	known_diving_level = -1
+	level_intro_seen.clear()
+	level_intro_waiting = false
+	level_intro_fade = 0.0
 	beaver_phase = BeaverVisualPhase.Hidden
 	beaver_phase_seconds = 0.0
 	beaver_player_hit = false
@@ -1592,7 +1639,7 @@ func update_actors() -> void:
 	update_homes_and_hazards()
 
 func update_player(fraction: float) -> void:
-	var player = actor("player", player_frog)
+	var player = actor("player", active_frog_model())
 	player.root.scale = Vector3.ONE
 	player.set_squash_color(0.0)
 	var cur_frame: int = state.get("frame", 0)
@@ -1674,10 +1721,6 @@ func update_player(fraction: float) -> void:
 
 func update_lanes(fraction: float) -> void:
 	turtle_supports.clear()
-	var level_val: int = BoardVisuals.at(state, 0x83b7)
-	if known_diving_level != level_val:
-		known_diving_groups.clear()
-		known_diving_level = level_val
 	var cur_frame: int = state.get("frame", 0)
 	# Rigid wheels share one turn clock; the per-lane offset keeps parallel
 	# traffic from spinning in lockstep.
@@ -1687,6 +1730,8 @@ func update_lanes(fraction: float) -> void:
 			continue
 		var table: int = 0x8100 + lane * 9
 		var count: int = mini(8, BoardVisuals.at(state, table))
+		if lane in [1, 4]:
+			count = mini(count, BoardVisuals.at(state, 0x8275 if lane == 1 else 0x827e))
 		var row: int = (lane + 3) * 16
 		var width: int = LaneWidths[lane]
 		var model: String = LaneModels[lane]
@@ -1698,10 +1743,12 @@ func update_lanes(fraction: float) -> void:
 			var raw_center: float = float(BoardVisuals.at(state, table + index + 1) - (12 if lane < 5 else 3)) - float(width) / 2.0
 			var center: float = moving_visuals.step(lane * 16 + index, raw_center, cur_frame, presentation_delta, paused)
 			var members: int = 2 if lane == 1 else (3 if lane == 4 else 1)
-			var group_key: String = "%d_%d" % [lane, index]
-			if is_turtle and BoardVisuals.turtle_phase(state, raw_center, row) > 0:
-				known_diving_groups[group_key] = true
-			var depth: float = BoardVisuals.turtle_depth(state, raw_center, row, fraction, known_diving_groups.has(group_key)) if is_turtle else 0.0
+			# ROM 0x20fb/0x219c stamps only the last group in each turtle
+			# layout. Empty water is not evidence that a group can dive.
+			var diver: bool = is_turtle and index == BoardVisuals.at(state, 0x8275 if lane == 1 else 0x827e) - 1
+			var depth: float = BoardVisuals.turtle_depth(state, raw_center, row, fraction, diver) if diver else 0.0
+			if is_turtle and not diver and BoardVisuals.turtle_phase(state, raw_center, row) == 2:
+				continue
 			for member in range(members):
 				for wrap in [-1, 0, 1]:
 					var x: float = center + float(wrap) * 256.0 + (float(member) - float(members - 1) / 2.0) * 16.0
@@ -1792,7 +1839,7 @@ func update_homes_and_hazards() -> void:
 	for i in range(5):
 		var held_here: bool = home_arrival.active(cur_frame, frac) and absf(float(home_arrival.x) - (24.0 + 48.0 * float(i))) <= 8.0
 		if BoardVisuals.at(state, home_base + i) != 0 and not held_here:
-			var a = actor("home%d" % i, player_frog)
+			var a = actor("home%d" % i, active_frog_model())
 			a.set_active(true)
 			a.root.position = Vector3(-6.0 + 3.0 * float(i), 0.08, -6.0)
 			a.root.rotation = Vector3(0, PI, 0)
@@ -1900,7 +1947,7 @@ func update_beaver(cur_frame: int) -> void:
 	var slot_code: int = BoardVisuals.at(state, 0x8059)
 	var descriptor_visible: bool = slot_x >= 8 and slot_x <= 235 and slot_y >= 32 and slot_y <= 136 and slot_code != 0
 
-	if descriptor_visible:
+	if descriptor_visible and beaver_phase in [BeaverVisualPhase.Hidden, BeaverVisualPhase.Done, BeaverVisualPhase.Approach]:
 		var displayed_slot_x: float = moving_visuals.step(1000 + 0x8058, float(slot_x), cur_frame, presentation_delta, paused)
 		beaver_heading = -1 if (slot_code & 0x80) != 0 else 1
 		# The native lethal probes are slot X+20 facing right and X-4 facing
@@ -1909,6 +1956,9 @@ func update_beaver(cur_frame: int) -> void:
 		var attack_x: float = displayed_slot_x + (20.0 if beaver_heading > 0 else -4.0)
 		beaver_last_x = attack_x - float(beaver_heading) * 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
 		beaver_last_row = float(slot_y)
+		var log_end: Variant = nearest_log_end(beaver_last_row, beaver_heading, attack_x)
+		if log_end != null and (attack_x - float(log_end)) * float(beaver_heading) >= 0.0:
+			beaver_last_x = float(log_end) - float(beaver_heading) * 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
 		if beaver_phase in [BeaverVisualPhase.Hidden, BeaverVisualPhase.Done] and native_state == 1:
 			beaver_phase = BeaverVisualPhase.Approach
 			beaver_phase_seconds = 0.0
@@ -1966,6 +2016,7 @@ func update_beaver(cur_frame: int) -> void:
 	var sink_amount: float = clampf(beaver_phase_seconds / BeaverSinkSeconds, 0.0, 1.0) if beaver_phase == BeaverVisualPhase.Sink else 0.0
 	var a = actor("hazard32856", "otter")
 	a.set_active(true)
+	a.set_clipped(true)
 	a.root.position = pos3(beaver_last_x, beaver_last_row,
 		BoardVisuals.beaver_height(BoardVisuals.WaterSurfaceHeight, BeaverScale, sink_amount))
 	a.root.rotation = Vector3(0, float(beaver_heading) * PI / 2.0, 0)
@@ -2103,6 +2154,8 @@ func read_review_args() -> void:
 
 func review_frames_list() -> Array:
 	match review:
+		"level-start": return [1, 50, 100, 130, 160, 190]
+		"two-player": return [1, 40, 100, 160, 220]
 		"carry", "carry-left": return [1, 5, 9, 13, 25]
 		"lady-move": return [1, 8, 17, 25, 30, 40, 45]
 		"lady-hidden": return [1, 8]
@@ -2166,6 +2219,15 @@ func put_passenger_on_log() -> void:
 func step_review() -> void:
 	review_frame += 1
 	if review_frame == 1:
+		if review == "level-start":
+			start_game(1)
+		if review == "two-player":
+			start_game(2)
+			for frame in range(4000):
+				simulation.step()
+				if simulation.peek(0x83fd) == 2 and simulation.peek(0x8109) > 0:
+					break
+			observe_frame()
 		if review in ["carry", "carry-left", "bonus", "bonus-follow", "home-input"]:
 			put_passenger_on_log()
 		if review in ["squash", "drown", "edge-squash", "upper-edge-squash"]:
@@ -2310,7 +2372,7 @@ func step_review() -> void:
 			var width: int = 31 if lane == 1 else 47
 			for index in range(mini(8, BoardVisuals.at(probe, table))):
 				var center: float = float(BoardVisuals.at(probe, table + index + 1) - 12 - width / 2)
-				var diver: bool = known_diving_groups.has("%d_%d" % [lane, index]) or BoardVisuals.turtle_phase(probe, center, row) > 0
+				var diver: bool = index == BoardVisuals.at(probe, 0x8275 if lane == 1 else 0x827e) - 1
 				var depth: float = BoardVisuals.turtle_depth(probe, center, row, 0.0, diver)
 				for member in range(group_size):
 					var x: int = int(roundf(center + (float(member) - float(group_size - 1) / 2.0) * 16.0))
@@ -2407,7 +2469,7 @@ func capture_review() -> void:
 	var img = get_viewport().get_texture().get_image()
 	var error = img.save_png(path)
 
-	var player = actor("player", player_frog)
+	var player = actor("player", active_frog_model())
 	var free_lady: ModelActor = actors.get("lady")
 	var snake: ModelActor = actors.get("hazard32840")
 	var home_gator: ModelActor = actors.get("homegator2")
@@ -2605,7 +2667,7 @@ func capture_review() -> void:
 func update_review_camera() -> void:
 	if not review_close and not review_lady_close and not review_turtle_close and not review_gator_close and not review_snake_close and not review_beaver_close:
 		return
-	var player = actor("player", player_frog)
+	var player = actor("player", active_frog_model())
 	var target: Vector3
 	if review_gator_close:
 		target = pos3(134.0, 48.0, 0.0) if review in ["river-gator", "river-back", "river-snout"] else Vector3(0, 0.30, -6.3)

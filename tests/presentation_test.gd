@@ -359,6 +359,7 @@ func run() -> void:
 	game.presentation_delta = game.FRAME_SECONDS
 	game.update_homes_and_hazards()
 	var beaver: ModelActor = game.actors["hazard32856"]
+	check(beaver.is_clipped, "Beaver is clipped at both playfield edges")
 	var water_surface: float = BoardVisuals.WaterSurfaceHeight
 	var swimming_height: float = BoardVisuals.beaver_height(water_surface, game.BeaverScale, 0.0)
 	check(is_equal_approx(beaver.root.position.y, swimming_height), "Approaching beaver stays half-submerged until log contact")
@@ -366,12 +367,12 @@ func run() -> void:
 		"Approaching beaver visibly crosses the waterline")
 	check(beaver.current_anim.to_lower().ends_with("move"), "Approaching beaver does not bite before lethal range")
 	var rendered_nose_x: float = 120.0 + 16.0 * (beaver.root.position.x + game.BeaverScale * ModelFootprints.BeaverFrontTiles)
-	check(absf(rendered_nose_x - 140.0) < 0.01, "Beaver nose aligns with the ROM's right-facing lethal probe")
+	check(rendered_nose_x <= 140.01, "Right-facing beaver stops at the log before the native probe enters it")
 	game.simulation.poke(0x8059, 0x81)
 	game.observe_frame()
 	game.update_homes_and_hazards()
 	rendered_nose_x = 120.0 + 16.0 * (beaver.root.position.x - game.BeaverScale * ModelFootprints.BeaverFrontTiles)
-	check(absf(rendered_nose_x - 116.0) < 0.01, "Beaver nose aligns with the ROM's left-facing lethal probe")
+	check(rendered_nose_x >= 115.99, "Left-facing beaver stops at the log before the native probe enters it")
 	game.simulation.poke(0x8486, 2)
 	game.observe_frame()
 	game.update_homes_and_hazards()
@@ -501,6 +502,59 @@ func run() -> void:
 	game.simulation.poke(0x83cd, 0)
 	game.observe_frame()
 	check(game.frog_visual.dying, "Death flag on a crocodile is never concealed as a ride")
+	# Exercise a real turn handoff, including a full dive cycle for each player.
+	game.start_game(2)
+	game.set_process(false)
+	var tested_players: Dictionary = {}
+	for frame in range(4000):
+		game.simulation.step()
+		game.observe_frame()
+		if frame % 16 != 0 or BoardVisuals.at(game.state, 0x8109) == 0:
+			continue
+		var turn: int = BoardVisuals.at(game.state, 0x83fd)
+		tested_players[turn] = true
+		game.update_actors()
+		for turtle_key in game.actors:
+			if not turtle_key.begins_with("lane1.") and not turtle_key.begins_with("lane4."):
+				continue
+			var turtle_view: ModelActor = game.actors[turtle_key]
+			if not turtle_view.root.visible:
+				continue
+			var turtle_lane: int = int(turtle_key.substr(4, 1))
+			var turtle_index: int = int(turtle_key.split(".")[1])
+			var layout_count: int = BoardVisuals.at(game.state, 0x8275 if turtle_lane == 1 else 0x827e)
+			check(turtle_index < layout_count, "No phantom turtle group after turn handoff")
+			if turtle_index != layout_count - 1:
+				check(is_equal_approx(turtle_view.root.position.y, -0.22), "Ordinary turtles never join the diving group")
+	check(tested_players.has(1) and tested_players.has(2), "Turtle regression exercised both real player turns")
+	for selected in ["frog", "lady_frog"]:
+		game.player_frog = selected
+		for turn in [1, 2, 1]:
+			game.simulation.poke(0x83fd, turn)
+			game.observe_frame()
+			game.update_player(0.0)
+			var expected_model: String = selected if turn == 1 else ("frog" if selected == "lady_frog" else "lady_frog")
+			check(game.actors["player"].root.scene_file_path.ends_with("/%s.glb" % expected_model), "Turn uses assigned frog color for either selection")
+	game.clear_presentation()
+	game.started = true
+	game.paused = false
+	game.simulation.poke(0x83fe, 1)
+	game.simulation.poke(0x83b7, 2)
+	game.simulation.poke(0x83d2, 20)
+	game.observe_frame()
+	game.update_hud()
+	check(game.message_label.text == "LEVEL 2" and game.message_hint.text == "GET READY", "Level intro has title and padded ready line")
+	game.simulation.poke(0x83d2, 0)
+	game.simulation.poke(0x83d3, 0)
+	game.simulation.poke(0x83ae, 0)
+	game.simulation.poke(0x8004, 0)
+	game.simulation.poke(0x8044, 120)
+	game.simulation.poke(0x8047, 224)
+	game.observe_frame()
+	game.update_hud()
+	check(game.message_hint.text == "GO", "Ready changes to GO when ROM releases play")
+	for frame in range(40): game.update_hud()
+	check(not game.message_panel.visible, "GO fades out without blocking play")
 	game.free()
 	await process_frame
 	print("PRESENTATION TEST: %s" % ("PASS" if failures.is_empty() else str(failures)))

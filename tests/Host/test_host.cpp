@@ -1080,6 +1080,28 @@ static void RunFeedbackTests(const std::vector<uint8_t>& rom) {
 int main() {
     try {
         auto rom = ReadFileBytes("godot/rom/maincpu.bin");
+        // ROM 0x08e0 awards one reserve frog at 20,000 displayed points.
+        // 0x83e5/e6 are lives (decremented at 0x096a), not time remaining.
+        for (int player : {1, 2}) {
+            ArcadeSimulationCore game(rom, false);
+            int score = player == 1 ? 0x83ed : 0x83eb;
+            int lives = 0x83e4 + player, latch = 0x83e6 + player;
+            game.Poke(0x83fe, 1); game.Poke(0x83fd, player);
+            game.Poke(0x83e5, 3); game.Poke(0x83e6, 3);
+            game.Poke(score, 0x98); game.Poke(score + 1, 0x19);
+            auto addTen = [&]() {
+                game.Cpu.PC = 0x08e0; game.Cpu.SP = 0x87f0; game.Cpu.DE = 1;
+                game.Poke(0x87f0, 0x34); game.Poke(0x87f1, 0x12);
+                int guard = 0;
+                while (game.Cpu.PC != 0x1234 && ++guard < 2000) game.Cpu.StepInstruction();
+                Check(game.Cpu.PC == 0x1234, "Score routine returns");
+            };
+            addTen(); Check(game.Peek(lives) == 3, "No extra life below 20,000");
+            addTen(); Check(game.Peek(lives) == 4 && game.Peek(latch) == 1, "Extra life at 20,000");
+            addTen(); Check(game.Peek(lives) == 4, "Threshold award is one-shot");
+            Check(game.Peek(player == 1 ? 0x83e6 : 0x83e5) == 3, "Other player's lives unchanged");
+        }
+
         ArcadeSimulationCore game(rom);
         auto tStart = std::chrono::high_resolution_clock::now();
         bool play = false, hop = false;
