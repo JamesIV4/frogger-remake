@@ -535,26 +535,49 @@ func run() -> void:
 			game.update_player(0.0)
 			var expected_model: String = selected if turn == 1 else ("frog" if selected == "lady_frog" else "lady_frog")
 			check(game.actors["player"].root.scene_file_path.ends_with("/%s.glb" % expected_model), "Turn uses assigned frog color for either selection")
-	game.clear_presentation()
-	game.started = true
-	game.paused = false
-	game.simulation.poke(0x83fe, 1)
-	game.simulation.poke(0x83b7, 2)
-	game.simulation.poke(0x83d2, 20)
-	game.observe_frame()
-	game.update_hud()
-	check(game.message_label.text == "LEVEL 2" and game.message_hint.text == "GET READY", "Level intro has title and padded ready line")
-	game.simulation.poke(0x83d2, 0)
-	game.simulation.poke(0x83d3, 0)
-	game.simulation.poke(0x83ae, 0)
-	game.simulation.poke(0x8004, 0)
-	game.simulation.poke(0x8044, 120)
-	game.simulation.poke(0x8047, 224)
-	game.observe_frame()
-	game.update_hud()
-	check(game.message_hint.text == "GO", "Ready changes to GO when ROM releases play")
-	for frame in range(40): game.update_hud()
-	check(not game.message_panel.visible, "GO fades out without blocking play")
+	# Drive the actual fifth-home award and the complete ROM board transition.
+	for intro_player in [1, 2]:
+		game.start_game(2)
+		for frame in range(180): game.simulation.step()
+		game.simulation.poke(0x83fd, intro_player)
+		game.simulation.poke(0x83b7, 1)
+		game.simulation.poke(0x83b8 if intro_player == 1 else 0x83b9, 1)
+		game.observe_frame()
+		game.update_hud()
+		check(not game.message_panel.visible, "Starting a level alone must not show a late GET READY")
+		var home_base: int = 0x825e if intro_player == 1 else 0x8263
+		for bay in range(4): game.simulation.poke(home_base + bay, 1)
+		game.simulation.poke(0x825c if intro_player == 1 else 0x825d, 4)
+		game.set_review_frog(216, 32)
+		game.simulation.poke(0x8120, 0)
+		game.simulation.poke(0x8121, 0)
+		game.simulation.poke(0x8134, 0)
+		game.simulation.poke(0x8135, 0)
+		var saw_ready: bool = false
+		var saw_go: bool = false
+		for frame in range(500):
+			game.simulation.step()
+			game.observe_frame()
+			game.presentation_delta = game.FRAME_SECONDS
+			game.update_hud()
+			var current_level: int = BoardVisuals.at(game.state, 0x83b7)
+			if game.level_intro_waiting:
+				saw_ready = true
+				check(current_level == 1 and game.message_label.text == "LEVEL 2" and game.message_hint.text == "GET READY", "Fifth home announces upcoming level before it starts")
+				if not saw_go:
+					for camera_follow in [false, true]:
+						game.follow_camera = camera_follow
+						game.update_message_layout()
+						var modal_center: Vector2 = game.message_panel.position + game.message_panel.size * 0.5
+						var screen_size: Vector2 = game.get_viewport().get_visible_rect().size
+						check(absf(modal_center.y - screen_size.y * (1.0 / 3.0 if camera_follow else 0.5)) < 0.1, "Follow places intro at top third; fixed camera centers it")
+						check(game.message_panel.size.y < 150.0 and game.message_panel.size.x < 400.0, "Intro fits text and padding in both dimensions")
+			if game.message_hint.text == "GO":
+				saw_go = true
+				check(current_level == 2 and not game.level_intro_waiting, "Level increment immediately starts GO fade")
+			if saw_go and frame > 450:
+				check(not game.message_panel.visible, "GO disappears without waiting for respawn timers")
+		check(saw_ready and saw_go, "Both real player board transitions exercise READY and GO")
 	game.free()
 	await process_frame
 	print("PRESENTATION TEST: %s" % ("PASS" if failures.is_empty() else str(failures)))

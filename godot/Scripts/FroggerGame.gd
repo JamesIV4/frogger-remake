@@ -84,10 +84,15 @@ var death_initial_height: float = 0.0
 var last_live_player_height: float = 0.0
 var last_live_player_x: float = 0.0
 var last_live_player_row: float = 0.0
-var level_intro_seen: Dictionary = {}
+var level_intro_home_counts: Dictionary = {}
 var level_intro_number: int = 0
 var level_intro_waiting: bool = false
 var level_intro_fade: float = 0.0
+var level_intro_player: int = 0
+const LevelIntroFadeIn: float = 0.25
+const LevelIntroFadeOut: float = 0.20
+const ModalVerticalPadding: float = 24.0
+const ModalGap: float = 12.0
 var lady_facing: int = 2
 var lady_hop_start_frame: int = -1
 var lady_last_motion_frame: int = -1
@@ -890,9 +895,11 @@ func style_box(color: Color, radius: int = 12, border: int = 0) -> StyleBoxFlat:
 func edge_panel_style(color: Color, at_top: bool) -> StyleBoxFlat:
 	var s = style_box(color, 0, 2)
 	if at_top:
+		s.border_width_top = 0
 		s.corner_radius_bottom_left = 16
 		s.corner_radius_bottom_right = 16
 	else:
+		s.border_width_bottom = 0
 		s.corner_radius_top_left = 16
 		s.corner_radius_top_right = 16
 	return s
@@ -987,7 +994,10 @@ func setup_ui() -> void:
 	var bottom := PanelContainer.new()
 	hud_footer = bottom
 	bottom.size = Vector2(870, 64)
-	bottom.add_theme_stylebox_override("panel", edge_panel_style(frame_color, false))
+	var footer_style := edge_panel_style(frame_color, false)
+	footer_style.content_margin_left = 12
+	footer_style.content_margin_right = 12
+	bottom.add_theme_stylebox_override("panel", footer_style)
 	root.add_child(bottom)
 
 	var foot := HBoxContainer.new()
@@ -1010,10 +1020,21 @@ func setup_ui() -> void:
 	gameplay_options_button.pressed.connect(toggle_pause_from_gear)
 	foot.add_child(gameplay_options_button)
 
+	var before_extra := Control.new()
+	before_extra.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	foot.add_child(before_extra)
+	var extra_life_label := make_text("EXTRA LIFE\n20,000", 12, LimeColor)
+	extra_life_label.name = "ExtraLifeLabel"
+	extra_life_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	foot.add_child(extra_life_label)
+	var before_lives := Control.new()
+	before_lives.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	foot.add_child(before_lives)
+
 	var lives_box := HBoxContainer.new()
+	lives_box.name = "LivesBox"
 	lives_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	lives_box.add_theme_constant_override("separation", 10)
-	lives_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(lives_box)
 
 	lives_label = make_text("FROGS", 19, LimeColor)
@@ -1024,6 +1045,13 @@ func setup_ui() -> void:
 	lives_icons.alignment = BoxContainer.ALIGNMENT_CENTER
 	lives_box.add_child(lives_icons)
 
+	var before_timer := Control.new()
+	before_timer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	foot.add_child(before_timer)
+	var timer_box := HBoxContainer.new()
+	timer_box.name = "TimerBox"
+	timer_box.add_theme_constant_override("separation", 12)
+	foot.add_child(timer_box)
 	timer_bar = ProgressBar.new()
 	timer_bar.min_value = 0
 	timer_bar.max_value = 100
@@ -1034,15 +1062,17 @@ func setup_ui() -> void:
 	timer_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	timer_bar.add_theme_stylebox_override("background", style_box(Color("121a29"), 4))
 	timer_bar.add_theme_stylebox_override("fill", style_box(Color("9ac75d"), 4))
-	foot.add_child(timer_bar)
+	timer_box.add_child(timer_bar)
 	var time_label := make_text("TIME", 19, Cream)
-	foot.add_child(time_label)
+	timer_box.add_child(time_label)
 
 	message_panel = PanelContainer.new()
 	message_panel.visible = false
 	message_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var msg_style = style_box(Color(0.06, 0.10, 0.17, 0.93), 12, 2)
 	msg_style.border_color = Color("ffce57")
+	msg_style.content_margin_top = ModalVerticalPadding
+	msg_style.content_margin_bottom = ModalVerticalPadding
 	message_panel.add_theme_stylebox_override("panel", msg_style)
 	root.add_child(message_panel)
 	var message_content := VBoxContainer.new()
@@ -1093,10 +1123,15 @@ func setup_ui() -> void:
 		var title_label: Label = row.get_child(1).get_child(0)
 		title_label.add_theme_font_size_override("font_size", 18 if narrow else 23)
 		level_label.visible = not narrow
-		lives_label.visible = not narrow
+		lives_label.add_theme_font_size_override("font_size", 10 if narrow else 19)
 		time_label.visible = not narrow
+		extra_life_label.add_theme_font_size_override("font_size", 10 if narrow else 12)
+		foot.add_theme_constant_override("separation", 4 if narrow else 12)
+		lives_box.add_theme_constant_override("separation", 4 if narrow else 10)
+		lives_box.custom_minimum_size.x = 116.0 if narrow else 0.0
+		timer_box.custom_minimum_size.x = 70.0 if narrow else panel_width * 0.32
 		bottom.size = Vector2(panel_width, 80)
-		bottom.position = Vector2((viewport_size.x - panel_width) / 2.0, h - 80)
+		bottom.position = Vector2((viewport_size.x - panel_width) / 2.0, h - bottom.size.y)
 		message_label.add_theme_font_size_override("font_size", 18 if viewport_size.x < 620 else (24 if viewport_size.x < 900 else 30))
 		update_message_layout()
 		var menu_height: float = clampf(menu_items.get_combined_minimum_size().y + 28.0, 220.0, 620.0)
@@ -1316,32 +1351,71 @@ func add_button(text_val: String, action: Callable) -> void:
 func update_message_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 	var text_width: float = 0.0
-	for label in [message_label, message_hint]:
+	var labels: Array = [message_label]
+	if not message_hint.text.is_empty():
+		labels.append(message_hint)
+	for label in labels:
 		var font: Font = label.get_theme_font("font")
 		text_width = maxf(text_width, font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size")).x)
 	var width: float = minf(text_width + 44.0, viewport_size.x - 48.0)
-	message_panel.size = Vector2(width, 180.0)
-	message_panel.position = (viewport_size - message_panel.size) * 0.5
+	var height: float = ModalVerticalPadding * 2.0 + 18.0 * float(labels.size() - 1)
+	for label in labels:
+		var font: Font = label.get_theme_font("font")
+		height += font.get_multiline_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, width - 44.0, label.get_theme_font_size("font_size")).y
+	message_panel.size = Vector2(width, height)
+	var center: Vector2 = viewport_size * 0.5
+	if follow_camera and (level_intro_waiting or level_intro_fade > 0.0):
+		center.y = viewport_size.y / 3.0
+	message_panel.position = center - message_panel.size * 0.5
+	# Reserve a separate row for every time-bonus panel, even on the first
+	# frame and after a camera or viewport change. Follow placement is shared
+	# by desktop, web and mobile, independent of projection and touch input.
+	var intro_visible: bool = level_intro_waiting or level_intro_fade > 0.0
+	var upper_edge: float = message_panel.get_global_rect().position.y
+	var lower_edge: float = message_panel.get_global_rect().end.y
+	var safe_top: float = hud_header.get_global_rect().end.y + 16.0
+	for popup in popups:
+		if popup.award.get("kind", 0) != 2:
+			continue
+		popup.view.size = popup.view.get_combined_minimum_size()
+		var top: float = safe_top if follow_camera else (viewport_size.y - popup.view.size.y) * 0.5
+		if intro_visible:
+			if upper_edge - ModalGap - popup.view.size.y >= safe_top:
+				top = upper_edge - ModalGap - popup.view.size.y
+				upper_edge = top
+			else:
+				top = lower_edge + ModalGap
+				lower_edge = top + popup.view.size.y
+		popup.view.global_position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
 
-func update_level_intro() -> void:
-	if review not in ["", "level-start", "two-player", "default-view"]:
-		return
-	if not started or paused or BoardVisuals.at(state, 0x83fe) == 0:
+func observe_level_intro() -> void:
+	if not started or BoardVisuals.at(state, 0x83fe) == 0:
 		return
 	var player: int = BoardVisuals.at(state, 0x83fd)
 	var level: int = BoardVisuals.at(state, 0x83b7)
-	if level > 0 and level_intro_seen.get(player, 0) != level:
-		level_intro_seen[player] = level
-		level_intro_number = level
+	# The per-player home counter is incremented by the actual home award.
+	# Announce the upcoming board here, while the completed board is visible.
+	var homes: int = BoardVisuals.at(state, 0x825d if player == 2 else 0x825c)
+	if homes == 5 and level_intro_home_counts.get(player, 0) != 5:
+		level_intro_player = player
+		level_intro_number = level + 1
 		level_intro_waiting = true
 		level_intro_fade = 0.0
+	level_intro_home_counts[player] = homes
+	if level_intro_waiting and player == level_intro_player and level == level_intro_number:
+		# This is the former show trigger. Do not wait for respawn timers.
+		level_intro_waiting = false
+	if player != level_intro_player:
+		level_intro_waiting = false
+		level_intro_fade = 0.0
+
+func update_level_intro() -> void:
+	if not started or paused:
 		return
 	if level_intro_waiting:
-		if FrogVisualState.player_on_board(state) and BoardVisuals.at(state, 0x83ae) == 0 and BoardVisuals.at(state, 0x83d2) == 0 and BoardVisuals.at(state, 0x83d3) == 0 and BoardVisuals.at(state, 0x8004) == 0:
-			level_intro_waiting = false
-			level_intro_fade = 0.45
+		level_intro_fade = minf(1.0, level_intro_fade + presentation_delta / LevelIntroFadeIn)
 	else:
-		level_intro_fade = maxf(0.0, level_intro_fade - presentation_delta)
+		level_intro_fade = maxf(0.0, level_intro_fade - presentation_delta / LevelIntroFadeOut)
 
 func update_hud() -> void:
 	# Keep the gear interactive and in place during pause so it can resume play.
@@ -1359,6 +1433,10 @@ func update_hud() -> void:
 	level_label.text = "PLAYER %d     •     LEVEL %02d" % [player, maxi(1, BoardVisuals.at(state, 0x83b7))]
 	lives_label.text = "FROGS"
 	var count: int = clampi(BoardVisuals.at(state, 0x83e5 if player == 1 else 0x83e6), 0, 12)
+	var narrow_footer: bool = get_viewport().get_visible_rect().size.x < 650.0
+	# Keep the life meter identifiable on a player's last frog. With three or
+	# more reserve icons, reclaim the label width so the portrait row still fits.
+	lives_label.visible = not narrow_footer or count <= 2
 	if lives_icons != null:
 		while lives_icons.get_child_count() < count:
 			var icon := TextureRect.new()
@@ -1377,12 +1455,10 @@ func update_hud() -> void:
 		if BoardVisuals.at(state, 0x83fe) == 0:
 			message_label.text = "GAME OVER"
 			message_hint.text = restart_prompt()
-		elif BoardVisuals.at(state, 0x8297) > 0 and BoardVisuals.at(state, 0x842f) >= 5:
-			message_label.text = "ALL FROGS HOME!"
 		elif level_intro_waiting or level_intro_fade > 0.0:
 			message_label.text = "LEVEL %d" % level_intro_number
 			message_hint.text = "GET READY" if level_intro_waiting else "GO"
-			message_panel.modulate.a = 1.0 if level_intro_waiting else level_intro_fade / 0.45
+			message_panel.modulate.a = level_intro_fade
 		else:
 			message_label.text = ""
 	message_panel.visible = message_label.text.length() > 0
@@ -1571,6 +1647,7 @@ func fit_board_overview(position: Vector3, target: Vector3, view_size: Vector2, 
 
 func observe_frame() -> void:
 	state = simulation.snapshot()
+	observe_level_intro()
 	river_gator_visual.observe(state)
 	frog_visual.observe(state)
 	lady_visual.observe(state, func(addr): return simulation.peek(addr))
@@ -1594,7 +1671,8 @@ func clear_presentation() -> void:
 	lady_last_motion_frame = -1
 	anchored_death_frame = -1
 	last_live_player_frame = -1
-	level_intro_seen.clear()
+	level_intro_player = 0
+	level_intro_home_counts.clear()
 	level_intro_waiting = false
 	level_intro_fade = 0.0
 	beaver_phase = BeaverVisualPhase.Hidden
@@ -2049,12 +2127,11 @@ func update_bonuses(fraction: float) -> void:
 			home_arrival.begin(award, rescued, frog_visual.hop_seconds(award.get("frame", 0), 0.0))
 			display_text = "TIME BONUS +%d" % amount
 			var panel := PanelContainer.new()
-			panel.custom_minimum_size.y = 106.0
 			panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			var st = style_box(Color(0.06, 0.10, 0.20, 0.94), 12, 2)
 			st.border_color = Color("ffce57")
-			st.content_margin_top = 8
-			st.content_margin_bottom = 8
+			st.content_margin_top = ModalVerticalPadding
+			st.content_margin_bottom = ModalVerticalPadding
 			panel.add_theme_stylebox_override("panel", st)
 			var content := VBoxContainer.new()
 			content.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -2098,12 +2175,11 @@ func update_bonuses(fraction: float) -> void:
 			popup.view.size = popup.view.get_combined_minimum_size()
 		var origin: Vector2 = popup.anchor_uv * viewport_size
 		popup.view.position = origin - popup.view.size * 0.5 + (Vector2.ZERO if time_bonus else Vector2(0, -age * 36.0))
-		if time_bonus:
-			var top: float = hud_header.get_global_rect().end.y + 16.0 if follow_camera else (viewport_size.y - popup.view.size.y) * 0.5
-			popup.view.position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
 		var opacity: float = minf(1.0, age / 0.08) if time_bonus else 1.0
 		opacity *= clampf((lifetime - age) / (0.22 if time_bonus else 0.35), 0.0, 1.0)
 		popup.view.modulate = Color(1, 1, 1, opacity)
+
+	update_message_layout()
 
 func update_death_ripple(fraction: float) -> void:
 	var is_active: bool = frog_visual.dying and frog_visual.drowning
@@ -2142,7 +2218,7 @@ func read_review_args() -> void:
 			review = arg.substr(9)
 	if review != "" and review != "default-view":
 		perspective_view = (review == "perspective" or review == "perspective-follow")
-		follow_camera = (review == "perspective-follow" or review == "ortho-follow" or review == "bonus-follow")
+		follow_camera = (review == "perspective-follow" or review == "ortho-follow" or review == "bonus-follow" or review == "level-transition-follow")
 	var args = OS.get_cmdline_user_args()
 	review_close = args.has("--review-close")
 	top_down_camera = args.has("--top-down-shot")
@@ -2154,7 +2230,9 @@ func read_review_args() -> void:
 
 func review_frames_list() -> Array:
 	match review:
+		"footer-empty": return [1, 8]
 		"level-start": return [1, 50, 100, 130, 160, 190]
+		"level-transition", "level-transition-follow": return [1, 16, 40, 100, 300, 340, 360, 380]
 		"two-player": return [1, 40, 100, 160, 220]
 		"carry", "carry-left": return [1, 5, 9, 13, 25]
 		"lady-move": return [1, 8, 17, 25, 30, 40, 45]
@@ -2219,6 +2297,8 @@ func put_passenger_on_log() -> void:
 func step_review() -> void:
 	review_frame += 1
 	if review_frame == 1:
+		if review == "footer-empty":
+			simulation.poke(0x83e5, 0)
 		if review == "level-start":
 			start_game(1)
 		if review == "two-player":
@@ -2270,7 +2350,7 @@ func step_review() -> void:
 					chosen = center
 					break
 			set_review_frog(chosen, 96)
-		if review == "final-home":
+		if review in ["final-home", "level-transition", "level-transition-follow"]:
 			set_review_frog(216, 42)
 			for bay in range(4):
 				simulation.poke(0x825e + bay, 1)

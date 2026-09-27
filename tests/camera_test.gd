@@ -33,6 +33,27 @@ func run() -> void:
 	game.perspective_view = true
 	game.touch_device = true
 	var camera: Camera3D = game.camera
+	# The portrait footer must retain all four groups even when the player is on
+	# the last frog (zero reserve icons) or has earned an extra life.
+	viewport.size = Vector2i(390, 844)
+	game.layout_ui.call()
+	var extra_life_label: Label = game.hud_footer.find_child("ExtraLifeLabel", true, false)
+	var lives_box: HBoxContainer = game.hud_footer.find_child("LivesBox", true, false)
+	var timer_box: HBoxContainer = game.hud_footer.find_child("TimerBox", true, false)
+	for reserve_lives in [0, 2, 3]:
+		game.simulation.poke(0x83e5, reserve_lives)
+		game.observe_frame()
+		game.update_hud()
+		await process_frame
+		var footer_rect: Rect2 = game.hud_footer.get_global_rect()
+		var gear_rect: Rect2 = game.gameplay_options_button.get_global_rect()
+		var extra_rect: Rect2 = extra_life_label.get_global_rect()
+		var lives_rect: Rect2 = lives_box.get_global_rect()
+		var timer_rect: Rect2 = timer_box.get_global_rect()
+		check(footer_rect.encloses(gear_rect) and footer_rect.encloses(extra_rect) and footer_rect.encloses(lives_rect) and footer_rect.encloses(timer_rect), "Portrait footer keeps every group inside the screen at %d reserve lives" % reserve_lives)
+		check(gear_rect.end.x <= extra_rect.position.x and extra_rect.end.x <= lives_rect.position.x and lives_rect.end.x <= timer_rect.position.x, "Portrait footer groups remain ordered without overlap at %d reserve lives" % reserve_lives)
+		check(lives_box.size.x >= 116.0, "Portrait reserves a visible life-meter slot even with no icons")
+		check(game.lives_label.visible == (reserve_lives <= 2), "Portrait labels an empty life meter and yields label space to three icons")
 	for size in [Vector2i(320, 932), Vector2i(390, 844), Vector2i(430, 932), Vector2i(768, 1024)]:
 		viewport.size = size
 		game.follow_camera = true
@@ -265,6 +286,36 @@ func run() -> void:
 			control.button_pressed = false
 	check(not slider.editable and reset.disabled, "Zoom controls disable when follow is off")
 	check(is_equal_approx(game.mobile_follow_zoom_percent, -30.0), "Disabling follow retains zoom preference")
+	# Modal placement shares one path across platforms, projections and resizes.
+	var bonus_panel := PanelContainer.new()
+	bonus_panel.custom_minimum_size = Vector2(230, 106)
+	game.bonus_overlay.add_child(bonus_panel)
+	game.popups.append(FroggerGame.BonusPopup.new({"kind": 2, "frame": game.state["frame"]}, bonus_panel, Vector2(0.5, 0.5), "TIME BONUS"))
+	game.level_intro_waiting = true
+	game.level_intro_fade = 1.0
+	game.message_label.text = "LEVEL 2"
+	game.message_hint.text = "GET READY"
+	game.message_hint.show()
+	game.message_panel.show()
+	for modal_size in [Vector2i(1100, 960), Vector2i(390, 844), Vector2i(844, 390)]:
+		viewport.size = modal_size
+		game.layout_ui.call()
+		for modal_touch in [false, true]:
+			game.touch_device = modal_touch
+			for modal_perspective in [false, true]:
+				game.perspective_view = modal_perspective
+				for modal_follow in [false, true]:
+					game.follow_camera = modal_follow
+					game.update_message_layout()
+					await process_frame
+					game.update_message_layout()
+					var modal_rect: Rect2 = game.message_panel.get_global_rect()
+					var bonus_rect: Rect2 = bonus_panel.get_global_rect()
+					check(absf(modal_rect.get_center().y - float(modal_size.y) * (1.0 / 3.0 if modal_follow else 0.5)) < 0.1, "Level modal stays at top third in every follow configuration")
+					check(not modal_rect.grow(5.0).intersects(bonus_rect), "Level and time bonus retain a gap across platforms and camera modes")
+					check(bonus_rect.position.y >= game.hud_header.get_global_rect().end.y and bonus_rect.end.y <= modal_size.y, "Bonus remains onscreen when stacked around the intro")
+					var modal_style: StyleBoxFlat = game.message_panel.get_theme_stylebox("panel")
+					check(modal_style.content_margin_top == game.ModalVerticalPadding and modal_style.content_margin_bottom == game.ModalVerticalPadding, "Intro uses shared generous bonus padding")
 	viewport.queue_free()
 	await process_frame
 	print("CAMERA TEST: %s" % ("PASS" if failures.is_empty() else str(failures)))

@@ -174,9 +174,9 @@ try {
 		<link rel="manifest" href="manifest.webmanifest">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="apple-mobile-web-app-title" content="Frogger">
-		<meta name="theme-color" content="#182332">
+		<meta name="theme-color" content="#000000">
 		<script>
 			if ('serviceWorker' in navigator) {
 				window.addEventListener('load', () => {
@@ -204,7 +204,7 @@ try {
   "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#182332",
-  "theme_color": "#182332",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "icon-192.png",
