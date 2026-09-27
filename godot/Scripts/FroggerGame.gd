@@ -273,12 +273,14 @@ func _process(delta: float) -> void:
 			accumulator -= FRAME_SECONDS
 	var t_sim: int = Time.get_ticks_usec()
 	update_frog_motion()
-	update_camera(delta)
-	var t_cam: int = Time.get_ticks_usec()
 	feed_audio()
 	var t_audio: int = Time.get_ticks_usec()
 	update_actors()
 	var t_actors: int = Time.get_ticks_usec()
+	# Home-arrival presentation is resolved by update_actors before following
+	# the visible frog, rather than the simulation's already-reset position.
+	update_camera(delta)
+	var t_cam: int = Time.get_ticks_usec()
 	update_hud()
 	var t_hud: int = Time.get_ticks_usec()
 	if water != null:
@@ -287,10 +289,10 @@ func _process(delta: float) -> void:
 
 	if show_fps:
 		var sim_us: float = float(t_sim - t_start)
-		var cam_us: float = float(t_cam - t_sim)
-		var audio_us: float = float(t_audio - t_cam)
+		var cam_us: float = float(t_cam - t_actors)
+		var audio_us: float = float(t_audio - t_sim)
 		var actors_us: float = float(t_actors - t_audio)
-		var hud_us: float = float(t_hud - t_actors)
+		var hud_us: float = float(t_hud - t_cam)
 		var total_us: float = float(t_hud - t_start)
 		prof_sim_us = lerpf(prof_sim_us, sim_us, 0.1)
 		prof_cam_us = lerpf(prof_cam_us, cam_us, 0.1)
@@ -1362,22 +1364,26 @@ func update_camera(delta: float) -> void:
 	# the frog approaches, keeping the action large rather than fitting all 14.
 	camera.fov = 48.0 if portrait_follow else (54.0 if (follow_camera and started) else 52.0)
 
-	var tracking: bool = follow_camera and started and FrogVisualState.player_on_board(state)
+	var holding_home: bool = portrait_follow and home_arrival.active(state.get("frame", 0), render_fraction())
+	var tracking: bool = follow_camera and started and (holding_home or FrogVisualState.player_on_board(state))
 	var tx: float = 0.0
 	var tz: float = 0.0
 	var followed_row: float = 0.0
 	if tracking:
 		var x: float = float(frog_visual.death_x) if frog_visual.dying else displayed_frog_x
 		var row: float = float(frog_visual.death_row) if frog_visual.dying else displayed_frog_row
+		if holding_home:
+			x = home_arrival.visual_x(state.get("frame", 0), render_fraction())
+			row = home_arrival.visual_row(state.get("frame", 0), render_fraction())
 		var p: Vector3 = pos3(x, row)
 		followed_row = p.z
 		tx = clampf(p.x, -horizontal_follow_limit, horizontal_follow_limit)
-		tz = clampf(p.z, -4.0, 4.0)
+		tz = p.z if portrait_follow else clampf(p.z, -4.0, 4.0)
 	elif follow_camera and started:
 		tx = clampf(camera.position.x, -horizontal_follow_limit, horizontal_follow_limit)
 		if portrait_follow or top_down_camera or not is_zero_approx(follow_zoom_percent()):
 			# Retain the followed row while the player is temporarily off board.
-			tz = clampf(camera_look_target.z + 0.80, -4.0, 4.0)
+			tz = camera_look_target.z if portrait_follow else clampf(camera_look_target.z + 0.80, -4.0, 4.0)
 		else:
 			tz = clampf(camera.position.z - (5.8 if perspective_view else 6.5), -4.0, 4.0)
 		followed_row = tz
@@ -1387,6 +1393,11 @@ func update_camera(delta: float) -> void:
 	else:
 		desired = Vector3(0, 15.5, 9.5) if perspective_view else Vector3(0, 19, 9.8)
 	var desired_look: Vector3 = Vector3(tx, 0, tz - 0.80) if (tracking or (follow_camera and started)) else Vector3(0, 0, -0.12)
+	if portrait_follow:
+		# Center vertically on the frog while preserving the existing follow
+		# distance and angle. No board-edge limits or projected-image offsets.
+		desired.z += 0.80
+		desired_look.z = tz
 	if top_down_camera:
 		# Angle and projection are independent: either projection can look down.
 		var height: float = desired.distance_to(desired_look) if perspective_view else desired.y
@@ -1403,10 +1414,6 @@ func update_camera(delta: float) -> void:
 		else:
 			camera.size /= zoom_factor
 	if portrait_follow:
-		if top_down_camera or perspective_view:
-			var row_limit: float = portrait_follow_row(desired, desired_look, view_size)
-			desired.z += row_limit - desired_look.z
-			desired_look.z = row_limit
 		var pan_limit: float = portrait_follow_pan_limit(desired, desired_look, followed_row)
 		desired.x = clampf(desired.x, -pan_limit, pan_limit)
 		desired_look.x = clampf(desired_look.x, -pan_limit, pan_limit)
@@ -1424,11 +1431,10 @@ func update_camera(delta: float) -> void:
 	camera.position = camera.position.lerp(desired, responsiveness)
 	camera_look_target = camera_look_target.lerp(desired_look, responsiveness)
 	if portrait_follow:
-		# Enforce the same limit during interpolation and after zoom changes.
-		if top_down_camera or perspective_view:
-			var row_limit: float = portrait_follow_row(camera.position, camera_look_target, view_size)
-			camera.position.z += row_limit - camera_look_target.z
-			camera_look_target.z = row_limit
+		# Follow the already-interpolated frog vertically, including the end rows.
+		# Keep its apparent size stable without compensating for board edges.
+		camera.position.z = desired.z
+		camera_look_target.z = desired_look.z
 		var pan_limit: float = portrait_follow_pan_limit(camera.position, camera_look_target, followed_row)
 		camera.position.x = clampf(camera.position.x, -pan_limit, pan_limit)
 		camera_look_target.x = clampf(camera_look_target.x, -pan_limit, pan_limit)
@@ -1445,37 +1451,6 @@ func portrait_follow_pan_limit(position: Vector3, target: Vector3, row: float) -
 		var depth: float = (position - edge).dot(backward)
 		visible_width = 2.0 * tan(deg_to_rad(camera.fov * 0.5)) * depth
 	return clampf(7.4 - visible_width * 0.34, 0.0, 4.0)
-
-func portrait_follow_row(position: Vector3, target: Vector3, view_size: Vector2) -> float:
-	# Clamp scrolling against the live HUD opening. If the board fits, both
-	# ends stay visible. If it doesn't, stop at each end rather than revealing
-	# empty space while the opposite end is still cropped.
-	var top: float = minf(hud_header.get_global_rect().end.y + 12.0, view_size.y * 0.4)
-	var bottom: float = maxf(hud_footer.global_position.y - 12.0, view_size.y * 0.6)
-	var aspect: float = view_size.x / maxf(1.0, view_size.y)
-	var backward := (position - target).normalized()
-	var up := backward.cross(Vector3.RIGHT).normalized()
-	var far_edge := Vector3(0, 1.3, -7.7)
-	var near_edge := Vector3(0, 0.1, 7.9)
-	var far_limit: float
-	var near_limit: float
-	if perspective_view:
-		# A move along the board changes both projected height and perspective
-		# depth. Solve where each end meets its HUD boundary at the current angle.
-		var slope: float = tan(deg_to_rad(camera.fov * 0.5)) / aspect
-		var top_slope: float = (1.0 - 2.0 * top / view_size.y) * slope
-		var bottom_slope: float = (1.0 - 2.0 * bottom / view_size.y) * slope
-		var far_divisor: float = up.z + top_slope * backward.z
-		var near_divisor: float = up.z + bottom_slope * backward.z
-		if far_divisor >= -0.001 or near_divisor >= -0.001:
-			return target.z # The HUD opening extends above the ground-plane horizon.
-		far_limit = target.z + ((far_edge - position).dot(up) - top_slope * (position - far_edge).dot(backward)) / far_divisor
-		near_limit = target.z + ((near_edge - position).dot(up) - bottom_slope * (position - near_edge).dot(backward)) / near_divisor
-	else:
-		var span: float = camera.size / aspect
-		far_limit = target.z + ((far_edge - position).dot(up) - (0.5 - top / view_size.y) * span) / up.z
-		near_limit = target.z + ((near_edge - position).dot(up) - (0.5 - bottom / view_size.y) * span) / up.z
-	return clampf(target.z, minf(far_limit, near_limit), maxf(far_limit, near_limit))
 
 func update_camera_clip_planes() -> void:
 	# Orthographic directional shadows use the camera's depth range. The default

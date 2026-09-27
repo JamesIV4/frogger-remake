@@ -200,17 +200,42 @@ func run() -> void:
 			game.top_down_camera = mode.y == 1
 			for zoom in [-50.0, 0.0, 100.0]:
 				game.set_follow_zoom_percent(zoom)
+				var reference_offsets: Array[Vector2] = []
 				for row in [-6.0, 0.0, 7.0]:
 					place_frog(game, 0.0, row)
-					settle(game)
-					var board_top: float = camera.unproject_position(Vector3(0, 1.3, -7.7)).y
-					var board_bottom: float = camera.unproject_position(Vector3(0, 0.1, 7.9)).y
-					var hud_top: float = game.hud_header.get_global_rect().end.y + 12.0
-					var hud_bottom: float = game.hud_footer.global_position.y - 12.0
-					var whole_board: bool = board_top >= hud_top - 0.1 and board_bottom <= hud_bottom + 0.1
-					var fills_opening: bool = board_top <= hud_top + 0.1 and board_bottom >= hud_bottom - 0.1
-					check(whole_board or fills_opening, "Portrait follow uses available vertical space without needless cropping")
+					if reference_offsets.is_empty():
+						settle(game)
+					else:
+						game.update_camera(1.0 / 60.0)
+					var frog_center := camera.unproject_position(Vector3(0, 0.3, row))
+					var offsets: Array[Vector2] = []
+					for corner in [Vector3(-0.4, 0, -0.4), Vector3(0.4, 0.5, 0.4), Vector3(0.4, 0, -0.4)]:
+						offsets.append(camera.unproject_position(Vector3(0, 0.3, row) + corner) - frog_center)
+					if reference_offsets.is_empty():
+						reference_offsets = offsets
+					else:
+						for index in range(offsets.size()):
+							check(offsets[index].distance_to(reference_offsets[index]) < 0.05, "Portrait follow preserves frog size and perspective at every row")
+					check(absf(game.camera_look_target.z - row) < 0.01, "Portrait camera stays centered on the followed row")
+					check(absf(camera.unproject_position(Vector3(0, 0, row)).y - size.y * 0.5) < 0.05, "Portrait frog stays vertically centered at the top and bottom")
+					check(camera.frustum_offset == Vector2.ZERO and is_zero_approx(camera.v_offset), "Portrait follow has no image panning")
+	# The ROM resets to the starting bank before the visible home hop ends.
+	# Keep following that visible arrival until its presentation releases it.
+	place_frog(game, 0.0, 7.0)
+	var home_frame: int = game.state["frame"]
+	game.home_arrival.begin({"frame": home_frame, "x": 120, "row": 40}, false)
+	for elapsed_frames in [0, 3, 6, 12, 20]:
+		game.state["frame"] = home_frame + elapsed_frames
+		game.update_player(0.0)
+		game.update_camera(1.0 / 60.0)
+		var visible_row: float = game.pos3(120, game.home_arrival.visual_row(game.state["frame"])).z
+		check(absf(game.camera_look_target.z - visible_row) < 0.01, "Camera stays with the visible frog through home arrival despite the ROM reset")
+	game.home_arrival.reset()
+	game.update_camera(1.0 / 60.0)
+	check(absf(game.camera_look_target.z - 7.0) < 0.01, "Camera follows the new frog when home presentation ends")
 	game.touch_device = false
+	game.update_camera(1.0 / 60.0)
+	check(camera.frustum_offset == Vector2.ZERO and is_zero_approx(camera.v_offset) and camera.projection == Camera3D.PROJECTION_PERSPECTIVE, "Desktop uses normal perspective after mobile follow")
 	game.set_follow_zoom_percent(50.0)
 	game.touch_device = true
 	game.set_follow_zoom_percent(-25.0)
