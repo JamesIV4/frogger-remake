@@ -17,6 +17,10 @@ var audio_capacity: int = 0
 var web_audio: JavaScriptObject = null
 var web_audio_checked: bool = false
 var web_crazygames: JavaScriptObject = null
+var crazygames_score_loaded: bool = false
+var crazygames_score_migrated: bool = false
+var local_high_score: int = 0
+var account_progress_label: Label = null
 var web_layout: JavaScriptObject = null
 var web_layout_callback: JavaScriptObject = null
 var ui_safe_rect: Rect2
@@ -237,6 +241,9 @@ func _ready() -> void:
 		observe_frame()
 		simulation.clear_sound_samples()
 
+	if web_crazygames != null:
+		web_crazygames.loading_complete()
+
 func reset_machine() -> void:
 	var main_rom = FileAccess.get_file_as_bytes("res://rom/maincpu.bin")
 	var sound_rom = FileAccess.get_file_as_bytes("res://rom/audiocpu.bin")
@@ -251,7 +258,7 @@ func start_game(players: int) -> void:
 	if web_crazygames != null:
 		if not bool(web_crazygames.request_start(players)):
 			return
-		web_crazygames.begin_game()
+		web_crazygames.begin_game(high_score)
 	reset_machine()
 	for i in range(180):
 		simulation.step()
@@ -283,9 +290,19 @@ func start_game(players: int) -> void:
 func sync_crazygames() -> void:
 	if web_crazygames == null:
 		return
+	if bool(web_crazygames.data_ready) and not crazygames_score_loaded:
+		high_score = int(web_crazygames.restore_high_score(local_high_score if not crazygames_score_migrated else 0))
+		crazygames_score_loaded = true
+		crazygames_score_migrated = true
+		save_preferences()
+	if is_instance_valid(account_progress_label):
+		account_progress_label.text = "Progress is linked to CrazyGames Account" if bool(web_crazygames.account_linked) else "High scores saved on this device"
 	# 0x83fe remains active through deaths and two-player handoffs. Zero
 	# after a started game means the whole game has ended, not zero reserves.
 	var active: bool = BoardVisuals.at(state, 0x83fe) != 0
+	# Capture the final score before the game-over transition reports achievements.
+	if started:
+		web_crazygames.check_score(maxi(bcd_score(0x83ed), bcd_score(0x83eb)))
 	web_crazygames.update(started, active, started and active and not paused)
 
 func ad_busy() -> bool:
@@ -872,6 +889,8 @@ func load_preferences() -> void:
 	var c := ConfigFile.new()
 	if c.load("user://settings.cfg") == OK:
 		high_score = int(c.get_value("play", "high_score", 0))
+		local_high_score = high_score
+		crazygames_score_migrated = bool(c.get_value("play", "crazygames_score_migrated", false))
 		muted = bool(c.get_value("play", "muted", false))
 		player_frog = str(c.get_value("play", "player_frog", "frog"))
 		if player_frog not in ["frog", "lady_frog"]:
@@ -908,7 +927,12 @@ func save_preferences() -> void:
 		return
 	var c := ConfigFile.new()
 	c.set_value("play", "defaults_version", GameDefaults.PreferencesVersion)
-	c.set_value("play", "high_score", high_score)
+	if not crazygames_score_loaded:
+		local_high_score = high_score
+	else:
+		web_crazygames.save_high_score(high_score)
+	c.set_value("play", "high_score", local_high_score)
+	c.set_value("play", "crazygames_score_migrated", crazygames_score_migrated)
 	c.set_value("play", "modern_collision", modern)
 	c.set_value("play", "muted", muted)
 	c.set_value("play", "player_frog", player_frog)
@@ -1313,7 +1337,16 @@ func show_menu(resume: bool) -> void:
 		add_button("OPTIONS", func(): show_options(false))
 		var instructions := make_text("Swipe to hop" if touch_device else "Arrow keys / WASD / D-pad to hop", 14, Color("adb8cc"))
 		menu_items.add_child(instructions)
+	if web_crazygames != null:
+		account_progress_label = make_account_progress_label()
+		menu_items.add_child(account_progress_label)
 	enable_menu_swipe_scrolling(menu_items)
+
+func make_account_progress_label() -> Label:
+	var label := make_text("Progress is linked to CrazyGames Account", 12, Color("adb8cc"))
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.text = "Progress is linked to CrazyGames Account" if web_crazygames != null and bool(web_crazygames.account_linked) else "High scores saved on this device"
+	return label
 
 func follow_zoom_percent() -> float:
 	return mobile_follow_zoom_percent if touch_device else desktop_follow_zoom_percent
@@ -1570,6 +1603,9 @@ func update_hud() -> void:
 	var current_score: int = bcd_score(0x83ed if player == 1 else 0x83eb)
 	score_label.text = "%05d" % current_score
 	var best: int = maxi(bcd_score(0x83ef), maxi(bcd_score(0x83ed), bcd_score(0x83eb)))
+	if crazygames_score_loaded:
+		# The ROM's best may have been seeded with an older local/account record.
+		best = maxi(bcd_score(0x83ed), bcd_score(0x83eb)) if started else high_score
 	if best > high_score:
 		high_score = best
 		save_preferences()

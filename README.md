@@ -75,6 +75,30 @@ changing the saved preference. When the host unmutes, audio resumes only if
 the player has sound enabled and the game is not paused or showing an ad.
 Test initial host muting locally at `http://localhost:8081/?muteAudio=true`.
 
+The CrazyGames edition reports `reportGameCompletedPercentage(100)` once at
+full game over, treating a finished arcade run as completion. `happytime()`
+asks the host to celebrate at full game over if either player beat the saved
+high score from the start of the run, at most once per run. Ties do not count;
+the first positive score can establish a new best when no record exists.
+`loadingStart()` is sent when the SDK initializes; `loadingStop()` follows when
+the Godot scene is ready. If the SDK arrives late, the loading pair is sent in
+order and pending game-over completion events are delivered once. These events
+are best-effort and never block play if the SDK fails.
+
+High scores use `SDK.data` for CrazyGames accounts and guests. Signed-in players
+see **Progress is linked to CrazyGames Account** in the main and pause menus;
+guests see **High scores saved on this device**. Existing SDK records take
+priority over browser-local records. An old local score is migrated once only
+when no SDK record exists; account scores are not copied into the shared local
+fallback. Outside CrazyGames, or if its Data module is unavailable, local
+high-score saving continues to work.
+
+In the CrazyGames submission settings, enable **Progress Save → Yes, using the
+Data Module from the CrazyGames SDK**. Without this setting, the platform
+disables the Data module. Verify signed-in saving and cross-device restoration
+in the developer preview; localhost uses simulated SDK users. See the
+[Data module documentation](https://docs.crazygames.com/sdk/data/).
+
 The iOS Home Screen app uses the September 27 viewport behavior: browser-default
 viewport fitting, the opaque `black` status bar, and Godot's adaptive canvas
 sizing. Safari reserves the system areas; the game adds no second set of insets
