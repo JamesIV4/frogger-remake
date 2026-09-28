@@ -1,4 +1,7 @@
+param([switch]$CrazyGames)
+
 . "$PSScriptRoot/tools/common.ps1"
+$webOutput = if ($CrazyGames) { "builds/crazygames" } else { "builds/web" }
 Push-Location $FroggerRoot
 try {
     if (-not (Test-Path godot/rom/maincpu.bin)) {
@@ -83,11 +86,11 @@ try {
         Set-Content -LiteralPath $wasmBuildStamp -Value 'threads=no' -Encoding ascii
     }
 
-    New-Item -ItemType Directory -Force builds/web | Out-Null
+    New-Item -ItemType Directory -Force $webOutput | Out-Null
     $froggerExportOut = Join-Path $FroggerRoot 'docs/evidence/export-web-stdout.log'
     $froggerExportErr = Join-Path $FroggerRoot 'docs/evidence/export-web-stderr.log'
     $froggerProject = (Join-Path $FroggerRoot 'godot')
-    $froggerTarget = (Join-Path $FroggerRoot 'builds/web/index.html')
+    $froggerTarget = (Join-Path $FroggerRoot "$webOutput/index.html")
 
     $godotExe = Get-FroggerGodotStandard
     Write-Host "Exporting Web target using $godotExe..."
@@ -96,17 +99,22 @@ try {
         throw "Web export failed. See $froggerExportErr."
     }
 
-    Copy-Item -LiteralPath tools/web_audio.js -Destination builds/web/frogger-audio.js -Force
-    Copy-Item -LiteralPath tools/web_layout.js -Destination builds/web/frogger-layout.js -Force
+    if ($CrazyGames) {
+        Copy-Item -LiteralPath tools/web_crazygames.js -Destination "$webOutput/frogger-crazygames.js" -Force
+    } elseif (Test-Path -LiteralPath "$webOutput/frogger-crazygames.js") {
+        Remove-Item -LiteralPath "$webOutput/frogger-crazygames.js" -Force
+    }
+    Copy-Item -LiteralPath tools/web_audio.js -Destination $webOutput/frogger-audio.js -Force
+    Copy-Item -LiteralPath tools/web_layout.js -Destination $webOutput/frogger-layout.js -Force
 
-    New-Item -ItemType Directory -Force builds/web/licenses | Out-Null
-    Copy-Item -LiteralPath LICENSE,THIRD_PARTY.md -Destination builds/web/licenses -Force
-    Get-ChildItem -LiteralPath godot/Fonts -Filter '*-OFL.txt' | Copy-Item -Destination builds/web/licenses -Force
+    New-Item -ItemType Directory -Force $webOutput/licenses | Out-Null
+    Copy-Item -LiteralPath LICENSE,THIRD_PARTY.md -Destination $webOutput/licenses -Force
+    Get-ChildItem -LiteralPath godot/Fonts -Filter '*-OFL.txt' | Copy-Item -Destination $webOutput/licenses -Force
 
     # Cloudflare Pages 25 MiB file size limit: split index.side.wasm if > 25MB
-    $sideWasm = Join-Path $FroggerRoot "builds/web/index.side.wasm"
-    $sideWasmPart0 = Join-Path $FroggerRoot "builds/web/index.side.part0.wasm"
-    $sideWasmPart1 = Join-Path $FroggerRoot "builds/web/index.side.part1.wasm"
+    $sideWasm = Join-Path $FroggerRoot "$webOutput/index.side.wasm"
+    $sideWasmPart0 = Join-Path $FroggerRoot "$webOutput/index.side.part0.wasm"
+    $sideWasmPart1 = Join-Path $FroggerRoot "$webOutput/index.side.part1.wasm"
     # Clear both the current names and the old extension-less names. Ending the
     # deployed chunks in .wasm gives Pages the application/wasm content type,
     # which allows Cloudflare's automatic Brotli/Gzip delivery to engage.
@@ -138,12 +146,12 @@ try {
     $commitHash = (& git rev-parse --short=12 HEAD 2>$null | Out-String).Trim()
     if (-not $commitHash) { $commitHash = 'no-git' }
     $cacheAssetPaths = @(
-        'builds/web/index.pck',
-        'builds/web/index.wasm',
-        'builds/web/index.side.wasm',
-        'builds/web/index.side.part0.wasm',
-        'builds/web/index.side.part1.wasm',
-        'builds/web/libfrogger_arcade.web.template_release.wasm32.wasm'
+        "$webOutput/index.pck",
+        "$webOutput/index.wasm",
+        "$webOutput/index.side.wasm",
+        "$webOutput/index.side.part0.wasm",
+        "$webOutput/index.side.part1.wasm",
+        "$webOutput/libfrogger_arcade.web.template_release.wasm32.wasm"
     ) | Where-Object { Test-Path -LiteralPath $_ }
     $assetHashText = ($cacheAssetPaths | Sort-Object | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }) -join ''
     $hashAlgorithm = [System.Security.Cryptography.SHA256]::Create()
@@ -154,15 +162,19 @@ try {
     }
     $cacheVersion = "$commitHash-$contentDigest"
     $cacheScript = [System.IO.File]::ReadAllText((Join-Path $FroggerRoot 'tools/web_cache.js')).Replace('__FROGGER_CACHE_VERSION__', $cacheVersion)
-    [System.IO.File]::WriteAllText((Join-Path $FroggerRoot 'builds/web/frogger-cache.js'), $cacheScript)
+    [System.IO.File]::WriteAllText((Join-Path $FroggerRoot "$webOutput/frogger-cache.js"), $cacheScript)
     Write-Host "IndexedDB asset cache version: $cacheVersion"
 
     # Inject side wasm chunk loader into index.html
-    $indexHtmlPath = Join-Path $FroggerRoot "builds/web/index.html"
+    $indexHtmlPath = Join-Path $FroggerRoot "$webOutput/index.html"
     if (Test-Path -LiteralPath $indexHtmlPath) {
         $html = [System.IO.File]::ReadAllText($indexHtmlPath)
         # Register the first-gesture audio handler before loading the engine.
         $html = $html.Replace('<script src="index.js"></script>', '<script src="frogger-compression.js"></script><script src="frogger-cache.js"></script><script>window.fetch = window.FroggerAssetCache.fetch;</script><script src="frogger-audio.js"></script><script src="frogger-layout.js"></script><script src="index.js"></script>')
+        if ($CrazyGames) {
+            $sdkVersion = (Get-FileHash -LiteralPath tools/web_crazygames.js -Algorithm SHA256).Hash.Substring(0, 12).ToLowerInvariant()
+            $html = $html.Replace('<script src="frogger-audio.js"></script>', "<script src=`"frogger-audio.js`"></script><script src=`"frogger-crazygames.js?v=$sdkVersion`"></script>")
+        }
         $layoutVersion = (Get-FileHash -LiteralPath tools/web_layout.js -Algorithm SHA256).Hash.Substring(0, 12).ToLowerInvariant()
         $html = $html.Replace('src="frogger-layout.js"', "src=`"frogger-layout.js?v=$layoutVersion`"")
         # Keep the original viewport tag on iOS. The layout helper opts other
@@ -234,7 +246,7 @@ try {
     }
 
     # Generate PWA manifest and service worker
-    $manifestPath = Join-Path $FroggerRoot "builds/web/manifest.webmanifest"
+    $manifestPath = Join-Path $FroggerRoot "$webOutput/manifest.webmanifest"
     $manifestContent = @"
 {
   "name": "Frogger Remake",
@@ -269,7 +281,7 @@ try {
 "@
     Set-Content -LiteralPath $manifestPath -Value $manifestContent -Encoding ascii
 
-    $swPath = Join-Path $FroggerRoot "builds/web/sw.js"
+    $swPath = Join-Path $FroggerRoot "$webOutput/sw.js"
     $swContent = @"
 self.addEventListener('install', (event) => {
 	self.skipWaiting();
@@ -286,9 +298,9 @@ self.addEventListener('fetch', (event) => {
     Set-Content -LiteralPath $swPath -Value $swContent -Encoding ascii
 
     # Refresh PWA icons on every export so SVG changes cannot leave stale icons.
-    $icon192 = Join-Path $FroggerRoot "builds/web/icon-192.png"
-    $icon512 = Join-Path $FroggerRoot "builds/web/icon-512.png"
-    $appleIcon = Join-Path $FroggerRoot "builds/web/index.apple-touch-icon.png"
+    $icon192 = Join-Path $FroggerRoot "$webOutput/icon-192.png"
+    $icon512 = Join-Path $FroggerRoot "$webOutput/icon-512.png"
+    $appleIcon = Join-Path $FroggerRoot "$webOutput/index.apple-touch-icon.png"
     if (Test-Path -LiteralPath $appleIcon) {
         python -c "
 from PIL import Image
@@ -299,7 +311,7 @@ im.resize((512, 512), Image.Resampling.LANCZOS).save(r'$icon512')
         Assert-FroggerExit 'Generate PWA icons'
     }
 
-    $headersPath = Join-Path $FroggerRoot "builds/web/_headers"
+    $headersPath = Join-Path $FroggerRoot "$webOutput/_headers"
     $headersContent = @"
 /index.html
   Cache-Control: no-cache
@@ -308,7 +320,7 @@ im.resize((512, 512), Image.Resampling.LANCZOS).save(r'$icon512')
 "@
     Set-Content -LiteralPath $headersPath -Value $headersContent -Encoding ascii
 
-    python tools/compress_web.py
+    python tools/compress_web.py --output $webOutput
     Assert-FroggerExit 'Compress web assets'
 
     Write-Host "Exported $froggerTarget"

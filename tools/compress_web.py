@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Package Godot's large assets as gzip payloads decoded by our web loader."""
 import gzip
+import argparse
 import json
 from pathlib import Path
 
 
 def main():
     root = Path(__file__).resolve().parents[1]
-    output = root / 'builds' / 'web'
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', default='builds/web', help='Export directory, relative to the repository or absolute')
+    output = root / parser.parse_args().output
     assets = {}
     sources = sorted([*output.glob('*.wasm'), *output.glob('*.pck')])
     if not sources:

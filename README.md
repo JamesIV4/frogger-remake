@@ -48,10 +48,26 @@ Any ordinary local HTTP server works, including
 with `file://` is not supported.
 
 For hosting, upload the **contents** of `builds/web/`, with `index.html` at the
-root and every supporting file included, and serve over HTTPS. This also
-applies to CrazyGames uploads. `DeployWeb.ps1` publishes to Cloudflare Pages;
+root and every supporting file included, and serve over HTTPS.
+`DeployWeb.ps1` publishes the standard web build to Cloudflare Pages;
 the generated `_headers` only controls entry-page/service-worker caching.
 See [Web audio](docs/WEB_AUDIO.md) for audio diagnostics.
+
+For the separate CrazyGames edition, run `./BuildCrazyGames.ps1` (equivalent to
+`./BuildWeb.ps1 -CrazyGames`). Upload the contents of `builds/crazygames/` to
+CrazyGames. This output includes the [CrazyGames v3 SDK](https://docs.crazygames.com/sdk/intro/);
+the ordinary `builds/web/` export and desktop game remain ad-free.
+Preview it with `python -m http.server 8081 --directory builds/crazygames`, then
+open `http://localhost:8081/`. Local SDK ads are test ads; verify the uploaded
+build in the CrazyGames developer preview before publishing.
+
+The CrazyGames edition requests one midgame ad after a full game over, at the
+earlier of one second or the player's restart input. Individual deaths,
+two-player turn changes, pauses and voluntary restarts during play do not
+request ads. A restart pressed before or during the ad is remembered and begins
+after the ad finishes or fails. Simulation and audio pause during the ad;
+mute preferences are preserved. Blocked/unavailable SDKs, ad errors and ad
+cooldowns allow play to continue. CrazyGames controls actual ad availability.
 
 The iOS Home Screen app uses the September 27 viewport behavior: browser-default
 viewport fitting, the opaque `black` status bar, and Godot's adaptive canvas

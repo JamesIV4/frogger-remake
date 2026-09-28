@@ -16,6 +16,7 @@ var audio_playback: AudioStreamGeneratorPlayback = null
 var audio_capacity: int = 0
 var web_audio: JavaScriptObject = null
 var web_audio_checked: bool = false
+var web_crazygames: JavaScriptObject = null
 var web_layout: JavaScriptObject = null
 var web_layout_callback: JavaScriptObject = null
 var ui_safe_rect: Rect2
@@ -197,6 +198,8 @@ func _init():
 	]
 
 func _ready() -> void:
+	if OS.has_feature("web"):
+		web_crazygames = JavaScriptBridge.get_interface("FroggerCrazyGames")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot="):
 			screenshot = arg.substr(13)
@@ -244,6 +247,11 @@ func reset_machine() -> void:
 	clear_presentation()
 
 func start_game(players: int) -> void:
+	sync_crazygames()
+	if web_crazygames != null:
+		if not bool(web_crazygames.request_start(players)):
+			return
+		web_crazygames.begin_game()
 	reset_machine()
 	for i in range(180):
 		simulation.step()
@@ -272,7 +280,27 @@ func start_game(players: int) -> void:
 	message_label.text = ""
 	message_panel.visible = false
 
+func sync_crazygames() -> void:
+	if web_crazygames == null:
+		return
+	# 0x83fe remains active through deaths and two-player handoffs. Zero
+	# after a started game means the whole game has ended, not zero reserves.
+	var active: bool = BoardVisuals.at(state, 0x83fe) != 0
+	web_crazygames.update(started, active, started and active and not paused)
+
+func ad_busy() -> bool:
+	return web_crazygames != null and bool(web_crazygames.busy)
+
 func _process(delta: float) -> void:
+	if web_crazygames != null:
+		var restart_players: int = int(web_crazygames.take_restart())
+		if restart_players > 0:
+			start_game(restart_players)
+	if ad_busy():
+		accumulator = 0.0
+		input_pulse.reset()
+		feed_audio()
+		return
 	update_mouse_visibility(delta)
 	if simulation == null:
 		return
@@ -302,6 +330,7 @@ func _process(delta: float) -> void:
 			observe_frame()
 			accumulator -= FRAME_SECONDS
 	var t_sim: int = Time.get_ticks_usec()
+	sync_crazygames()
 	update_frog_motion()
 	feed_audio()
 	var t_audio: int = Time.get_ticks_usec()
@@ -413,6 +442,8 @@ func restart_prompt() -> String:
 	return "Press Enter to restart"
 
 func navigate_back() -> void:
+	if ad_busy():
+		return
 	if options_open:
 		show_menu(options_return_to_pause)
 	elif started:
@@ -422,6 +453,11 @@ func navigate_back() -> void:
 			show_menu(true)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if ad_busy():
+		# A restart pressed while the timed ad is open is remembered once.
+		if (event is InputEventKey and event.pressed and not event.echo and event.physical_keycode in [KEY_ENTER, KEY_SPACE, KEY_1, KEY_2, KEY_R]) or (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_A, JOY_BUTTON_START]) or (event is InputEventScreenTouch and event.pressed):
+			start_game(2 if event is InputEventKey and event.physical_keycode == KEY_2 else 1)
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
 			KEY_ENTER, KEY_SPACE:
@@ -535,6 +571,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				swipe_triggered = true
 
 func resume_game() -> void:
+	if ad_busy():
+		return
 	paused = false
 	options_open = false
 	menu.visible = false
@@ -760,7 +798,7 @@ func feed_audio() -> void:
 			if web_audio != null:
 				web_audio.report_driver(AudioServer.get_driver_name())
 	if web_audio != null and bool(web_audio.enabled):
-		var audible: bool = started and not muted and not paused
+		var audible: bool = started and not muted and not paused and not ad_busy()
 		web_audio.set_active(audible)
 		var count: int = simulation.get_sound_sample_count()
 		if audible and count > 0:
@@ -786,7 +824,7 @@ func feed_audio() -> void:
 	if simulation == null:
 		return
 	var sample_count: int = simulation.get_sound_sample_count()
-	if muted or paused or not started:
+	if muted or paused or not started or ad_busy():
 		simulation.clear_sound_samples()
 		if audio_player.playing:
 			audio_player.stop()
@@ -1255,6 +1293,8 @@ func enable_menu_swipe_scrolling(node: Node) -> void:
 		enable_menu_swipe_scrolling(child)
 
 func show_menu(resume: bool) -> void:
+	if ad_busy():
+		return
 	clear_menu()
 	options_open = false
 	paused = resume
@@ -1320,6 +1360,8 @@ func add_follow_zoom_control(follow: CheckButton) -> void:
 	update_control.call()
 
 func return_to_main_menu() -> void:
+	if ad_busy():
+		return
 	started = false
 	paused = false
 	coin_frames = 0
@@ -1333,6 +1375,8 @@ func return_to_main_menu() -> void:
 	show_menu(false)
 
 func show_options(return_to_pause: bool) -> void:
+	if ad_busy():
+		return
 	clear_menu()
 	options_open = true
 	options_return_to_pause = return_to_pause
