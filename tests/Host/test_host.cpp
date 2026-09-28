@@ -1077,7 +1077,7 @@ static void RunFeedbackTests(const std::vector<uint8_t>& rom) {
 
 // ---------------- Main Test Runner ---------------- //
 
-int main() {
+int main(int argc, char** argv) {
     try {
         auto rom = ReadFileBytes("godot/rom/maincpu.bin");
         // ROM 0x08e0 awards one reserve frog at 20,000 displayed points.
@@ -1153,7 +1153,9 @@ int main() {
             int registerDifferences;
         };
         std::vector<MameFixtureResult> fixtures;
-        for (const auto& entry : fs::directory_iterator("docs/evidence/mame-functions")) {
+        const std::string fixtureDirectory = argc == 3 && std::string(argv[1]) == "--mame-fixtures"
+            ? argv[2] : "docs/evidence/mame-functions";
+        for (const auto& entry : fs::directory_iterator(fixtureDirectory)) {
             std::string path = entry.path().string();
             if (path.size() >= 11 && path.substr(path.size() - 11) == "-before.txt") {
                 std::string stem = path.substr(0, path.size() - 11);
@@ -1211,11 +1213,13 @@ int main() {
                 hexAddr << std::hex << std::setw(4) << std::setfill('0') << beforeRegs[0];
                 fixtures.push_back({hexAddr.str(), instructions, 3328, diff, regDiff});
                 if (diff != 0 || regDiff != 0) {
-                    throw std::runtime_error("MAME fixture mismatch at " + hexAddr.str());
+                    throw std::runtime_error("MAME fixture mismatch at " + path);
                 }
             }
         }
-        if (fixtures.size() != 8) throw std::runtime_error("Expected eight independent MAME fixtures");
+        if (fixtures.empty()) throw std::runtime_error("No independent MAME fixtures found");
+        if (fixtureDirectory == "docs/evidence/mame-functions" && fixtures.size() != 19)
+            throw std::runtime_error("Expected 19 independent MAME fixtures, including 11 beaver branches");
         std::sort(fixtures.begin(), fixtures.end(), [](const auto& a, const auto& b){ return a.address < b.address; });
 
         {
@@ -1231,9 +1235,10 @@ int main() {
                    << "  }" << (i + 1 < fixtures.size() ? ",\n" : "\n");
             }
             ss << "]\n";
-            WriteFileText("docs/evidence/native-vs-mame.json", ss.str());
+            WriteFileText(fixtureDirectory == "docs/evidence/mame-functions"
+                ? "docs/evidence/native-vs-mame.json" : fixtureDirectory + "/native-vs-mame.json", ss.str());
         }
-        std::cout << "Eight MAME function fixtures: exact RAM and register match" << std::endl;
+        std::cout << fixtures.size() << " MAME function fixtures: exact RAM and register match" << std::endl;
 
         // Native Sound
         auto audioRom = ReadFileBytes("godot/rom/audiocpu.bin");

@@ -40,7 +40,7 @@ for(const program of compiled){
 const parity=read('docs/evidence/native-vs-oracle.json');
 if(parity.differentBytes!==0||parity.frames<460||parity.maskedBytes!==0)failures.push('Native full-state oracle gate');
 const mame=read('docs/evidence/native-vs-mame.json');
-if(mame.length!==8||mame.some(f=>f.diff||f.registerDifferences))failures.push('Independent MAME gate');
+if(mame.length!==19||mame.some(f=>f.diff||f.registerDifferences))failures.push('Independent MAME gate');
 const assets=read('docs/evidence/asset-validation.json');
 const requiredAssets=['frog','lady_frog','turtle','gator','river_gator','fly','snake','otter','log','car','truck','racecar','dozer','sport','board'];
 const validated=new Set(assets.map(a=>a.asset));

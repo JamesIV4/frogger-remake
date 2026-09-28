@@ -1,0 +1,36 @@
+{
+  "source": "MAME executing reference/frogger.zip via tools/mame_beaver.lua",
+  "romSha256": "f8c0a2ef4105769c627b7bbf13d0844ada8bbe43c00d177eb90dd395d1e3a1e5",
+  "dispatcher": "0x2b83",
+  "executions": 2000,
+  "comparedBytes": 6656000,
+  "differentBytes": 0,
+  "registerDifferences": 0,
+  "branches": {
+    "idle": 842,
+    "retire-left": 11,
+    "retire-right": 14,
+    "spawn-left": 11,
+    "spawn-right": 15,
+    "step-left": 20,
+    "step-right": 99,
+    "wait-left": 202,
+    "wait-right": 780,
+    "wrap-left": 4,
+    "wrap-right": 2
+  },
+  "retainedCaptures": {
+    "idle": "2b83-beaver-0001",
+    "retire-left": "2b83-beaver-0092",
+    "retire-right": "2b83-beaver-0012",
+    "spawn-left": "2b83-beaver-0029",
+    "spawn-right": "2b83-beaver-0005",
+    "step-left": "2b83-beaver-0036",
+    "step-right": "2b83-beaver-0203",
+    "wait-left": "2b83-beaver-0031",
+    "wait-right": "2b83-beaver-0007",
+    "wrap-left": "2b83-beaver-0030",
+    "wrap-right": "2b83-beaver-0006"
+  },
+  "scope": "Level 3, frog held on bank, timer refreshed; native RNG, lane motion, spawning, steering and retirement. Does not exercise player-hit branches."
+}

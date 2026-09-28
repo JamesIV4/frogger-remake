@@ -84,6 +84,12 @@ var beaver_player_hit: bool = false
 var beaver_last_x: float = 120.0
 var beaver_last_row: float = 80.0
 var beaver_heading: int = 1
+var beaver_exit_log_x: Variant = null
+var beaver_was_visible: bool = false
+var beaver_native_active: bool = false
+var beaver_generation: int = 0
+var beaver_display_generation: int = -1
+var beaver_swim_offset: float = 0.0
 var home_gator_visuals: Array = []
 var river_gator_visual = BoardVisuals.RiverGatorPresentation.new()
 var anchored_death_frame: int = -1
@@ -1843,6 +1849,13 @@ func fit_board_overview(position: Vector3, target: Vector3, view_size: Vector2, 
 
 func observe_frame() -> void:
 	state = simulation.snapshot()
+	# Observe every simulation step, including those between rendered frames.
+	# Otherwise a clear followed by slot reuse can look like one moving animal.
+	var beaver_record: int = 0x8490 if BoardVisuals.at(state, 0x83fd) == 2 else 0x8480
+	var beaver_active: bool = BoardVisuals.at(state, beaver_record + 6) != 0
+	if beaver_active and not beaver_native_active:
+		beaver_generation += 1
+	beaver_native_active = beaver_active
 	observe_level_intro()
 	river_gator_visual.observe(state)
 	frog_visual.observe(state)
@@ -1878,6 +1891,12 @@ func clear_presentation() -> void:
 	beaver_last_x = 120.0
 	beaver_last_row = 80.0
 	beaver_heading = 1
+	beaver_exit_log_x = null
+	beaver_was_visible = false
+	beaver_native_active = false
+	beaver_generation = 0
+	beaver_display_generation = -1
+	beaver_swim_offset = 0.0
 	for p in popups:
 		p.view.queue_free()
 	popups.clear()
@@ -2184,6 +2203,8 @@ func begin_beaver_log_exit(player_hit: bool) -> void:
 	beaver_phase = BeaverVisualPhase.Grab
 	beaver_phase_seconds = 0.0
 	beaver_player_hit = player_hit
+	var nose_x: float = beaver_last_x + float(beaver_heading) * 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
+	beaver_exit_log_x = nearest_log_end(beaver_last_row, beaver_heading, nose_x)
 
 func nearest_log_end(row: float, heading: int, around_x: float) -> Variant:
 	var lane: int = int(roundf(row / 16.0)) - 3
@@ -2221,24 +2242,42 @@ func update_beaver(cur_frame: int) -> void:
 	var slot_y: int = BoardVisuals.at(state, 0x805b)
 	var slot_code: int = BoardVisuals.at(state, 0x8059)
 	var descriptor_visible: bool = slot_y >= 32 and slot_y <= 136 and slot_code != 0
+	var sprite_on_board: bool = descriptor_visible and slot_x >= 8 and slot_x <= 235
 
 	# A new native swimmer takes priority over the previous spawn's cosmetic
 	# exit. The ROM can reuse this slot before grab/look/sink has finished.
-	if descriptor_visible and native_state == 1 and beaver_phase != BeaverVisualPhase.Approach:
+	if descriptor_visible and native_state != 0 and (beaver_display_generation != beaver_generation or (native_state == 1 and beaver_phase != BeaverVisualPhase.Approach)):
 		moving_visuals.tracks.erase(1000 + 0x8058)
+		beaver_display_generation = beaver_generation
 		beaver_phase = BeaverVisualPhase.Approach
 		beaver_phase_seconds = 0.0
 		beaver_player_hit = false
+		beaver_exit_log_x = null
+		beaver_swim_offset = 0.0
+		# Match the authored cap to the ROM's destination once, at spawn.
+		# A fixed offset preserves every native swim step; clamping to a cap
+		# during approach instead makes the animal travel at log speed.
+		var heading: int = -1 if (slot_code & 0x80) != 0 else 1
+		var far_edge: int = BoardVisuals.at(state, record_base)
+		var near_edge: int = BoardVisuals.at(state, record_base + 1)
+		var span: int = (far_edge - near_edge) & 255
+		if span > 0 and span <= 32 and BoardVisuals.at(state, record_base + 4) == slot_y:
+			var lane_source: int = 0x8000 + BoardVisuals.at(state, record_base + 11)
+			var destination: float = float((BoardVisuals.at(state, lane_source) - (far_edge if heading < 0 else near_edge)) & 255)
+			var probe: float = destination + (20.0 if heading > 0 else -4.0)
+			var cap: Variant = nearest_log_end(float(slot_y), heading, probe)
+			if cap != null and absf(float(cap) - probe) <= 24.0:
+				beaver_swim_offset = float(cap) - probe
 
 	if descriptor_visible and beaver_phase in [BeaverVisualPhase.Hidden, BeaverVisualPhase.Done, BeaverVisualPhase.Approach]:
 		var displayed_slot_x: float = moving_visuals.step(1000 + 0x8058, float(slot_x), cur_frame, presentation_delta, paused)
 		beaver_heading = -1 if (slot_code & 0x80) != 0 else 1
 		# The native lethal probes are slot X+20 facing right and X-4 facing
-		# left. Put the model's nose on that exact point so its torso never
-		# phases into the log while its paws and incisors meet the end.
-		var attack_x: float = displayed_slot_x + (20.0 if beaver_heading > 0 else -4.0)
+		# left, with the fixed model-to-cap offset chosen at this spawn.
+		var attack_x: float = displayed_slot_x + (20.0 if beaver_heading > 0 else -4.0) + beaver_swim_offset
 		beaver_last_x = attack_x - float(beaver_heading) * 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
 		beaver_last_row = float(slot_y)
+		beaver_was_visible = sprite_on_board
 		# Keep swimming on the sprite's path. The nearest log end may be
 		# behind us across a gap; attaching to it here erases native movement.
 
@@ -2246,9 +2285,16 @@ func update_beaver(cur_frame: int) -> void:
 		if native_state >= 2:
 			begin_beaver_log_exit(true)
 		elif native_state == 0:
+			if not beaver_was_visible:
+				# Failed edge spawns and offscreen retirements have no visible
+				# animal to animate. A ghost here can drift back onto the board.
+				beaver_phase = BeaverVisualPhase.Hidden
+				return
 			# With no frog at the end the ROM clears the descriptor immediately.
 			# Preserve only a short presentation ghost for grab/look/sink.
 			begin_beaver_log_exit(false)
+		elif not sprite_on_board:
+			return
 
 	if beaver_phase == BeaverVisualPhase.Hidden:
 		if descriptor_visible and native_state >= 2:
@@ -2260,15 +2306,15 @@ func update_beaver(cur_frame: int) -> void:
 			beaver_phase = BeaverVisualPhase.Hidden
 		return
 
-	# Once contact begins, follow the rendered log end even while the native
-	# descriptor remains visible. Native motion and render smoothing can otherwise
-	# carry the held head through the wood before the dive finishes.
+	# Preserve the position at retirement/contact. The ROM's probe is not the
+	# authored log cap: snapping to the nearest cap can jump almost a whole tile.
+	# Follow only the cap's subsequent movement, retaining the original offset.
 	if beaver_phase in [BeaverVisualPhase.Grab, BeaverVisualPhase.Look, BeaverVisualPhase.Bite, BeaverVisualPhase.Sink]:
-		var front_pixels: float = 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
-		var prior_nose_x: float = beaver_last_x + float(beaver_heading) * front_pixels
-		var tracked_end: Variant = nearest_log_end(beaver_last_row, beaver_heading, prior_nose_x)
-		if tracked_end != null:
-			beaver_last_x = float(tracked_end) - float(beaver_heading) * front_pixels
+		if beaver_exit_log_x != null:
+			var tracked_end: Variant = nearest_log_end(beaver_last_row, beaver_heading, float(beaver_exit_log_x))
+			if tracked_end != null:
+				beaver_last_x += float(tracked_end) - float(beaver_exit_log_x)
+				beaver_exit_log_x = tracked_end
 
 	var delta: float = 0.0 if paused else presentation_delta
 	if beaver_phase == BeaverVisualPhase.Grab:

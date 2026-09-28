@@ -30,7 +30,7 @@ Headless Ghidra can return exit code 0 even when a Java post-script fails. `tool
 | --- | --- | --- |
 | ROM provenance | Assembled input hashes | Exact pinned set |
 | Native whole-program replay | Every main RAM, VRAM and object-RAM byte over 460 frames: boot, coin, start, hop | 1,530,880 bytes, zero differences, zero masked bytes |
-| MAME function fixtures | Before/after snapshots of ROM 0x11bf, 0x14b7, 0x08e0, 0x1cff, 0x16f8 and three contacts at 0x28bb; native execution starts from MAME's captured entry registers and RAM | Eight executions of six functions match all 3,328 state bytes and all captured registers |
+| MAME function fixtures | Before/after snapshots of ROM 0x11bf, 0x14b7, 0x08e0, 0x1cff, 0x16f8, three contacts at 0x28bb and eleven beaver branches at 0x2b83; native execution starts from MAME's captured entry registers and RAM | Nineteen executions of seven functions match all 3,328 state bytes and all captured registers |
 | Recovered-reference suite | Function equivalence, mutation controls, board hardware and new provenance checks | 439 pass, 0 fail; one optional recorded-audio-file check skipped |
 | Lifecycle scenarios | 9,000-frame idle run through timer deaths and game-over; two-player hand-off; five forced safe home entries followed by ordinary board progression | Passed; next board reached |
 | Native sound | Original sound CPU and commands running through the compiled program | 1,425,600 samples in the 1,800-frame test; non-silent output; full command sweep expands executed-code coverage |
@@ -46,7 +46,7 @@ $env:FROGGER_EVIDENCE = "$PWD/docs/evidence/mame-functions"
 ./tools/verify.ps1
 ```
 
-The equivalence gate has limits: 460 frames and eight independent function fixtures are concrete evidence, not an exhaustive proof over every possible machine state. Ghidra producing C is a weaker, separate fact. `docs/evidence/audit.json` records these distinctions.
+The equivalence gate has limits: 460 frames and nineteen independent function fixtures are concrete evidence, not an exhaustive proof over every possible machine state. The [beaver movement audit](BEAVER-MOTION.md) additionally checked 2,000 consecutive dispatcher executions against MAME and retained eleven representative branches. Ghidra producing C is a weaker, separate fact. `docs/evidence/audit.json` records these distinctions.
 
 ## Presentation and intentional differences
 
