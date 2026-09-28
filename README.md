@@ -69,6 +69,12 @@ after the ad finishes or fails. Simulation and audio pause during the ad;
 mute preferences are preserved. Blocked/unavailable SDKs, ad errors and ad
 cooldowns allow play to continue. CrazyGames controls actual ad availability.
 
+CrazyGames' `game.settings.muteAudio` is applied at SDK initialization and on
+live settings changes. Host muting overrides the in-game sound toggle without
+changing the saved preference. When the host unmutes, audio resumes only if
+the player has sound enabled and the game is not paused or showing an ad.
+Test initial host muting locally at `http://localhost:8081/?muteAudio=true`.
+
 The iOS Home Screen app uses the September 27 viewport behavior: browser-default
 viewport fitting, the opaque `black` status bar, and Godot's adaptive canvas
 sizing. Safari reserves the system areas; the game adds no second set of insets

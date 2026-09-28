@@ -9,6 +9,13 @@
     let playing = false;
     let reportedPlaying = false;
 
+    function applySettings(settings) {
+        api.audio_muted = Boolean(settings && settings.muteAudio);
+        // Stop queued browser audio immediately, including between Godot frames.
+        // Unmuting is left to feed_audio so pause, ads and user mute still win.
+        if (api.audio_muted && root.FroggerAudio) root.FroggerAudio.set_active(false);
+    }
+
     function reportGameplay() {
         const next = playing && !api.busy;
         if (!sdk || next === reportedPlaying) return;
@@ -50,6 +57,7 @@
 
     const api = root.FroggerCrazyGames = {
         busy: false,
+        audio_muted: false,
         update(started, active, gameplay) {
             playing = Boolean(gameplay);
             if (!started) {
@@ -94,6 +102,8 @@
             await candidate.init();
             if (candidate.environment === 'disabled') return;
             sdk = candidate;
+            applySettings(sdk.game.settings);
+            sdk.game.addSettingsChangeListener(applySettings);
             reportGameplay();
         } catch (_) { /* Offline, blocked, or unsupported host: play without ads. */ }
     };

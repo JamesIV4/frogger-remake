@@ -791,6 +791,8 @@ func setup_world() -> void:
 func feed_audio() -> void:
 	if simulation == null:
 		return
+	# Host mute is temporary and takes priority without changing saved preferences.
+	var audio_muted: bool = muted or (web_crazygames != null and bool(web_crazygames.audio_muted))
 	if not web_audio_checked:
 		web_audio_checked = true
 		if OS.has_feature("web"):
@@ -798,7 +800,7 @@ func feed_audio() -> void:
 			if web_audio != null:
 				web_audio.report_driver(AudioServer.get_driver_name())
 	if web_audio != null and bool(web_audio.enabled):
-		var audible: bool = started and not muted and not paused and not ad_busy()
+		var audible: bool = started and not audio_muted and not paused and not ad_busy()
 		web_audio.set_active(audible)
 		var count: int = simulation.get_sound_sample_count()
 		if audible and count > 0:
@@ -824,7 +826,7 @@ func feed_audio() -> void:
 	if simulation == null:
 		return
 	var sample_count: int = simulation.get_sound_sample_count()
-	if muted or paused or not started or ad_busy():
+	if audio_muted or paused or not started or ad_busy():
 		simulation.clear_sound_samples()
 		if audio_player.playing:
 			audio_player.stop()
