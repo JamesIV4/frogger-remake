@@ -8,6 +8,16 @@ descriptors no longer flash a model or leave a ghost that drifts onto the board.
 Native slot lifetimes are observed on every simulation step to handle a clear
 and replacement between rendered frames.
 
+A later replay exposed another discontinuity that the first test excluded:
+it only compared consecutive renders within the same sprite generation. The
+next native spawn discarded the previous animal's still-visible grab/look/sink
+animation, even when the replacement was offscreen. This interrupted 24 visible
+exits in a 6,000-frame replay, including a 149-pixel relocation of the shared
+model. Departing animals now retain separate temporary presentation actors and
+finish submerging while the next native swimmer uses the live sprite slot.
+These actors are reclaimed after the dive or on presentation reset. They do
+not add simulation hazards or alter the ROM.
+
 The model's cap alignment is calculated once per spawn from the ROM destination
 (`record +0/+1`, relative to the lane source at `0x8000 | record[+11]`). This
 constant visual offset keeps the larger model outside the log at arrival while
@@ -38,6 +48,7 @@ python tools/select_beaver_fixtures.py scratch/beaver-mame
 
 `tests/beaver_motion_test.gd` runs 12,000 real native simulation frames, with
 rendering every one or three steps. It checks visible retirement continuity,
-offscreen sprite handling and slot reuse between renders. Restoring the old
-log-cap snap makes this regression test fail. No simulation speed, spawning,
+offscreen sprite handling and slot reuse between renders, including continuity
+across generation changes and completion/cleanup of overlapping exits. Discarding
+the previous exit again makes the cross-generation checks fail. No simulation speed, spawning,
 collision or generated instruction changes are part of this fix.

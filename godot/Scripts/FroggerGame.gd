@@ -90,6 +90,8 @@ var beaver_native_active: bool = false
 var beaver_generation: int = 0
 var beaver_display_generation: int = -1
 var beaver_swim_offset: float = 0.0
+var beaver_exits: Array[Dictionary] = []
+var beaver_exit_serial: int = 0
 var home_gator_visuals: Array = []
 var river_gator_visual = BoardVisuals.RiverGatorPresentation.new()
 var anchored_death_frame: int = -1
@@ -1897,6 +1899,13 @@ func clear_presentation() -> void:
 	beaver_generation = 0
 	beaver_display_generation = -1
 	beaver_swim_offset = 0.0
+	for exit_visual in beaver_exits:
+		var exit_actor: ModelActor = actors.get(exit_visual.key)
+		if exit_actor != null:
+			exit_actor.root.queue_free()
+			actors.erase(exit_visual.key)
+	beaver_exits.clear()
+	beaver_exit_serial = 0
 	for p in popups:
 		p.view.queue_free()
 	popups.clear()
@@ -2186,6 +2195,7 @@ func update_homes_and_hazards() -> void:
 			support.y / 16.0, support.z / 16.0, (float(cur_frame) + frac) * FRAME_SECONDS, snake_row < 128.0)
 
 	update_beaver(cur_frame)
+	update_beaver_exits()
 
 	if lady_visual.visible(ModelFootprints.FrogAlongX * LadyInRiverScale):
 		var a = actor("lady", rescue_frog_model())
@@ -2205,6 +2215,57 @@ func begin_beaver_log_exit(player_hit: bool) -> void:
 	beaver_player_hit = player_hit
 	var nose_x: float = beaver_last_x + float(beaver_heading) * 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
 	beaver_exit_log_x = nearest_log_end(beaver_last_row, beaver_heading, nose_x)
+
+func retain_beaver_exit() -> void:
+	if not beaver_was_visible or beaver_phase in [BeaverVisualPhase.Hidden, BeaverVisualPhase.Done]:
+		return
+	# The ROM reuses its one sprite slot before our cosmetic exit finishes.
+	# Give the departing animal its own actor instead of moving/hiding it when
+	# the next native swimmer starts. Also handle a clear between render steps.
+	if beaver_phase == BeaverVisualPhase.Approach:
+		begin_beaver_log_exit(false)
+	beaver_exit_serial += 1
+	beaver_exits.append({
+		"key": "beaver-exit-%d" % beaver_exit_serial,
+		"generation": beaver_display_generation,
+		"x": beaver_last_x, "row": beaver_last_row, "heading": beaver_heading,
+		"phase": beaver_phase, "seconds": beaver_phase_seconds,
+		"hit": beaver_player_hit, "log_x": beaver_exit_log_x,
+	})
+
+func advance_beaver_exit(visual: Dictionary, delta: float) -> void:
+	if visual.phase in [BeaverVisualPhase.Grab, BeaverVisualPhase.Look, BeaverVisualPhase.Bite, BeaverVisualPhase.Sink]:
+		visual.seconds += delta
+	match visual.phase:
+		BeaverVisualPhase.Grab:
+			if visual.seconds >= BeaverGrabSeconds:
+				visual.phase = BeaverVisualPhase.Bite if visual.hit else BeaverVisualPhase.Look
+				visual.seconds = 0.0
+		BeaverVisualPhase.Look, BeaverVisualPhase.Bite:
+			if visual.seconds >= (BeaverBiteSeconds if visual.phase == BeaverVisualPhase.Bite else BeaverLookSeconds):
+				visual.phase = BeaverVisualPhase.Sink
+				visual.seconds = 0.0
+		BeaverVisualPhase.Sink:
+			if visual.seconds >= BeaverSinkSeconds + BeaverUnderHoldSeconds:
+				visual.phase = BeaverVisualPhase.Done
+
+func update_beaver_exits() -> void:
+	for index in range(beaver_exits.size() - 1, -1, -1):
+		var visual: Dictionary = beaver_exits[index]
+		if visual.log_x != null:
+			var tracked_end: Variant = nearest_log_end(visual.row, visual.heading, visual.log_x)
+			if tracked_end != null:
+				visual.x += float(tracked_end) - float(visual.log_x)
+				visual.log_x = tracked_end
+		advance_beaver_exit(visual, 0.0 if paused else presentation_delta)
+		if visual.phase == BeaverVisualPhase.Done:
+			var exit_actor: ModelActor = actors.get(visual.key)
+			if exit_actor != null:
+				exit_actor.root.queue_free()
+				actors.erase(visual.key)
+			beaver_exits.remove_at(index)
+			continue
+		render_beaver(visual.key, visual.x, visual.row, visual.heading, visual.phase, visual.seconds, visual.hit)
 
 func nearest_log_end(row: float, heading: int, around_x: float) -> Variant:
 	var lane: int = int(roundf(row / 16.0)) - 3
@@ -2244,9 +2305,9 @@ func update_beaver(cur_frame: int) -> void:
 	var descriptor_visible: bool = slot_y >= 32 and slot_y <= 136 and slot_code != 0
 	var sprite_on_board: bool = descriptor_visible and slot_x >= 8 and slot_x <= 235
 
-	# A new native swimmer takes priority over the previous spawn's cosmetic
-	# exit. The ROM can reuse this slot before grab/look/sink has finished.
+	# The new native swimmer and the old cosmetic exit have separate lifetimes.
 	if descriptor_visible and native_state != 0 and (beaver_display_generation != beaver_generation or (native_state == 1 and beaver_phase != BeaverVisualPhase.Approach)):
+		retain_beaver_exit()
 		moving_visuals.tracks.erase(1000 + 0x8058)
 		beaver_display_generation = beaver_generation
 		beaver_phase = BeaverVisualPhase.Approach
@@ -2316,46 +2377,33 @@ func update_beaver(cur_frame: int) -> void:
 				beaver_last_x += float(tracked_end) - float(beaver_exit_log_x)
 				beaver_exit_log_x = tracked_end
 
-	var delta: float = 0.0 if paused else presentation_delta
-	if beaver_phase == BeaverVisualPhase.Grab:
-		beaver_phase_seconds += delta
-		if beaver_phase_seconds >= BeaverGrabSeconds:
-			beaver_phase = BeaverVisualPhase.Bite if beaver_player_hit else BeaverVisualPhase.Look
-			beaver_phase_seconds = 0.0
-	elif beaver_phase == BeaverVisualPhase.Look:
-		beaver_phase_seconds += delta
-		if beaver_phase_seconds >= BeaverLookSeconds:
-			beaver_phase = BeaverVisualPhase.Sink
-			beaver_phase_seconds = 0.0
-	elif beaver_phase == BeaverVisualPhase.Bite:
-		beaver_phase_seconds += delta
-		if beaver_phase_seconds >= BeaverBiteSeconds:
-			beaver_phase = BeaverVisualPhase.Sink
-			beaver_phase_seconds = 0.0
-	elif beaver_phase == BeaverVisualPhase.Sink:
-		beaver_phase_seconds += delta
-		if beaver_phase_seconds >= BeaverSinkSeconds + BeaverUnderHoldSeconds:
-			beaver_phase = BeaverVisualPhase.Done
-			return
+	var visual: Dictionary = {"phase": beaver_phase, "seconds": beaver_phase_seconds, "hit": beaver_player_hit}
+	advance_beaver_exit(visual, 0.0 if paused else presentation_delta)
+	beaver_phase = visual.phase
+	beaver_phase_seconds = visual.seconds
+	if beaver_phase == BeaverVisualPhase.Done:
+		return
+	render_beaver("hazard32856", beaver_last_x, beaver_last_row, beaver_heading, beaver_phase, beaver_phase_seconds, beaver_player_hit)
 
-	var sink_amount: float = clampf(beaver_phase_seconds / BeaverSinkSeconds, 0.0, 1.0) if beaver_phase == BeaverVisualPhase.Sink else 0.0
-	var a = actor("hazard32856", "otter")
+func render_beaver(key: String, x: float, row: float, heading: int, phase: int, seconds: float, player_hit: bool) -> void:
+	var sink_amount: float = clampf(seconds / BeaverSinkSeconds, 0.0, 1.0) if phase == BeaverVisualPhase.Sink else 0.0
+	var a = actor(key, "otter")
 	a.set_active(true)
 	a.set_clipped(true)
-	a.root.position = pos3(beaver_last_x, beaver_last_row,
+	a.root.position = pos3(x, row,
 		BoardVisuals.beaver_height(BoardVisuals.WaterSurfaceHeight, BeaverScale, sink_amount))
-	a.root.rotation = Vector3(0, float(beaver_heading) * PI / 2.0, 0)
+	a.root.rotation = Vector3(0, float(heading) * PI / 2.0, 0)
 	a.root.scale = Vector3.ONE * BeaverScale
 	var grab_end: float = BeaverAttackSeconds * 0.55
-	match beaver_phase:
+	match phase:
 		BeaverVisualPhase.Approach:
 			a.play("Move")
 		BeaverVisualPhase.Grab:
-			a.pose("Attack", grab_end * clampf(beaver_phase_seconds / BeaverGrabSeconds, 0.0, 1.0))
+			a.pose("Attack", grab_end * clampf(seconds / BeaverGrabSeconds, 0.0, 1.0))
 		BeaverVisualPhase.Bite:
-			a.pose("Attack", grab_end + (BeaverAttackSeconds - grab_end) * clampf(beaver_phase_seconds / BeaverBiteSeconds, 0.0, 1.0))
+			a.pose("Attack", grab_end + (BeaverAttackSeconds - grab_end) * clampf(seconds / BeaverBiteSeconds, 0.0, 1.0))
 		BeaverVisualPhase.Look, BeaverVisualPhase.Sink:
-			a.pose("Attack", BeaverAttackSeconds if beaver_player_hit else grab_end)
+			a.pose("Attack", BeaverAttackSeconds if player_hit else grab_end)
 
 func update_bonuses(fraction: float) -> void:
 	var incoming = simulation.get_bonus_awards()
