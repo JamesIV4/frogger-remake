@@ -53,52 +53,6 @@ root and every supporting file included, and serve over HTTPS.
 the generated `_headers` only controls entry-page/service-worker caching.
 See [Web audio](docs/WEB_AUDIO.md) for audio diagnostics.
 
-For the separate CrazyGames edition, run `./BuildCrazyGames.ps1` (equivalent to
-`./BuildWeb.ps1 -CrazyGames`). Upload the contents of `builds/crazygames/` to
-CrazyGames. This output includes the [CrazyGames v3 SDK](https://docs.crazygames.com/sdk/intro/);
-the ordinary `builds/web/` export and desktop game remain ad-free.
-Preview it with `python -m http.server 8081 --directory builds/crazygames`, then
-open `http://localhost:8081/`. Local SDK ads are test ads; verify the uploaded
-build in the CrazyGames developer preview before publishing.
-
-The CrazyGames edition requests one midgame ad after a full game over, at the
-earlier of one second or the player's restart input. Individual deaths,
-two-player turn changes, pauses and voluntary restarts during play do not
-request ads. A restart pressed before or during the ad is remembered and begins
-after the ad finishes or fails. Simulation and audio pause during the ad;
-mute preferences are preserved. Blocked/unavailable SDKs, ad errors and ad
-cooldowns allow play to continue. CrazyGames controls actual ad availability.
-
-CrazyGames' `game.settings.muteAudio` is applied at SDK initialization and on
-live settings changes. Host muting overrides the in-game sound toggle without
-changing the saved preference. When the host unmutes, audio resumes only if
-the player has sound enabled and the game is not paused or showing an ad.
-Test initial host muting locally at `http://localhost:8081/?muteAudio=true`.
-
-The CrazyGames edition reports `reportGameCompletedPercentage(100)` once at
-full game over, treating a finished arcade run as completion. `happytime()`
-asks the host to celebrate at full game over if either player beat the saved
-high score from the start of the run, at most once per run. Ties do not count;
-the first positive score can establish a new best when no record exists.
-`loadingStart()` is sent when the SDK initializes; `loadingStop()` follows when
-the Godot scene is ready. If the SDK arrives late, the loading pair is sent in
-order and pending game-over completion events are delivered once. These events
-are best-effort and never block play if the SDK fails.
-
-High scores use `SDK.data` for CrazyGames accounts and guests. Signed-in players
-see **Progress is linked to CrazyGames Account** in the main and pause menus;
-guests see **High scores saved on this device**. Existing SDK records take
-priority over browser-local records. An old local score is migrated once only
-when no SDK record exists; account scores are not copied into the shared local
-fallback. Outside CrazyGames, or if its Data module is unavailable, local
-high-score saving continues to work.
-
-In the CrazyGames submission settings, enable **Progress Save → Yes, using the
-Data Module from the CrazyGames SDK**. Without this setting, the platform
-disables the Data module. Verify signed-in saving and cross-device restoration
-in the developer preview; localhost uses simulated SDK users. See the
-[Data module documentation](https://docs.crazygames.com/sdk/data/).
-
 The iOS Home Screen app uses the September 27 viewport behavior: browser-default
 viewport fitting, the opaque `black` status bar, and Godot's adaptive canvas
 sizing. Safari reserves the system areas; the game adds no second set of insets
@@ -115,7 +69,7 @@ payloads. The generated loader decompresses them in the browser, so no server
 `Content-Encoding` configuration is needed. Upload those `.bin` files and
 `frogger-compression.js` along with the rest of the output; do not rename them
 or upload additional uncompressed copies. `BuildWeb.ps1` reports the complete
-upload size and warns if it exceeds the 20 MB CrazyGames mobile size target.
+upload size.
 This uses the standard gzip `DecompressionStream` API (Safari/iOS 16.4+,
 Chrome/Edge 80+, Firefox 113+).
 

@@ -459,6 +459,39 @@ func run() -> void:
 				var nose_x: float = beaver.root.position.x + heading * game.BeaverScale * ModelFootprints.BeaverFrontTiles
 				check(heading * (nose_x - end_x) <= 0.0001,
 					"Grab/bite/dive stays outside the moving log end in either direction")
+	# Swimming follows the sprite even when the closest log end is behind it.
+	# The native relative swim step is only one pixel every eight frames.
+	for heading in [-1, 1]:
+		game.clear_presentation()
+		game.simulation.poke(0x8112, 1)
+		game.simulation.poke(0x8059, 0x81 if heading < 0 else 1)
+		game.simulation.poke(0x805b, 80)
+		game.simulation.poke(0x8486, 1)
+		for frame in range(64):
+			var scroll: int = frame / 4
+			var slot: int = 120 + scroll + heading * (frame / 8)
+			game.simulation.poke(0x8113, 166 + scroll)
+			game.simulation.poke(0x8058, slot)
+			game.observe_frame()
+			game.state["frame"] += frame
+			game.update_actors()
+			var nose: float = 120.0 + 16.0 * (beaver.root.position.x + heading * game.BeaverScale * ModelFootprints.BeaverFrontTiles)
+			check(absf(nose - (slot + (20 if heading > 0 else -4))) < 2.0,
+				"Swimming beaver follows native relative motion instead of the nearest log")
+	# A replacement sprite must appear immediately, even during the old exit.
+	for phase in [game.BeaverVisualPhase.Grab, game.BeaverVisualPhase.Look, game.BeaverVisualPhase.Bite, game.BeaverVisualPhase.Sink, game.BeaverVisualPhase.Done]:
+		game.beaver_phase = phase
+		game.beaver_phase_seconds = 0.2
+		game.simulation.poke(0x8058, 200)
+		game.simulation.poke(0x805b, 48)
+		game.simulation.poke(0x8059, 1)
+		game.simulation.poke(0x8486, 1)
+		game.observe_frame()
+		game.update_actors()
+		check(beaver.is_active and game.beaver_phase == game.BeaverVisualPhase.Approach,
+			"New native spawn interrupts the previous beaver exit immediately")
+		check(is_equal_approx(game.beaver_last_row, 48.0) and is_equal_approx(game.beaver_last_x + 16.0 * game.BeaverScale * ModelFootprints.BeaverFrontTiles, 220.0),
+			"Replacement beaver uses its new row and position without stale smoothing")
 	# Render both incarnations of slot zero while they overlap opposite edges.
 	for outgoing in [false, true]:
 		game.clear_presentation()

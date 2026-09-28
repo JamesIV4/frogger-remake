@@ -2220,7 +2220,15 @@ func update_beaver(cur_frame: int) -> void:
 	var slot_x: int = BoardVisuals.at(state, 0x8058)
 	var slot_y: int = BoardVisuals.at(state, 0x805b)
 	var slot_code: int = BoardVisuals.at(state, 0x8059)
-	var descriptor_visible: bool = slot_x >= 8 and slot_x <= 235 and slot_y >= 32 and slot_y <= 136 and slot_code != 0
+	var descriptor_visible: bool = slot_y >= 32 and slot_y <= 136 and slot_code != 0
+
+	# A new native swimmer takes priority over the previous spawn's cosmetic
+	# exit. The ROM can reuse this slot before grab/look/sink has finished.
+	if descriptor_visible and native_state == 1 and beaver_phase != BeaverVisualPhase.Approach:
+		moving_visuals.tracks.erase(1000 + 0x8058)
+		beaver_phase = BeaverVisualPhase.Approach
+		beaver_phase_seconds = 0.0
+		beaver_player_hit = false
 
 	if descriptor_visible and beaver_phase in [BeaverVisualPhase.Hidden, BeaverVisualPhase.Done, BeaverVisualPhase.Approach]:
 		var displayed_slot_x: float = moving_visuals.step(1000 + 0x8058, float(slot_x), cur_frame, presentation_delta, paused)
@@ -2231,12 +2239,8 @@ func update_beaver(cur_frame: int) -> void:
 		var attack_x: float = displayed_slot_x + (20.0 if beaver_heading > 0 else -4.0)
 		beaver_last_x = attack_x - float(beaver_heading) * 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
 		beaver_last_row = float(slot_y)
-		var log_end: Variant = nearest_log_end(beaver_last_row, beaver_heading, attack_x)
-		if log_end != null and (attack_x - float(log_end)) * float(beaver_heading) >= 0.0:
-			beaver_last_x = float(log_end) - float(beaver_heading) * 16.0 * BeaverScale * ModelFootprints.BeaverFrontTiles
-		if beaver_phase in [BeaverVisualPhase.Hidden, BeaverVisualPhase.Done] and native_state == 1:
-			beaver_phase = BeaverVisualPhase.Approach
-			beaver_phase_seconds = 0.0
+		# Keep swimming on the sprite's path. The nearest log end may be
+		# behind us across a gap; attaching to it here erases native movement.
 
 	if beaver_phase == BeaverVisualPhase.Approach:
 		if native_state >= 2:
@@ -2621,7 +2625,15 @@ func step_review() -> void:
 	if review in ["river-gator", "river-back", "river-snout"]:
 		var x: int = 120
 		simulation.poke(0x83b7, 2)
-		simulation.poke(0x8100, 1)
+		if review == "river-gator":
+			# Keep the complete lane and its spacing in visual captures. Shift
+			# the logs with the staged crocodile instead of hiding every log.
+			var shift: int = x + 12 + 30 - simulation.peek(0x8101)
+			for index in range(mini(8, simulation.peek(0x8100))):
+				var address: int = 0x8101 + index
+				simulation.poke(address, (simulation.peek(address) + shift) & 255)
+		else:
+			simulation.poke(0x8100, 1)
 		simulation.poke(0x8101, x + 12 + 30)
 		simulation.poke(0x8150, 1)
 		if review_frame == 1 and review != "river-gator":
