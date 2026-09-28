@@ -14,5 +14,7 @@ try {
     & (Get-FroggerGodot) --headless --path godot --quit; Assert-FroggerExit 'Godot headless verification'
     & (Get-FroggerGodot) --headless --path godot --script ../tests/presentation_test.gd; Assert-FroggerExit 'Presentation and menu behavior'
     & (Get-FroggerGodot) --headless --path godot --script ../tests/camera_test.gd; Assert-FroggerExit 'Mobile and desktop camera behavior'
+    & (Get-FroggerGodot) --headless --path godot --script ../tests/mobile_ui_test.gd -- --mobile-ui; Assert-FroggerExit 'Mobile UI orientation scaling'
+    & (Get-FroggerGodot) --headless --path godot --script ../tests/frog_material_test.gd; Assert-FroggerExit 'Green and pink frog squash materials'
     & (Get-FroggerGodot) --headless --audio-driver WASAPI --path godot --script ../tests/audio_feed.gd; Assert-FroggerExit 'Audio queue behavior'
 } finally { Pop-Location }

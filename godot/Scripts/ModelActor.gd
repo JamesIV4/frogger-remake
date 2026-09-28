@@ -11,6 +11,7 @@ var squash_color: float = -1.0
 var is_active: bool = true
 var is_clipped: bool = false
 var supports_squash_color: bool = false
+var squash_materials: Dictionary = {}
 
 static var unclipped_materials: Dictionary = {}
 static var clipped_materials: Dictionary = {}
@@ -22,7 +23,7 @@ static func _get_unclipped_shader(animated_squash: bool) -> Shader:
 		var unclipped_shader := Shader.new()
 		unclipped_shader.code = """shader_type spatial;
 render_mode depth_draw_opaque;
-instance uniform float squash_color = 0.0;
+uniform float squash_color = 0.0;
 uniform vec4 tint : source_color = vec4(1.0);
 varying float intact_shade;
 void vertex(){
@@ -35,7 +36,7 @@ void fragment(){
     ROUGHNESS=.75;
 }"""
 		if not animated_squash:
-			unclipped_shader.code = unclipped_shader.code.replace("instance uniform float squash_color = 0.0;", "const float squash_color = 0.0;")
+			unclipped_shader.code = unclipped_shader.code.replace("uniform float squash_color = 0.0;", "const float squash_color = 0.0;")
 		unclipped_shaders[animated_squash] = unclipped_shader
 	return unclipped_shaders[animated_squash]
 
@@ -43,7 +44,7 @@ static func _get_clipped_shader(animated_squash: bool) -> Shader:
 	if not clipped_shaders.has(animated_squash):
 		var clipped_shader := Shader.new()
 		clipped_shader.code = """shader_type spatial;
-instance uniform float squash_color = 0.0;
+uniform float squash_color = 0.0;
 uniform vec4 tint : source_color = vec4(1.0);
 varying vec3 world;
 varying float intact_shade;
@@ -59,13 +60,13 @@ void fragment(){
     ROUGHNESS=.75;
 }"""
 		if not animated_squash:
-			clipped_shader.code = clipped_shader.code.replace("instance uniform float squash_color = 0.0;", "const float squash_color = 0.0;")
+			clipped_shader.code = clipped_shader.code.replace("uniform float squash_color = 0.0;", "const float squash_color = 0.0;")
 		clipped_shaders[animated_squash] = clipped_shader
 	return clipped_shaders[animated_squash]
 
 func _init(parent: Node, asset: String):
-	# Each mesh with an instance uniform consumes one of GLES3's limited slots,
-	# even on hidden actors. Only playable frog models need the squash effect.
+	# Frog-owned material uniforms avoid GLES3/WebGL's limited per-instance
+	# uniform pool. Other actors continue sharing immutable materials.
 	supports_squash_color = asset in ["frog", "lady_frog"]
 	var scene = load("res://Models/%s.glb" % asset)
 	root = scene.instantiate() as Node3D
@@ -101,6 +102,14 @@ func _setup_materials(node: Node) -> void:
 					clipped_mat.shader = _get_clipped_shader(supports_squash_color)
 					clipped_mat.set_shader_parameter("tint", original.albedo_color)
 					clipped_materials[id] = clipped_mat
+				if supports_squash_color:
+					if not squash_materials.has(id):
+						squash_materials[id] = {
+							"unclipped": unclipped_mat.duplicate(),
+							"clipped": clipped_mat.duplicate()
+						}
+					unclipped_mat = squash_materials[id]["unclipped"]
+					clipped_mat = squash_materials[id]["clipped"]
 
 				mesh.set_surface_override_material(i, unclipped_mat)
 				surface_bindings.append({
@@ -140,8 +149,10 @@ func set_squash_color(amount: float) -> void:
 	if absf(amount - squash_color) < 0.001:
 		return
 	squash_color = amount
-	for mesh in mesh_instances:
-		mesh.set_instance_shader_parameter("squash_color", amount)
+	for materials in squash_materials.values():
+		# Keep both variants current so crossing a board edge cannot reset shading.
+		materials["unclipped"].set_shader_parameter("squash_color", amount)
+		materials["clipped"].set_shader_parameter("squash_color", amount)
 
 func play(clip: String, loop: bool = true, speed: float = 1.0) -> void:
 	if animator == null:

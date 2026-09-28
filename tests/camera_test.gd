@@ -38,8 +38,8 @@ func run() -> void:
 	viewport.size = Vector2i(390, 844)
 	game.layout_ui.call()
 	var extra_life_label: Label = game.hud_footer.find_child("ExtraLifeLabel", true, false)
-	var lives_box: HBoxContainer = game.hud_footer.find_child("LivesBox", true, false)
-	var timer_box: HBoxContainer = game.hud_footer.find_child("TimerBox", true, false)
+	var lives_box: BoxContainer = game.hud_footer.find_child("LivesBox", true, false)
+	var timer_box: BoxContainer = game.hud_footer.find_child("TimerBox", true, false)
 	for reserve_lives in [0, 2, 3]:
 		game.simulation.poke(0x83e5, reserve_lives)
 		game.observe_frame()
@@ -304,6 +304,8 @@ func run() -> void:
 		game.layout_ui.call()
 		for modal_touch in [false, true]:
 			game.touch_device = modal_touch
+			game.layout_ui.call()
+			await process_frame
 			for modal_perspective in [false, true]:
 				game.perspective_view = modal_perspective
 				for modal_follow in [false, true]:
@@ -315,9 +317,27 @@ func run() -> void:
 					var bonus_rect: Rect2 = bonus_panel.get_global_rect()
 					check(absf(modal_rect.get_center().y - float(modal_size.y) * (1.0 / 3.0 if modal_follow else 0.5)) < 0.1, "Level modal stays at top third in every follow configuration")
 					check(not modal_rect.grow(5.0).intersects(bonus_rect), "Level and time bonus retain a gap across platforms and camera modes")
-					check(bonus_rect.position.y >= game.hud_header.get_global_rect().end.y and bonus_rect.end.y <= modal_size.y, "Bonus remains onscreen when stacked around the intro")
+					check(bonus_rect.position.y >= game.hud_message_top() and bonus_rect.end.y <= modal_size.y, "Bonus remains onscreen when stacked around the intro")
 					var modal_style: StyleBoxFlat = game.message_panel.get_theme_stylebox("panel")
 					check(modal_style.content_margin_top == game.ModalVerticalPadding and modal_style.content_margin_bottom == game.ModalVerticalPadding, "Intro uses shared generous bonus padding")
+	game.return_to_main_menu()
+	for menu_touch in [false, true]:
+		game.touch_device = menu_touch
+		for menu_size in [Vector2i(390, 844), Vector2i(844, 390), Vector2i(1100, 960), Vector2i(1920, 1080)]:
+			viewport.size = menu_size
+			game.layout_ui.call()
+			for menu_top_down in [false, true]:
+				game.top_down_camera = menu_top_down
+				for menu_perspective in [false, true]:
+					game.perspective_view = menu_perspective
+					settle(game)
+					var top_edge: float = INF
+					var bottom_edge: float = -INF
+					for edge in [Vector2(-0.94, 7.90), Vector2(0.20, 7.90), Vector2(-0.94, -7.70), Vector2(0.20, -7.70), Vector2(1.30, -7.25)]:
+						var screen_point := camera.unproject_position(Vector3(0, edge.x, edge.y))
+						top_edge = minf(top_edge, screen_point.y)
+						bottom_edge = maxf(bottom_edge, screen_point.y)
+					check(absf(top_edge - 6.0) < 1.0 and absf(bottom_edge - float(menu_size.y - 6)) < 1.0, "Main-menu board fills screen height on every platform, orientation and projection: %s" % menu_size)
 	viewport.queue_free()
 	await process_frame
 	print("CAMERA TEST: %s" % ("PASS" if failures.is_empty() else str(failures)))

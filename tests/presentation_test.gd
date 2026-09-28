@@ -176,7 +176,7 @@ func run() -> void:
 					check(time_bonus.size.x < 370.0, "Time Bonus is not held to the old fixed width")
 					check(is_equal_approx(center.x, game.get_viewport().get_visible_rect().size.x * 0.5), "Time Bonus stays horizontally centered on every platform")
 					if follow_mode:
-						check(is_equal_approx(time_bonus.position.y, game.hud_header.get_global_rect().end.y + 16.0), "Follow Time Bonus sits below the HUD with padding on every platform")
+						check(is_equal_approx(time_bonus.position.y, game.hud_message_top() + 16.0), "Follow Time Bonus retains its padded position on every platform")
 					else:
 						check(center.is_equal_approx(game.get_viewport().get_visible_rect().size * 0.5), "Non-follow Time Bonus is centered on every platform")
 	game.touch_device = false

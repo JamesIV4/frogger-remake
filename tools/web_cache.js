@@ -10,11 +10,12 @@
     const CACHEABLE_FILES = new Set([
         'index.pck',
         'index.wasm',
+        'index.side.wasm',
         'index.side.part0.wasm',
         'index.side.part1.wasm',
         'libfrogger_arcade.web.template_release.wasm32.wasm',
     ]);
-    const nativeFetch = root.fetch.bind(root);
+    const nativeFetch = root.FroggerCompressedAssets ? root.FroggerCompressedAssets.fetch : root.fetch.bind(root);
     const stats = { hits: 0, misses: 0, writes: 0 };
     let databasePromise = null;
 

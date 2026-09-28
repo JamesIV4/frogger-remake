@@ -53,6 +53,20 @@ applies to CrazyGames uploads. `DeployWeb.ps1` publishes to Cloudflare Pages;
 the generated `_headers` only controls entry-page/service-worker caching.
 See [Web audio](docs/WEB_AUDIO.md) for audio diagnostics.
 
+The iOS Home Screen app uses `viewport-fit=cover` and Apple's
+`black-translucent` status-bar mode for an edge-to-edge canvas. Portrait iOS
+does not add safe-area padding; landscape still protects sidebar controls from
+the notch. Android retains its safe-area handling, including the bottom inset.
+
+Web builds losslessly gzip the large `.wasm` and `.pck` assets into `.bin`
+payloads. The generated loader decompresses them in the browser, so no server
+`Content-Encoding` configuration is needed. Upload those `.bin` files and
+`frogger-compression.js` along with the rest of the output; do not rename them
+or upload additional uncompressed copies. `BuildWeb.ps1` reports the complete
+upload size and warns if it exceeds the 20 MB CrazyGames mobile size target.
+This uses the standard gzip `DecompressionStream` API (Safari/iOS 16.4+,
+Chrome/Edge 80+, Firefox 113+).
+
 ## How fidelity is checked
 
 This project separates **decompilation**, **native translation**, and **behavior verification**. A generated function or a successful Ghidra exit is not, by itself, a proof of gameplay parity.

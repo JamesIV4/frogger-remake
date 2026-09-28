@@ -65,7 +65,7 @@ func configure(model: String, selected: bool, font: Font) -> void:
 	world.add_child(preview_camera)
 	preview_camera.look_at_from_position(preview_camera.position, Vector3(0, 0.23, 0))
 	preview_camera.current = true
-	# Previews use the asset's own materials: gameplay clipping/squash instance
+	# Previews use the asset's own materials: gameplay clipping/squash shader
 	# uniforms are unnecessary here and consume the Web renderer's shared budget.
 	var preview: Node3D = load("res://Models/%s.glb" % model).instantiate()
 	preview_model = preview

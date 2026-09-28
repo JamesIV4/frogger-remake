@@ -16,6 +16,9 @@ var audio_playback: AudioStreamGeneratorPlayback = null
 var audio_capacity: int = 0
 var web_audio: JavaScriptObject = null
 var web_audio_checked: bool = false
+var web_layout: JavaScriptObject = null
+var web_layout_callback: JavaScriptObject = null
+var ui_safe_rect: Rect2
 
 var started: bool = false
 var paused: bool = false
@@ -122,7 +125,7 @@ var score_label: Label = null
 var high_label: Label = null
 var level_label: Label = null
 var lives_label: Label = null
-var lives_icons: HBoxContainer = null
+var lives_icons: BoxContainer = null
 var frog_icon_texture: Texture2D = null
 
 # Mobile swipe & touch control state
@@ -631,7 +634,7 @@ func setup_world() -> void:
 		_hide_warmup_shadows(showcase.root)
 		showcase.set_active(true)
 		showcase.set_clipped(true)
-		# Touch squash's instance uniform path once so the driver has the variant.
+		# Touch squash's material uniform path once so the driver has the variant.
 		showcase.set_squash_color(0.6)
 		showcase.set_squash_color(0.0)
 		for clip in WarmupClips[model]:
@@ -895,9 +898,20 @@ func style_box(color: Color, radius: int = 12, border: int = 0) -> StyleBoxFlat:
 	s.border_color = Color("70614e")
 	return s
 
-func edge_panel_style(color: Color, at_top: bool) -> StyleBoxFlat:
+func edge_panel_style(color: Color, at_top: bool, at_side: bool = false) -> StyleBoxFlat:
 	var s = style_box(color, 0, 2)
-	if at_top:
+	if at_side:
+		s.content_margin_left = 12
+		s.content_margin_right = 12
+		if at_top:
+			s.border_width_left = 0
+			s.corner_radius_top_right = 16
+			s.corner_radius_bottom_right = 16
+		else:
+			s.border_width_right = 0
+			s.corner_radius_top_left = 16
+			s.corner_radius_bottom_left = 16
+	elif at_top:
 		s.border_width_top = 0
 		s.corner_radius_bottom_left = 16
 		s.corner_radius_bottom_right = 16
@@ -925,10 +939,12 @@ func setup_ui() -> void:
 	touch_device = OS.has_feature("android") or OS.has_feature("ios") or OS.get_cmdline_user_args().has("--mobile-ui")
 	if OS.has_feature("web"):
 		touch_device = touch_device or bool(JavaScriptBridge.eval("window.matchMedia('(pointer: coarse)').matches"))
+		web_layout = JavaScriptBridge.get_interface("FroggerLayout")
 	last_input_method = "touch" if touch_device else "keyboard"
 	if touch_device:
-		# Match phone-sized logical UI units instead of shrinking a desktop canvas.
-		get_tree().root.content_scale_size = Vector2i(480, 320)
+		# Anchor UI units to the short edge in both orientations. A 480x320
+		# base enlarged landscape controls by 50%, including on high-DPI PWAs.
+		get_tree().root.content_scale_size = Vector2i(480, 480)
 		get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	display_font = load("res://Fonts/PressStart2P-Regular.ttf")
 	body_font = load("res://Fonts/Silkscreen-Regular.ttf")
@@ -971,7 +987,7 @@ func setup_ui() -> void:
 	header.add_theme_stylebox_override("panel", edge_panel_style(frame_color, true))
 	root.add_child(header)
 
-	var row := HBoxContainer.new()
+	var row := BoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 12)
 	header.add_child(row)
@@ -1003,7 +1019,7 @@ func setup_ui() -> void:
 	bottom.add_theme_stylebox_override("panel", footer_style)
 	root.add_child(bottom)
 
-	var foot := HBoxContainer.new()
+	var foot := BoxContainer.new()
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
 	foot.add_theme_constant_override("separation", 12)
 	bottom.add_child(foot)
@@ -1034,7 +1050,7 @@ func setup_ui() -> void:
 	before_lives.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(before_lives)
 
-	var lives_box := HBoxContainer.new()
+	var lives_box := BoxContainer.new()
 	lives_box.name = "LivesBox"
 	lives_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	lives_box.add_theme_constant_override("separation", 10)
@@ -1043,7 +1059,7 @@ func setup_ui() -> void:
 	lives_label = make_text("FROGS", 19, LimeColor)
 	lives_box.add_child(lives_label)
 
-	lives_icons = HBoxContainer.new()
+	lives_icons = BoxContainer.new()
 	lives_icons.add_theme_constant_override("separation", 5)
 	lives_icons.alignment = BoxContainer.ALIGNMENT_CENTER
 	lives_box.add_child(lives_icons)
@@ -1051,7 +1067,7 @@ func setup_ui() -> void:
 	var before_timer := Control.new()
 	before_timer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(before_timer)
-	var timer_box := HBoxContainer.new()
+	var timer_box := BoxContainer.new()
 	timer_box.name = "TimerBox"
 	timer_box.add_theme_constant_override("separation", 12)
 	foot.add_child(timer_box)
@@ -1113,46 +1129,104 @@ func setup_ui() -> void:
 	menu_items.add_theme_constant_override("separation", 14)
 	menu_scroll.add_child(menu_items)
 
+	var header_groups := row.get_children()
+	var footer_groups := foot.get_children()
 	layout_ui = func():
 		var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 		root.size = viewport_size
-		var panel_width: float = minf(870.0, viewport_size.x)
+		ui_safe_rect = get_ui_safe_rect(viewport_size)
+		var sidebars: bool = hud_uses_sidebars()
+		var panel_width: float = minf(870.0, ui_safe_rect.size.x)
 		var narrow: bool = viewport_size.x < 650.0
+		var compact_text: bool = touch_device or narrow
 		var portrait_footer: bool = touch_device and viewport_size.x < viewport_size.y
-		var h: float = root.size.y
+		# Reflow the same controls, preserving input ownership and upright glyphs.
+		# Reverse the groups to match portrait HUD bars turned counterclockwise,
+		# with their contents turned clockwise back into reading orientation.
+		row.vertical = sidebars
+		foot.vertical = sidebars
+		lives_box.vertical = sidebars
+		lives_icons.vertical = sidebars
+		timer_box.vertical = sidebars
+		for i in range(header_groups.size()):
+			row.move_child(header_groups[i], header_groups.size() - 1 - i if sidebars else i)
+			header_groups[i].size_flags_horizontal = Control.SIZE_FILL if sidebars else Control.SIZE_EXPAND_FILL
+			header_groups[i].size_flags_vertical = Control.SIZE_EXPAND_FILL if sidebars else Control.SIZE_FILL
+		for i in range(footer_groups.size()):
+			foot.move_child(footer_groups[i], footer_groups.size() - 1 - i if sidebars else i)
+		header.add_theme_stylebox_override("panel", edge_panel_style(frame_color, true, sidebars))
+		var current_footer_style := edge_panel_style(frame_color, false, sidebars)
+		current_footer_style.content_margin_left = 12
+		current_footer_style.content_margin_right = 12
+		bottom.add_theme_stylebox_override("panel", current_footer_style)
 		header.size = Vector2(panel_width, 94)
-		header.position = Vector2((viewport_size.x - panel_width) / 2.0, 0)
+		header.position = Vector2(ui_safe_rect.get_center().x - panel_width / 2.0, ui_safe_rect.position.y)
 		for label in [score_label, high_label]:
-			label.add_theme_font_size_override("font_size", 19 if narrow else 26)
+			label.add_theme_font_size_override("font_size", 19 if compact_text else 26)
 		var title_label: Label = row.get_child(1).get_child(0)
-		title_label.add_theme_font_size_override("font_size", 18 if narrow else 23)
-		level_label.visible = not narrow
-		lives_label.add_theme_font_size_override("font_size", 10 if narrow else 19)
-		time_label.visible = not narrow
-		extra_life_label.add_theme_font_size_override("font_size", 10 if narrow else 12)
-		foot.add_theme_constant_override("separation", 0 if portrait_footer else (4 if narrow else 12))
+		title_label.add_theme_font_size_override("font_size", 14 if sidebars else (18 if compact_text else 23))
+		level_label.visible = not narrow and not sidebars
+		lives_label.add_theme_font_size_override("font_size", 10 if compact_text else 19)
+		time_label.visible = not narrow and not sidebars
+		extra_life_label.add_theme_font_size_override("font_size", 10 if compact_text else 12)
+		foot.add_theme_constant_override("separation", 0 if portrait_footer or sidebars else (4 if narrow else 12))
 		lives_box.add_theme_constant_override("separation", 4 if narrow else 10)
-		lives_box.custom_minimum_size.x = 116.0 if narrow else 0.0
+		lives_box.custom_minimum_size = Vector2(116.0 if narrow and not sidebars else 0.0, 0.0)
+		lives_icons.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if sidebars else Control.SIZE_FILL
+		gameplay_options_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if sidebars else Control.SIZE_FILL
+		gameplay_options_button.custom_minimum_size = Vector2(52, 52 if sidebars else 48)
 		for footer_spacer in [before_extra, before_lives, before_timer]:
-			footer_spacer.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if portrait_footer else Control.SIZE_EXPAND_FILL
-			footer_spacer.custom_minimum_size.x = PortraitFooterGap if portrait_footer else 0.0
+			footer_spacer.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if portrait_footer or sidebars else Control.SIZE_EXPAND_FILL
+			footer_spacer.custom_minimum_size = Vector2(0, PortraitFooterGap) if sidebars else Vector2(PortraitFooterGap if portrait_footer else 0.0, 0)
 		timer_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL if portrait_footer else Control.SIZE_SHRINK_BEGIN
-		timer_box.custom_minimum_size.x = 70.0 if narrow else panel_width * 0.32
+		timer_box.size_flags_vertical = Control.SIZE_EXPAND_FILL if sidebars else Control.SIZE_FILL
+		timer_box.custom_minimum_size = Vector2(0, 70) if sidebars else Vector2(70.0 if narrow else panel_width * 0.32, 0)
+		timer_bar.fill_mode = ProgressBar.FILL_BOTTOM_TO_TOP if sidebars else ProgressBar.FILL_BEGIN_TO_END
+		timer_bar.custom_minimum_size = Vector2(18, 70) if sidebars else Vector2(70, 18)
+		timer_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if sidebars else Control.SIZE_EXPAND_FILL
+		timer_bar.size_flags_vertical = Control.SIZE_EXPAND_FILL if sidebars else Control.SIZE_SHRINK_CENTER
 		bottom.size = Vector2(panel_width, 80)
-		bottom.position = Vector2((viewport_size.x - panel_width) / 2.0, h - bottom.size.y)
-		message_label.add_theme_font_size_override("font_size", 18 if viewport_size.x < 620 else (24 if viewport_size.x < 900 else 30))
+		bottom.position = Vector2(ui_safe_rect.get_center().x - panel_width / 2.0, ui_safe_rect.end.y - bottom.size.y)
+		if sidebars:
+			# A smaller landscape title leaves more horizontal room for the board.
+			header.size = Vector2(124, ui_safe_rect.size.y)
+			header.position = ui_safe_rect.position
+			bottom.size = Vector2(92, ui_safe_rect.size.y)
+			bottom.position = Vector2(ui_safe_rect.end.x - bottom.size.x, ui_safe_rect.position.y)
+			timer_box.size_flags_horizontal = Control.SIZE_FILL
+		message_label.add_theme_font_size_override("font_size", 18 if touch_device or viewport_size.x < 620 else (24 if viewport_size.x < 900 else 30))
 		update_message_layout()
 		var menu_height: float = clampf(menu_items.get_combined_minimum_size().y + 28.0, 220.0, 620.0)
-		menu.size = Vector2(minf(480.0 if touch_device else 520.0, viewport_size.x - 24.0), minf(menu_height, h - 40.0))
-		menu.position = (viewport_size - menu.size) / 2.0
+		menu.size = Vector2(minf(480.0 if touch_device else 520.0, ui_safe_rect.size.x - 24.0), minf(menu_height, ui_safe_rect.size.y - 40.0))
+		menu.position = ui_safe_rect.get_center() - menu.size / 2.0
 	layout_ui.call()
 	get_viewport().size_changed.connect(layout_ui)
+	if web_layout != null:
+		web_layout_callback = JavaScriptBridge.create_callback(func(_args): layout_ui.call_deferred())
+		web_layout.subscribe(web_layout_callback)
 
 	bonus_overlay = Control.new()
 	bonus_overlay.size = get_viewport().get_visible_rect().size
 	bonus_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(bonus_overlay)
 	get_viewport().size_changed.connect(func(): bonus_overlay.size = get_viewport().get_visible_rect().size)
+
+func get_ui_safe_rect(view_size: Vector2) -> Rect2:
+	if not touch_device or web_layout == null:
+		return Rect2(Vector2.ZERO, view_size)
+	var insets: JavaScriptObject = web_layout.get_insets(view_size.x, view_size.y)
+	var origin := Vector2(float(insets.left), float(insets.top))
+	var end := view_size - Vector2(float(insets.right), float(insets.bottom))
+	return Rect2(origin, (end - origin).max(Vector2.ONE))
+
+func hud_uses_sidebars() -> bool:
+	var view := get_viewport().get_visible_rect().size
+	return touch_device and view.x > view.y
+
+func hud_message_top() -> float:
+	# Modals retain their existing placement rather than using the height of a
+	# sidebar as a top obstruction.
+	return ui_safe_rect.position.y + 94.0 if hud_uses_sidebars() else hud_header.get_global_rect().end.y
 
 func clear_menu() -> void:
 	menu.visible = true
@@ -1365,15 +1439,15 @@ func update_message_layout() -> void:
 	for label in labels:
 		var font: Font = label.get_theme_font("font")
 		text_width = maxf(text_width, font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size")).x)
-	var width: float = minf(text_width + 44.0, viewport_size.x - 48.0)
+	var width: float = minf(text_width + 44.0, ui_safe_rect.size.x - 48.0)
 	var height: float = ModalVerticalPadding * 2.0 + 18.0 * float(labels.size() - 1)
 	for label in labels:
 		var font: Font = label.get_theme_font("font")
 		height += font.get_multiline_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, width - 44.0, label.get_theme_font_size("font_size")).y
 	message_panel.size = Vector2(width, height)
-	var center: Vector2 = viewport_size * 0.5
+	var center: Vector2 = ui_safe_rect.get_center()
 	if follow_camera and (level_intro_waiting or level_intro_fade > 0.0):
-		center.y = viewport_size.y / 3.0
+		center.y = ui_safe_rect.position.y + ui_safe_rect.size.y / 3.0
 	message_panel.position = center - message_panel.size * 0.5
 	# Reserve a separate row for every time-bonus panel, even on the first
 	# frame and after a camera or viewport change. Follow placement is shared
@@ -1381,12 +1455,12 @@ func update_message_layout() -> void:
 	var intro_visible: bool = level_intro_waiting or level_intro_fade > 0.0
 	var upper_edge: float = message_panel.get_global_rect().position.y
 	var lower_edge: float = message_panel.get_global_rect().end.y
-	var safe_top: float = hud_header.get_global_rect().end.y + 16.0
+	var safe_top: float = hud_message_top() + 16.0
 	for popup in popups:
 		if popup.award.get("kind", 0) != 2:
 			continue
 		popup.view.size = popup.view.get_combined_minimum_size()
-		var top: float = safe_top if follow_camera else (viewport_size.y - popup.view.size.y) * 0.5
+		var top: float = safe_top if follow_camera else ui_safe_rect.get_center().y - popup.view.size.y * 0.5
 		if intro_visible:
 			if upper_edge - ModalGap - popup.view.size.y >= safe_top:
 				top = upper_edge - ModalGap - popup.view.size.y
@@ -1394,7 +1468,7 @@ func update_message_layout() -> void:
 			else:
 				top = lower_edge + ModalGap
 				lower_edge = top + popup.view.size.y
-		popup.view.global_position = Vector2((viewport_size.x - popup.view.size.x) * 0.5, top)
+		popup.view.global_position = Vector2(ui_safe_rect.get_center().x - popup.view.size.x * 0.5, top)
 
 func observe_level_intro() -> void:
 	if not started or BoardVisuals.at(state, 0x83fe) == 0:
@@ -1620,6 +1694,7 @@ func update_camera_clip_planes() -> void:
 func fit_board_overview(position: Vector3, target: Vector3, view_size: Vector2, crop_frame: bool) -> Dictionary:
 	# Fit the board into the live HUD opening, preserving the chosen angle.
 	# Portrait phones prioritize playable lanes over the decorative wooden frame.
+	var main_menu_view: bool = not started and menu != null and menu.visible
 	var backward := (position - target).normalized()
 	var up := backward.cross(Vector3.RIGHT).normalized()
 	var slope: float = tan(deg_to_rad(camera.fov * 0.5))
@@ -1632,6 +1707,14 @@ func fit_board_overview(position: Vector3, target: Vector3, view_size: Vector2, 
 	var top_slope: float = (1.0 - 2.0 * top / view_size.y) * slope
 	var bottom_slope: float = (1.0 - 2.0 * bottom / view_size.y) * slope
 	var available_width: float = maxf(1.0, view_size.x - (8.0 if crop_frame else 12.0))
+	if hud_uses_sidebars() or main_menu_view:
+		top = ui_safe_rect.position.y + 6.0
+		bottom = ui_safe_rect.end.y - 6.0
+		top_slope = (1.0 - 2.0 * top / view_size.y) * slope
+		bottom_slope = (1.0 - 2.0 * bottom / view_size.y) * slope
+	if hud_uses_sidebars():
+		# Keep the overview centered while clearing both sidebars.
+		available_width = maxf(1.0, view_size.x - 2.0 * maxf(hud_header.get_global_rect().end.x, view_size.x - hud_footer.position.x) - 12.0)
 	var side_slope: float = slope * available_width / view_size.y
 	var upper_bound: float = -INF
 	var lower_bound: float = INF
@@ -1642,19 +1725,24 @@ func fit_board_overview(position: Vector3, target: Vector3, view_size: Vector2, 
 	# Actual silhouette: only the rear hedge is tall, and the deep river bed
 	# is not at the front. Empty bounding-box corners would force a loose fit.
 	var edges: Array[Vector2] = [Vector2(-0.94, 7.90), Vector2(0.20, 7.90), Vector2(-0.94, -7.70), Vector2(0.20, -7.70), Vector2(1.30, -7.25)]
-	if crop_frame:
+	if crop_frame and not main_menu_view:
 		edges = [Vector2(0.1, 7.0), Vector2(0.1, -7.0), Vector2(1.30, -7.25)]
 	for x in [-half_width, half_width]:
 		for edge in edges:
 			var point := Vector3(x, edge.x, edge.y) - target
 			var depth: float = point.dot(backward)
 			var height: float = point.dot(up)
-			distance = maxf(distance, depth + absf(point.x) / side_slope)
+			if not main_menu_view:
+				distance = maxf(distance, depth + absf(point.x) / side_slope)
 			upper_bound = maxf(upper_bound, height + top_slope * depth)
 			lower_bound = minf(lower_bound, height + bottom_slope * depth)
 			low_height = minf(low_height, height)
 			high_height = maxf(high_height, height)
-	var size: float = maxf(2.0 * half_width * view_size.y / available_width, (high_height - low_height) * view_size.y / (bottom - top))
+	# Behind the main menu, fill the safe screen height even if the board's sides
+	# extend offscreen. Gameplay overview still fits both axes around the HUD.
+	var size: float = (high_height - low_height) * view_size.y / (bottom - top)
+	if not main_menu_view:
+		size = maxf(2.0 * half_width * view_size.y / available_width, size)
 	var offset: float
 	if perspective_view:
 		distance = maxf(distance, (upper_bound - lower_bound) / (top_slope - bottom_slope))
@@ -2167,7 +2255,7 @@ func update_bonuses(fraction: float) -> void:
 			view = panel
 			screen = viewport_size * 0.5
 			if follow_camera:
-				screen.y = hud_header.get_global_rect().end.y + 16.0 + panel.size.y * 0.5
+				screen.y = hud_message_top() + 16.0 + panel.size.y * 0.5
 		else:
 			display_text = "+%d" % amount
 			var label = make_text(display_text, 28, Color("ff75da") if kind == 1 else Color("fff32f"))

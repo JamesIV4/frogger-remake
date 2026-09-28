@@ -97,6 +97,7 @@ try {
     }
 
     Copy-Item -LiteralPath tools/web_audio.js -Destination builds/web/frogger-audio.js -Force
+    Copy-Item -LiteralPath tools/web_layout.js -Destination builds/web/frogger-layout.js -Force
 
     New-Item -ItemType Directory -Force builds/web/licenses | Out-Null
     Copy-Item -LiteralPath LICENSE,THIRD_PARTY.md -Destination builds/web/licenses -Force
@@ -161,7 +162,9 @@ try {
     if (Test-Path -LiteralPath $indexHtmlPath) {
         $html = [System.IO.File]::ReadAllText($indexHtmlPath)
         # Register the first-gesture audio handler before loading the engine.
-        $html = $html.Replace('<script src="index.js"></script>', '<script src="frogger-cache.js"></script><script src="frogger-audio.js"></script><script src="index.js"></script>')
+        $html = $html.Replace('<script src="index.js"></script>', '<script src="frogger-compression.js"></script><script src="frogger-cache.js"></script><script>window.fetch = window.FroggerAssetCache.fetch;</script><script src="frogger-audio.js"></script><script src="frogger-layout.js"></script><script src="index.js"></script>')
+        # Own safe-area placement explicitly for iOS standalone/fullscreen views.
+        $html = $html.Replace('content="width=device-width, user-scalable=no, initial-scale=1.0"', 'content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover"')
         # The browser PCM transport owns the sole audio context. Use Godot's
         # supported Dummy driver rather than leaving a second silent worklet alive.
         $audioStartup = "engine.startGame({"
@@ -207,7 +210,7 @@ try {
 		<link rel="manifest" href="manifest.webmanifest">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<meta name="apple-mobile-web-app-title" content="Frogger">
 		<meta name="theme-color" content="#000000">
 		<script>
@@ -299,6 +302,9 @@ im.resize((512, 512), Image.Resampling.LANCZOS).save(r'$icon512')
   Cache-Control: no-cache
 "@
     Set-Content -LiteralPath $headersPath -Value $headersContent -Encoding ascii
+
+    python tools/compress_web.py
+    Assert-FroggerExit 'Compress web assets'
 
     Write-Host "Exported $froggerTarget"
     Write-Host "Generated $headersPath"
