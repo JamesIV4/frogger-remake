@@ -25,8 +25,8 @@ jobs:
             exit 1
           fi
           if [ ! -f _headers ]; then
-            echo "::warning::_headers file missing; generating default COOP/COEP headers..."
-            printf "/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n" > _headers
+            echo "::warning::_headers file missing; generating entry-page cache headers..."
+            printf "/index.html\n  Cache-Control: no-cache\n/sw.js\n  Cache-Control: no-cache\n" > _headers
           fi
 
       - name: Deploy to Cloudflare Pages

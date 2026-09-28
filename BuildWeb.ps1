@@ -7,11 +7,18 @@ try {
     }
 
     $wasmBinary = "godot/bin/libfrogger_arcade.web.template_release.wasm32.wasm"
-    $cppSources = Get-ChildItem -Path src -Filter *.cpp -Recurse
-    $needCompile = (-not (Test-Path $wasmBinary))
+    $wasmDebugBinary = "godot/bin/libfrogger_arcade.web.template_debug.wasm32.wasm"
+    $godotCppLib = "src/godot-cpp/bin/libgodot-cpp.web.template_release.wasm32.nothreads.a"
+    # Force migration of existing threaded binaries even if sources are older.
+    # Write this stamp only after both non-threaded outputs are complete.
+    $wasmBuildStamp = "godot/bin/.frogger-web-nothreads"
+    $cppSources = Get-ChildItem -Path src -Recurse -File | Where-Object { $_.Extension -in '.cpp', '.h', '.hpp' }
+    $compileInputs = @($cppSources) + @(Get-Item -LiteralPath $PSCommandPath)
+    if (Test-Path -LiteralPath $godotCppLib) { $compileInputs += Get-Item -LiteralPath $godotCppLib }
+    $needCompile = (-not (Test-Path $wasmBinary)) -or (-not (Test-Path $wasmDebugBinary)) -or (-not (Test-Path $wasmBuildStamp)) -or (-not (Test-Path $godotCppLib))
     if (-not $needCompile) {
         $wasmTime = (Get-Item $wasmBinary).LastWriteTime
-        foreach ($src in $cppSources) {
+        foreach ($src in $compileInputs) {
             if ($src.LastWriteTime -gt $wasmTime) {
                 $needCompile = $true
                 break
@@ -20,6 +27,7 @@ try {
     }
 
     if ($needCompile) {
+        if (Test-Path -LiteralPath $wasmBuildStamp) { Remove-Item -LiteralPath $wasmBuildStamp -Force }
         Write-Host "Compiling GDExtension WebAssembly module..."
         if (-not (Get-Command em++ -ErrorAction SilentlyContinue)) {
             $emsdkCandidates = @(
@@ -39,25 +47,15 @@ try {
             throw "em++ not found. Please activate Emscripten SDK."
         }
 
-        $godotCppLib = "src/godot-cpp/bin/libgodot-cpp.web.template_release.wasm32.a"
-        # The stamp records that this lib was built WITH threads=yes. A lib left
-        # over from before that flag existed is silently single-threaded and scons
-        # would never rebuild it, so the stamp forces exactly one rebuild on upgrade.
-        $godotCppThreadsStamp = "src/godot-cpp/bin/.frogger-web-threads-yes"
-        if ((-not (Test-Path $godotCppLib)) -or (-not (Test-Path $godotCppThreadsStamp))) {
-            Write-Host "Building godot-cpp web library (threads=yes)..."
-            Push-Location "src/godot-cpp"
-            try {
-                scons platform=web target=template_release api_version=4.7 threads=yes
-                Assert-FroggerExit 'Build godot-cpp web library'
-            } finally { Pop-Location }
-            New-Item -ItemType Directory -Force (Split-Path -Parent $godotCppThreadsStamp) | Out-Null
-            New-Item -ItemType File -Force $godotCppThreadsStamp | Out-Null
-        }
+        Write-Host "Building godot-cpp web library (threads=no)..."
+        Push-Location "src/godot-cpp"
+        try {
+            scons platform=web target=template_release api_version=4.7 threads=no
+            Assert-FroggerExit 'Build godot-cpp web library'
+        } finally { Pop-Location }
 
         New-Item -ItemType Directory -Force godot/bin | Out-Null
         $cmd = @(
-            "-pthread",
             "-sSIDE_MODULE=1",
             "-sWASM_BIGINT",
             "-sSUPPORT_LONGJMP=wasm",
@@ -81,7 +79,8 @@ try {
         )
         & em++ @cmd
         Assert-FroggerExit 'Compile GDExtension wasm'
-        Copy-Item -LiteralPath $wasmBinary -Destination "godot/bin/libfrogger_arcade.web.template_debug.wasm32.wasm" -Force
+        Copy-Item -LiteralPath $wasmBinary -Destination $wasmDebugBinary -Force
+        Set-Content -LiteralPath $wasmBuildStamp -Value 'threads=no' -Encoding ascii
     }
 
     New-Item -ItemType Directory -Force builds/web | Out-Null
@@ -140,6 +139,7 @@ try {
     $cacheAssetPaths = @(
         'builds/web/index.pck',
         'builds/web/index.wasm',
+        'builds/web/index.side.wasm',
         'builds/web/index.side.part0.wasm',
         'builds/web/index.side.part1.wasm',
         'builds/web/libfrogger_arcade.web.template_release.wasm32.wasm'
@@ -190,9 +190,7 @@ try {
 				status: 200,
 				statusText: 'OK',
 				headers: {
-					'Content-Type': 'application/wasm',
-					'Cross-Origin-Opener-Policy': 'same-origin',
-					'Cross-Origin-Embedder-Policy': 'require-corp'
+                    'Content-Type': 'application/wasm'
 				}
 			});
 		}
@@ -201,7 +199,7 @@ try {
 })();
 		</script>
 "@
-        if ($html -notmatch 'side\.part0\.wasm') {
+        if ((Test-Path -LiteralPath $sideWasmPart0) -and ($html -notmatch 'side\.part0\.wasm')) {
             $html = $html.Replace('<script src="index.js"></script>', "$chunkScript`r`n		<script src=`"index.js`"></script>")
         }
         if ($html -notmatch 'manifest\.webmanifest') {
@@ -274,7 +272,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-	// Let browser handle fetches natively with Cloudflare edge headers
+	// Let the browser handle fetches natively; isolation headers are not needed.
 });
 "@
     Set-Content -LiteralPath $swPath -Value $swContent -Encoding ascii
@@ -295,10 +293,10 @@ im.resize((512, 512), Image.Resampling.LANCZOS).save(r'$icon512')
 
     $headersPath = Join-Path $FroggerRoot "builds/web/_headers"
     $headersContent = @"
-/*
-  Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: require-corp
-  Cross-Origin-Resource-Policy: same-origin
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache
 "@
     Set-Content -LiteralPath $headersPath -Value $headersContent -Encoding ascii
 

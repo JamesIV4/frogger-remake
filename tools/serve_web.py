@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cross-origin isolated HTTP server for Godot Web export builds."""
+"""Local HTTP server for the non-threaded Godot Web export."""
 import os
 import sys
 from functools import partial
@@ -20,9 +20,6 @@ class Handler(SimpleHTTPRequestHandler):
     }
 
     def end_headers(self):
-        self.send_header("Cross-Origin-Opener-Policy", "same-origin")
-        self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
-        self.send_header("Cross-Origin-Resource-Policy", "same-origin")
         self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
         super().end_headers()
 

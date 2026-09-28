@@ -1,25 +1,29 @@
 # Web audio
 
-Desktop Web exports retain Godot's threaded audio driver. On iPhone/iPad the page
-instead plays the original sound CPU's 48 kHz mono PCM through Web Audio buffer
-sources. The reported delay is now measured at **over one second**, on built-in
-speakers in an iOS 27 Home Screen installation. The changes below address output
-ownership and session lifecycle; they are **not a confirmed diagnosis or a
-device-verified fix** for that measured delay.
+All Web exports use non-threaded Godot and play the original sound CPU's 48 kHz
+mono PCM through Web Audio buffer sources. The game and its C++ GDExtension need
+neither SharedArrayBuffer nor cross-origin isolation headers. The browser still
+renders scheduled audio on its audio rendering thread. The non-threaded
+prototype was tested successfully by the user and promoted to the standard web
+build; see [the investigation](CRAZYGAMES_INVESTIGATION.md).
 
-The native sound CPU and its timing are unchanged. The original native queue is
-capped at 2,400 samples (50 ms), and the generator and exported worklet have finite
-ring buffers. The exported threaded worklet uses shared-memory Atomics, not an
-unbounded queue of posted PCM chunks. Those queues do not by themselves account
+This transport originated in an investigation of a reported delay of over one
+second on iOS 27 Home Screen speakers. The lifecycle changes described below
+are not a confirmed root-cause diagnosis of that earlier device report.
+
+The native sound CPU and its timing are unchanged. The native queue is capped
+at 2,400 samples (50 ms). In the previous threaded build, the Godot worklet used
+a finite shared-memory ring buffer, not an unbounded queue of posted PCM chunks.
+Those queues do not by themselves account
 for the reported delay. The actual exported Godot 4.7 resume function already
 accepts any context state other than `running`, including Safari's `interrupted`
 state. An interrupted-state omission is therefore not the diagnosis either.
 
-The iOS path starts Godot with its supported `--audio-driver Dummy` argument,
+The browser PCM path starts Godot with its supported `--audio-driver Dummy` argument,
 before engine initialization. Previously, skipping the GDScript generator still
 left Godot's silent AudioContext/worklet running alongside the helper's context.
-Now the helper owns the sole browser output. Desktop and `?audio=godot` retain
-Godot's threaded driver. Browser buffer-source rendering runs in the browser's
+Now the helper owns the sole browser output. `?audio=godot` selects Godot's
+non-threaded driver for diagnosis. Browser buffer-source rendering runs in the browser's
 audio engine; the main game thread submits PCM each rendered frame.
 
 It schedules at most 75 ms of PCM on the browser clock, drains
@@ -45,9 +49,9 @@ The helper is tracked at `tools/web_audio.js` and copied/injected by `BuildWeb.p
 It does not patch the engine or vendored JavaScript. iPadOS desktop-style user
 agents are detected by `MacIntel` plus touch support. For device comparisons:
 
-- Normal URL: browser PCM on iOS, threaded Godot elsewhere.
-- `?audio=godot`: original Godot transport on every platform.
-- `?audio=browser`: browser PCM on every platform.
+- Normal URL: browser PCM on every platform.
+- `?audio=godot`: non-threaded Godot transport on every platform.
+- `?audio=browser`: explicitly selects the default browser PCM transport.
 - Add `&audio_debug=1` to either explicit URL to log the actual Godot driver name
   (`Dummy` for exclusive browser output, otherwise `AudioWorklet` or
   `ScriptProcessor`) and isolation/shared-memory availability
@@ -71,6 +75,14 @@ ten simulated minutes at 60 FPS. The native `tests/audio_feed.gd` checks the God
 fallback's queue draining and mute/pause/menu gates. Neither test establishes
 actual iOS speaker latency. Compare both URL modes with the same hop/death events
 on the affected device, including after background/foreground and mute/unmute.
+
+`BuildWeb.ps1` builds godot-cpp with `threads=no`, compiles the side module
+without `-pthread`, and uses Godot's non-threaded GDExtension export template.
+A build stamp forces existing threaded game binaries to be rebuilt on upgrade.
+The `.gdextension` descriptor only advertises the web binaries for `nothreads`.
+The local server deliberately omits isolation headers so local testing covers
+ordinary hosting. Use HTTP on localhost or HTTPS when hosted; opening the HTML
+directly through `file://` still does not work.
 
 References checked during investigation:
 

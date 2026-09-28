@@ -52,13 +52,14 @@ function pcm(length = 792) {
     return Buffer.from(samples.buffer).toString('base64');
 }
 
-test('only iOS uses native browser transport by default; explicit A/B overrides work', () => {
+test('all web platforms use browser transport by default; explicit Godot override works', () => {
     assert.equal(setup().api.enabled, true);
     assert.equal(setup({ platform: 'MacIntel', userAgent: 'Macintosh' }).api.enabled, true);
     const desktop = setup({ platform: 'Win32', userAgent: 'Chrome', maxTouchPoints: 0 });
-    assert.equal(desktop.api.enabled, false);
+    assert.equal(desktop.api.enabled, true);
     desktop.event('pointerdown');
-    assert.equal(desktop.contexts.length, 0);
+    assert.equal(desktop.contexts.length, 1);
+    assert.equal(setup({ platform: 'Linux armv8l', userAgent: 'Android' }).api.enabled, true);
     assert.equal(setup({ search: '?audio=godot' }).api.enabled, false);
     assert.equal(setup({ search: '?audio=browser', platform: 'Win32', userAgent: 'Chrome' }).api.enabled, true);
 });
@@ -140,12 +141,12 @@ test('hidden/interrupted output discards old PCM; returning reuses one context a
     assert.equal(first.nodes.length, 2);
 });
 
-test('browser output selects Dummy before startup; normal desktop and A/B Godot retain engine audio', () => {
+test('browser output selects Dummy on desktop and mobile; explicit Godot override retains engine audio', () => {
     const app = setup();
     assert.deepEqual(Array.from(app.api.engine_arguments()), ['--audio-driver', 'Dummy']);
     assert.equal(app.api.diagnostics().ownsOutput, true);
     assert.deepEqual(Array.from(setup({ search: '?audio=godot' }).api.engine_arguments()), []);
-    assert.deepEqual(Array.from(setup({ platform: 'Win32', userAgent: 'Chrome' }).api.engine_arguments()), []);
+    assert.deepEqual(Array.from(setup({ platform: 'Win32', userAgent: 'Chrome' }).api.engine_arguments()), ['--audio-driver', 'Dummy']);
     const failed = setup({ failCreate: true });
     failed.api.engine_arguments();
     failed.event('pointerdown');

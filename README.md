@@ -30,6 +30,29 @@ The checked-in GLBs need no Blender installation to play. To regenerate them, in
 
 For a private Windows build, install Godot's matching .NET export templates and run `./BuildGame.ps1`. The output is under `builds/windows/`. The build includes your local ROM data and is not a ROM-free distribution.
 
+## Web version
+
+Use Godot 4.7 **Standard** and its matching export templates, Emscripten 4.0.20,
+and SCons, then run:
+
+```powershell
+./BuildWeb.ps1
+./RunWeb.ps1
+```
+
+Open `http://localhost:8080/index.html`. The standard web build is non-threaded,
+including its C++ GDExtension, and uses the browser's Web Audio output for live
+ROM audio. It needs no SharedArrayBuffer or cross-origin isolation headers.
+Any ordinary local HTTP server works, including
+`python -m http.server 8080 --directory builds/web`. Opening `index.html` directly
+with `file://` is not supported.
+
+For hosting, upload the **contents** of `builds/web/`, with `index.html` at the
+root and every supporting file included, and serve over HTTPS. This also
+applies to CrazyGames uploads. `DeployWeb.ps1` publishes to Cloudflare Pages;
+the generated `_headers` only controls entry-page/service-worker caching.
+See [Web audio](docs/WEB_AUDIO.md) for audio diagnostics.
+
 ## How fidelity is checked
 
 This project separates **decompilation**, **native translation**, and **behavior verification**. A generated function or a successful Ghidra exit is not, by itself, a proof of gameplay parity.

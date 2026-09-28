@@ -1,7 +1,7 @@
-/* Browser-native output for the ROM's 48 kHz mono PCM on iOS WebKit.
- * The threaded Godot output remains the default everywhere else. This bypasses
- * its streaming mixer/worklet; it does not change the recovered sound CPU.
- * ?audio=godot disables this path; ?audio=browser enables it for comparison.
+/* Browser-native output for the ROM's 48 kHz mono PCM on every Web platform.
+ * This bypasses Godot's streaming mixer/worklet without requiring shared memory;
+ * it does not change the recovered sound CPU.
+ * ?audio=godot selects the engine fallback; ?audio=browser explicitly uses this path.
  */
 (function (root) {
     'use strict';
@@ -13,7 +13,7 @@
     const ios = /iPad|iPhone|iPod/.test(root.navigator.userAgent) ||
         (root.navigator.platform === 'MacIntel' && root.navigator.maxTouchPoints > 1);
     const Context = root.AudioContext || root.webkitAudioContext;
-    const enabled = Boolean(Context) && mode !== 'godot' && (ios || mode === 'browser');
+    const enabled = Boolean(Context) && mode !== 'godot';
     let context = null;
     let gain = null;
     let active = false;
@@ -121,7 +121,7 @@
         enabled,
         engine_arguments() {
             // Select before engine startup: skipping the GDScript player alone
-            // still leaves Godot's silent context and worklet running on iOS.
+            // still leaves Godot's silent context and worklet running.
             ownsOutput = this.enabled;
             return ownsOutput ? ['--audio-driver', 'Dummy'] : [];
         },
