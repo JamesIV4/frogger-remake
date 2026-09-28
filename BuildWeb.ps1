@@ -163,8 +163,13 @@ try {
         $html = [System.IO.File]::ReadAllText($indexHtmlPath)
         # Register the first-gesture audio handler before loading the engine.
         $html = $html.Replace('<script src="index.js"></script>', '<script src="frogger-compression.js"></script><script src="frogger-cache.js"></script><script>window.fetch = window.FroggerAssetCache.fetch;</script><script src="frogger-audio.js"></script><script src="frogger-layout.js"></script><script src="index.js"></script>')
-        # Own safe-area placement explicitly for iOS standalone/fullscreen views.
-        $html = $html.Replace('content="width=device-width, user-scalable=no, initial-scale=1.0"', 'content="width=device-width, user-scalable=no, initial-scale=1.0, viewport-fit=cover"')
+        $layoutVersion = (Get-FileHash -LiteralPath tools/web_layout.js -Algorithm SHA256).Hash.Substring(0, 12).ToLowerInvariant()
+        $html = $html.Replace('src="frogger-layout.js"', "src=`"frogger-layout.js?v=$layoutVersion`"")
+        # Keep the original viewport tag on iOS. The layout helper opts other
+        # platforms into cover before startup, preserving Android safe insets.
+        $engineStartup = 'const engine = new Engine(GODOT_CONFIG);'
+        if (-not $html.Contains($engineStartup)) { throw 'Web shell canvas startup hook missing.' }
+        $html = $html.Replace($engineStartup, "window.FroggerLayout.configure_engine(GODOT_CONFIG);`n$engineStartup")
         # The browser PCM transport owns the sole audio context. Use Godot's
         # supported Dummy driver rather than leaving a second silent worklet alive.
         $audioStartup = "engine.startGame({"
@@ -210,7 +215,7 @@ try {
 		<link rel="manifest" href="manifest.webmanifest">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="apple-mobile-web-app-title" content="Frogger">
 		<meta name="theme-color" content="#000000">
 		<script>

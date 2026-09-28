@@ -1135,6 +1135,9 @@ func setup_ui() -> void:
 		var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 		root.size = viewport_size
 		ui_safe_rect = get_ui_safe_rect(viewport_size)
+		if web_layout != null:
+			fps_container.position = ui_safe_rect.position + Vector2(8, 104)
+			fps_container.z_index = 100
 		var sidebars: bool = hud_uses_sidebars()
 		var panel_width: float = minf(870.0, ui_safe_rect.size.x)
 		var narrow: bool = viewport_size.x < 650.0
@@ -1574,6 +1577,8 @@ func update_hud() -> void:
 			actors_ms,
 			gpu_ms
 		]
+		if web_layout != null:
+			fps_label.text += "\n" + str(web_layout.diagnostics_text())
 
 func bcd_score(addr: int) -> int:
 	var low: int = BoardVisuals.at(state, addr)

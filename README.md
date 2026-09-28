@@ -53,10 +53,16 @@ applies to CrazyGames uploads. `DeployWeb.ps1` publishes to Cloudflare Pages;
 the generated `_headers` only controls entry-page/service-worker caching.
 See [Web audio](docs/WEB_AUDIO.md) for audio diagnostics.
 
-The iOS Home Screen app uses `viewport-fit=cover` and Apple's
-`black-translucent` status-bar mode for an edge-to-edge canvas. Portrait iOS
-does not add safe-area padding; landscape still protects sidebar controls from
-the notch. Android retains its safe-area handling, including the bottom inset.
+The iOS Home Screen app uses the September 27 viewport behavior: browser-default
+viewport fitting, the opaque `black` status bar, and Godot's adaptive canvas
+sizing. Safari reserves the system areas; the game adds no second set of insets
+and never overrides the canvas size or position. This applies in both
+orientations, including the landscape sidebars. Android retains
+`viewport-fit=cover` and explicit safe-area handling, including the bottom inset.
+For device diagnosis, **Options > FPS Counter** also displays the web layout
+revision, screen/window/visual-viewport/canvas sizes, and raw/applied safe insets.
+These measurements are needed to distinguish a page-owned gap from iOS system
+UI that cannot be painted by the game.
 
 Web builds losslessly gzip the large `.wasm` and `.pck` assets into `.bin`
 payloads. The generated loader decompresses them in the browser, so no server
