@@ -19,5 +19,7 @@ try {
     New-Item -ItemType Directory -Force builds/windows/licenses | Out-Null
     Copy-Item -LiteralPath LICENSE,THIRD_PARTY.md -Destination builds/windows/licenses
     Get-ChildItem -LiteralPath godot/Fonts -Filter '*-OFL.txt' | Copy-Item -Destination builds/windows/licenses
+    python tools/package_desktop.py --exe $froggerTarget --output builds/windows
+    Assert-FroggerExit 'Compress desktop build'
     Write-Host "Exported $froggerTarget"
 } finally { Pop-Location }

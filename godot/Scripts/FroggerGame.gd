@@ -6,6 +6,8 @@ const FRAME_SECONDS: float = 33.0 / 2000.0
 var simulation: RefCounted = null
 var state: Dictionary = {"frame": 0, "ram": [], "video": [], "objects": [], "sounds": []}
 var actors: Dictionary = {}
+var actor_variants: Dictionary = {}
+var beaver_actor_pool: Array[ModelActor] = []
 var player_frog: String = "frog"
 var batched_lanes: Dictionary = {}
 var warmup_node: Node3D = null
@@ -38,6 +40,8 @@ var facing: int = 2
 var coin_frames: int = 0
 var render_frames: int = 0
 var high_score: int = 0
+var score_save_pending: bool = false
+var score_save_seconds: float = 0.0
 var screenshot: String = ""
 var water: ShaderMaterial = null
 var camera: Camera3D = null
@@ -78,6 +82,7 @@ var popups: Array = []
 var death_ripple: MeshInstance3D = null
 var ripple_material: StandardMaterial3D = null
 var turtle_supports: Array = []
+var turtle_support_cache: Array = []
 enum BeaverVisualPhase { Hidden, Approach, Grab, Look, Bite, Sink, Done }
 var beaver_phase: BeaverVisualPhase = BeaverVisualPhase.Hidden
 var beaver_phase_seconds: float = 0.0
@@ -152,6 +157,8 @@ var swipe_frames: int = 0
 const SWIPE_THRESHOLD: float = 30.0
 var message_label: Label = null
 var message_hint: Label = null
+var message_layout_key: Array = []
+var message_layout_size: Vector2 = Vector2.ZERO
 var hud_header: PanelContainer = null
 var hud_footer: PanelContainer = null
 var last_input_method: String = "keyboard"
@@ -178,6 +185,7 @@ var prof_actors_us: float = 0.0
 var prof_hud_us: float = 0.0
 var prof_total_script_us: float = 0.0
 var prof_last_steps: int = 0
+var fps_update_seconds: float = 0.25
 var display_font: Font = null
 var body_font: Font = null
 
@@ -212,7 +220,8 @@ func _init():
 
 func _ready() -> void:
 	if OS.has_feature("web"):
-		web_crazygames = JavaScriptBridge.get_interface("FroggerCrazyGames")
+		# The normal Web shell intentionally has no CrazyGames SDK bridge.
+		web_crazygames = JavaScriptBridge.get_interface("window").FroggerCrazyGames
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot="):
 			screenshot = arg.substr(13)
@@ -220,6 +229,7 @@ func _ready() -> void:
 	setup_world()
 	setup_ui()
 	load_preferences()
+	prepare_gameplay_actors()
 	reset_machine()
 	for i in range(180):
 		simulation.step()
@@ -263,6 +273,7 @@ func reset_machine() -> void:
 	clear_presentation()
 
 func start_game(players: int) -> void:
+	flush_score_save()
 	sync_crazygames()
 	if web_crazygames != null:
 		if not bool(web_crazygames.request_start(players)):
@@ -334,13 +345,14 @@ func _process(delta: float) -> void:
 	update_mouse_visibility(delta)
 	if simulation == null:
 		return
-	if warmup_node != null:
+	if warmup_node != null and warmup_frames < 2:
 		# Let the hidden precompiled actors draw behind the menu so GPU uploads
 		# happen now. The node hides after two presented frames; the compiled
 		# shaders stay cached for gameplay without per-type upload stutters.
 		warmup_frames += 1
 		if warmup_frames >= 2:
 			warmup_node.visible = false
+			warmup_node.process_mode = Node.PROCESS_MODE_DISABLED
 	var t_start: int = Time.get_ticks_usec()
 	presentation_delta = clampf(delta, 0.0, 0.1)
 	var steps: int = 0
@@ -371,6 +383,10 @@ func _process(delta: float) -> void:
 	update_camera(delta)
 	var t_cam: int = Time.get_ticks_usec()
 	update_hud()
+	if score_save_pending:
+		score_save_seconds += delta
+		if score_save_seconds >= 1.0 or paused or not started or BoardVisuals.at(state, 0x83fe) == 0:
+			flush_score_save()
 	var t_hud: int = Time.get_ticks_usec()
 	if water != null:
 		water.set_shader_parameter("clock", float(state.get("frame", 0)) * FRAME_SECONDS)
@@ -621,14 +637,41 @@ func toggle_pause_from_gear() -> void:
 		show_menu(true)
 
 func actor(key: String, model: String) -> ModelActor:
-	if actors.has(key) and not actors[key].root.scene_file_path.ends_with("/%s.glb" % model):
-		actors[key].root.queue_free()
-		actors.erase(key)
-		if key == "player":
-			actors.erase("passenger")
-	if not actors.has(key):
-		actors[key] = ModelActor.new(self, model)
+	var current: ModelActor = actors.get(key)
+	if current != null and current.model_name == model:
+		return current
+	if current != null:
+		current.set_active(false)
+	var variants: Dictionary = actor_variants.get(key, {})
+	if not variants.has(model):
+		variants[model] = ModelActor.new(self, model)
+		actor_variants[key] = variants
+	actors[key] = variants[model]
 	return actors[key]
+
+func prepare_gameplay_actors() -> void:
+	# Fixed ROM slots: prepare both player colors and all possible turtle
+	# members before play. Wrapping a turtle reuses its slot's existing rig.
+	for model in ["frog", "lady_frog"]:
+		for key in ["player", "passenger", "lady", "home0", "home1", "home2", "home3", "home4"]:
+			actor(key, model)
+	for lane in [1, 4]:
+		for index in range(8):
+			for member in range(2 if lane == 1 else 3):
+				actor("lane%d.%d.%d" % [lane, index, member], "turtle")
+	for wrap in [-1, 0, 1]:
+		actor("lane0.0.0.%d.true" % wrap, "river_gator")
+	for index in range(5):
+		actor("homefly%d" % index, "fly")
+		actor("homegator%d" % index, "gator")
+	for address in [0x8048, 0x8050]:
+		actor("hazard%d" % address, "snake")
+	actor("hazard32856", "otter")
+	for index in range(3):
+		beaver_actor_pool.append(ModelActor.new(self, "otter"))
+	# 8 groups per lane, 2/3 turtles per group, and three wrap positions.
+	for index in range(120):
+		turtle_support_cache.append({"x": 0.0, "row": 0, "depth": 0.0})
 
 func active_frog_model() -> String:
 	if BoardVisuals.at(state, 0x83fd) == 2:
@@ -642,12 +685,7 @@ func select_player_frog(model: String) -> void:
 	if model == player_frog or model not in ["frog", "lady_frog"]:
 		return
 	player_frog = model
-	# The passenger is owned by its player's socket; freeing that root also
-	# frees the passenger. Recreate cached actors with their newly selected roles.
-	for view in actors.values():
-		if view.root.get_parent() == self:
-			view.root.queue_free()
-	actors.clear()
+	# Both colors remain prepared for player handoffs and menu selection.
 	save_preferences()
 	show_menu(false)
 
@@ -711,6 +749,7 @@ func setup_world() -> void:
 		for clip in WarmupClips[model]:
 			showcase.play(clip)
 		var double := ModelActor.new(warmup_node, model)
+		_hide_warmup_shadows(double.root)
 		double.set_active(true)
 	# Pre-build the rigid batched equivalents too: touching every log/vehicle
 	# body and wheel mesh compiles the lane shader against those vertex layouts.
@@ -748,6 +787,14 @@ func setup_world() -> void:
 	warm_ripple_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	warm_ripple.material_override = warm_ripple_mat
 	warmup_node.add_child(warm_ripple)
+	# Keep the actual effect's mesh/material ready as well as its shader.
+	ripple_material = warm_ripple_mat.duplicate()
+	death_ripple = MeshInstance3D.new()
+	death_ripple.mesh = warm_torus
+	death_ripple.material_override = ripple_material
+	death_ripple.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	death_ripple.visible = false
+	add_child(death_ripple)
 	var is_web: bool = OS.has_feature("web")
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
@@ -961,7 +1008,20 @@ func save_preferences() -> void:
 	c.set_value("play", "desktop_follow_zoom_percent", desktop_follow_zoom_percent)
 	c.set_value("play", "mobile_follow_zoom_percent", mobile_follow_zoom_percent)
 	c.set_value("play", "fullscreen", fullscreen)
-	c.save("user://settings.cfg")
+	if c.save("user://settings.cfg") == OK:
+		score_save_pending = false
+		score_save_seconds = 0.0
+
+func flush_score_save() -> void:
+	if score_save_pending:
+		save_preferences()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_CLOSE_REQUEST:
+		flush_score_save()
+
+func _exit_tree() -> void:
+	flush_score_save()
 
 func style_box(color: Color, radius: int = 12, border: int = 0) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -1529,20 +1589,25 @@ func add_button(text_val: String, action: Callable) -> void:
 		b.grab_focus()
 
 func update_message_layout() -> void:
-	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	var text_width: float = 0.0
-	var labels: Array = [message_label]
-	if not message_hint.text.is_empty():
-		labels.append(message_hint)
-	for label in labels:
-		var font: Font = label.get_theme_font("font")
-		text_width = maxf(text_width, font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size")).x)
-	var width: float = minf(text_width + 44.0, ui_safe_rect.size.x - 48.0)
-	var height: float = ModalVerticalPadding * 2.0 + 18.0 * float(labels.size() - 1)
-	for label in labels:
-		var font: Font = label.get_theme_font("font")
-		height += font.get_multiline_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, width - 44.0, label.get_theme_font_size("font_size")).y
-	message_panel.size = Vector2(width, height)
+	var layout_key: Array = [message_label.text, message_hint.text, ui_safe_rect.size.x,
+		message_label.get_theme_font("font"), message_hint.get_theme_font("font"),
+		message_label.get_theme_font_size("font_size"), message_hint.get_theme_font_size("font_size")]
+	if layout_key != message_layout_key:
+		message_layout_key = layout_key
+		var text_width: float = 0.0
+		var labels: Array = [message_label]
+		if not message_hint.text.is_empty():
+			labels.append(message_hint)
+		for label in labels:
+			var font: Font = label.get_theme_font("font")
+			text_width = maxf(text_width, font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size")).x)
+		var width: float = minf(text_width + 44.0, ui_safe_rect.size.x - 48.0)
+		var height: float = ModalVerticalPadding * 2.0 + 18.0 * float(labels.size() - 1)
+		for label in labels:
+			var font: Font = label.get_theme_font("font")
+			height += font.get_multiline_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, width - 44.0, label.get_theme_font_size("font_size")).y
+		message_layout_size = Vector2(width, height)
+	message_panel.size = message_layout_size
 	var center: Vector2 = ui_safe_rect.get_center()
 	if follow_camera and (level_intro_waiting or level_intro_fade > 0.0):
 		center.y = ui_safe_rect.position.y + ui_safe_rect.size.y / 3.0
@@ -1624,7 +1689,9 @@ func update_hud() -> void:
 		best = maxi(bcd_score(0x83ed), bcd_score(0x83eb)) if started else high_score
 	if best > high_score:
 		high_score = best
-		save_preferences()
+		# Coalesce rapid +10 hop records rather than synchronously rewriting
+		# settings/SDK storage on every hop. Flush on pause, exit and restart too.
+		score_save_pending = true
 	high_label.text = "%05d" % high_score
 	level_label.text = "PLAYER %d     •     LEVEL %02d" % [player, maxi(1, BoardVisuals.at(state, 0x83b7))]
 	lives_label.text = "FROGS"
@@ -1644,36 +1711,41 @@ func update_hud() -> void:
 		for i in range(lives_icons.get_child_count()):
 			lives_icons.get_child(i).visible = (i < count)
 	timer_bar.value = clampf(float(BoardVisuals.at(state, 0x83dd)) / 60.0, 0.0, 1.0) * 100.0
-	message_hint.text = ""
+	var next_hint: String = ""
 	message_panel.modulate.a = 1.0
 	update_level_intro()
 	if started and not paused:
 		if BoardVisuals.at(state, 0x83fe) == 0:
 			message_label.text = "GAME OVER"
-			message_hint.text = restart_prompt()
+			next_hint = restart_prompt()
 		elif level_intro_waiting or level_intro_fade > 0.0:
 			message_label.text = "LEVEL %d" % level_intro_number
-			message_hint.text = "GET READY" if level_intro_waiting else "GO"
+			next_hint = "GET READY" if level_intro_waiting else "GO"
 			message_panel.modulate.a = level_intro_fade
 		else:
 			message_label.text = ""
+	message_hint.text = next_hint
 	message_panel.visible = message_label.text.length() > 0
 	message_hint.visible = not message_hint.text.is_empty()
 	update_message_layout()
-	if fps_label != null and show_fps:
+	fps_update_seconds += presentation_delta
+	if fps_label != null and show_fps and fps_update_seconds >= 0.25:
+		fps_update_seconds = 0.0
 		var fps: float = Engine.get_frames_per_second()
 		var frame_ms: float = presentation_delta * 1000.0
 		var sim_ms: float = prof_sim_us / 1000.0
 		var audio_ms: float = prof_audio_us / 1000.0
 		var actors_ms: float = prof_actors_us / 1000.0
 		var script_ms: float = prof_total_script_us / 1000.0
-		var gpu_ms: float = maxf(0.0, frame_ms - script_ms)
-		fps_label.text = "FPS: %3d (%4.1f ms)\nSim:   %4.1f ms (%d step%s)\nAudio: %4.1f ms\nActors:%4.1f ms\nGPU:   %4.1f ms" % [
+		# Frame time minus scripts includes engine work, scheduling and vsync;
+		# it is not a GPU timer. Throttle text/layout diagnostics to 4 Hz.
+		var other_ms: float = maxf(0.0, frame_ms - script_ms)
+		fps_label.text = "FPS: %3d (%4.1f ms)\nSim:   %4.1f ms (%d step%s)\nAudio: %4.1f ms\nActors:%4.1f ms\nOther: %4.1f ms" % [
 			int(fps), frame_ms,
 			sim_ms, prof_last_steps, ("s" if prof_last_steps != 1 else " "),
 			audio_ms,
 			actors_ms,
-			gpu_ms
+			other_ms
 		]
 		if web_layout != null:
 			fps_label.text += "\n" + str(web_layout.diagnostics_text())
@@ -1908,10 +1980,7 @@ func clear_presentation() -> void:
 	beaver_display_generation = -1
 	beaver_swim_offset = 0.0
 	for exit_visual in beaver_exits:
-		var exit_actor: ModelActor = actors.get(exit_visual.key)
-		if exit_actor != null:
-			exit_actor.root.queue_free()
-			actors.erase(exit_visual.key)
+		release_beaver_actor(exit_visual.key)
 	beaver_exits.clear()
 	beaver_exit_serial = 0
 	for p in popups:
@@ -1942,17 +2011,21 @@ func track_lady_hop() -> void:
 
 func update_actors() -> void:
 	var fraction: float = render_fraction()
-	for a in actors.values():
-		a.set_active(false)
+	for key in actors:
+		actors[key].frame_requested = false
 	update_bonuses(fraction)
 	update_lanes(fraction)
 	update_player(fraction)
 	update_homes_and_hazards()
+	for key in actors:
+		var view: ModelActor = actors[key]
+		if not view.frame_requested:
+			view.set_active(false)
 
 func update_player(fraction: float) -> void:
 	var player = actor("player", active_frog_model())
 	player.root.scale = Vector3.ONE
-	player.set_squash_color(0.0)
+	var squash_color: float = 0.0
 	var cur_frame: int = state.get("frame", 0)
 	var holding_home: bool = home_arrival.active(cur_frame, fraction)
 	player.set_active(holding_home or FrogVisualState.player_on_board(state))
@@ -1990,7 +2063,7 @@ func update_player(fraction: float) -> void:
 			if frog_visual.death_row <= 144 or frog_visual.death_row >= 208:
 				h = lerpf(h, maxf(h, 0.09), squash)
 			player.root.scale = Vector3(1.0 + 0.50 * squash, 1.0 - 0.92 * squash, 1.0 + 0.40 * squash)
-			player.set_squash_color(squash)
+			squash_color = squash
 		player.root.position = pos3(float(frog_visual.death_x), float(frog_visual.death_row), h)
 		player.pose("Drown" if frog_visual.drowning else "Squash", age)
 	else:
@@ -2006,15 +2079,13 @@ func update_player(fraction: float) -> void:
 		else:
 			player.play("Idle")
 
+	player.set_squash_color(squash_color)
 	if frog_visual.carrying or (holding_home and home_arrival.passenger):
 		if player.passenger_socket == null:
 			push_error("The Blender frog rig has no PassengerSocket")
-		var passenger: ModelActor
-		if not actors.has("passenger"):
-			passenger = ModelActor.new(player.passenger_socket, rescue_frog_model())
-			actors["passenger"] = passenger
-		else:
-			passenger = actors["passenger"]
+		var passenger := actor("passenger", rescue_frog_model())
+		if passenger.root.get_parent() != player.passenger_socket:
+			passenger.root.reparent(player.passenger_socket, false)
 		passenger.set_active(true)
 		passenger.root.position = Vector3.ZERO
 		passenger.root.scale = Vector3.ONE * PassengerScale
@@ -2065,7 +2136,11 @@ func update_lanes(fraction: float) -> void:
 					var x: float = center + float(wrap) * 256.0 + (float(member) - float(members - 1) / 2.0) * 16.0
 					var crocodile: bool = lane == 0 and index == 0 and river_gator_visual.is_gator(x + 12.0 + float(width) / 2.0)
 					if is_turtle:
-						turtle_supports.append({"x": x, "row": row, "depth": depth})
+						var support: Dictionary = turtle_support_cache[turtle_supports.size()]
+						support.x = x
+						support.row = row
+						support.depth = depth
+						turtle_supports.append(support)
 					var half_width: float = (float(width) - 3.0) * 0.52 if (lane < 5 and not is_turtle) else (9.0 if is_turtle else (15.0 if lane == 6 else 10.0))
 					var gator_fit = BoardVisuals.fit_river_gator(width) if crocodile else {}
 					var render_x: float = x + (gator_fit.get("center_offset_pixels", 0.0) if crocodile else 0.0)
@@ -2078,7 +2153,9 @@ func update_lanes(fraction: float) -> void:
 					if batch != null and not crocodile:
 						batch.place(batched_lane_transform(lane, width, model, render_x, float(row)))
 						continue
-					var actor_key: String = "lane%d.%d.%d.%d.%s" % [lane, index, member, wrap, str(crocodile)]
+					# A turtle is narrower than the 32px gap between board copies:
+					# at most one wrap is visible, so it needs only one persistent rig.
+					var actor_key: String = "lane%d.%d.%d" % [lane, index, member] if is_turtle else "lane%d.%d.%d.%d.%s" % [lane, index, member, wrap, str(crocodile)]
 					var obj = actor(actor_key, "river_gator" if crocodile else model)
 					obj.set_active(true)
 					var straddling_edge: bool = absf(bounds_center - 120.0) + half_width > 110.0
@@ -2267,13 +2344,17 @@ func update_beaver_exits() -> void:
 				visual.log_x = tracked_end
 		advance_beaver_exit(visual, 0.0 if paused else presentation_delta)
 		if visual.phase == BeaverVisualPhase.Done:
-			var exit_actor: ModelActor = actors.get(visual.key)
-			if exit_actor != null:
-				exit_actor.root.queue_free()
-				actors.erase(visual.key)
+			release_beaver_actor(visual.key)
 			beaver_exits.remove_at(index)
 			continue
 		render_beaver(visual.key, visual.x, visual.row, visual.heading, visual.phase, visual.seconds, visual.hit)
+
+func release_beaver_actor(key: String) -> void:
+	var view: ModelActor = actors.get(key)
+	if view != null:
+		view.set_active(false)
+		beaver_actor_pool.append(view)
+		actors.erase(key)
 
 func nearest_log_end(row: float, heading: int, around_x: float) -> Variant:
 	var lane: int = int(roundf(row / 16.0)) - 3
@@ -2395,6 +2476,8 @@ func update_beaver(cur_frame: int) -> void:
 
 func render_beaver(key: String, x: float, row: float, heading: int, phase: int, seconds: float, player_hit: bool) -> void:
 	var sink_amount: float = clampf(seconds / BeaverSinkSeconds, 0.0, 1.0) if phase == BeaverVisualPhase.Sink else 0.0
+	if key.begins_with("beaver-exit-") and not actors.has(key):
+		actors[key] = beaver_actor_pool.pop_back() if not beaver_actor_pool.is_empty() else ModelActor.new(self, "otter")
 	var a = actor(key, "otter")
 	a.set_active(true)
 	a.set_clipped(true)

@@ -9,6 +9,9 @@ var surface_bindings: Array = []
 var current_anim: String = ""
 var squash_color: float = -1.0
 var is_active: bool = true
+var frame_requested: bool = false
+var model_name: String
+var animation_names: Dictionary = {}
 var is_clipped: bool = false
 var supports_squash_color: bool = false
 var squash_materials: Dictionary = {}
@@ -65,6 +68,7 @@ void fragment(){
 	return clipped_shaders[animated_squash]
 
 func _init(parent: Node, asset: String):
+	model_name = asset
 	# Frog-owned material uniforms avoid GLES3/WebGL's limited per-instance
 	# uniform pool. Other actors continue sharing immutable materials.
 	supports_squash_color = asset in ["frog", "lady_frog"]
@@ -132,6 +136,7 @@ func set_clipped(clipped: bool) -> void:
 		binding["mesh"].set_surface_override_material(binding["surface"], mat)
 
 func set_active(active: bool) -> void:
+	frame_requested = active
 	if is_active == active:
 		return
 	is_active = active
@@ -154,33 +159,42 @@ func set_squash_color(amount: float) -> void:
 		materials["unclipped"].set_shader_parameter("squash_color", amount)
 		materials["clipped"].set_shader_parameter("squash_color", amount)
 
+func animation_name(clip: String) -> StringName:
+	if not animation_names.has(clip):
+		animation_names[clip] = &""
+		for name in animator.get_animation_list():
+			if name.to_lower().ends_with(clip.to_lower()):
+				animation_names[clip] = StringName(name)
+				break
+	return animation_names[clip]
+
 func play(clip: String, loop: bool = true, speed: float = 1.0) -> void:
 	if animator == null:
 		return
-	for anim_name in animator.get_animation_list():
-		if anim_name.to_lower().ends_with(clip.to_lower()):
-			if current_anim == anim_name and animator.is_playing():
-				return
-			var anim = animator.get_animation(anim_name)
-			anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
-			animator.speed_scale = speed
-			animator.play(anim_name, 0.035)
-			current_anim = anim_name
-			return
+	var anim_name := animation_name(clip)
+	if anim_name == &"":
+		return
+	if current_anim == anim_name and animator.is_playing():
+		return
+	var anim = animator.get_animation(anim_name)
+	anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+	animator.speed_scale = speed
+	animator.play(anim_name, 0.035)
+	current_anim = anim_name
 
 func pose(clip: String, seconds: float) -> void:
 	if animator == null:
 		return
-	for anim_name in animator.get_animation_list():
-		if anim_name.to_lower().ends_with(clip.to_lower()):
-			var anim = animator.get_animation(anim_name)
-			if current_anim != anim_name:
-				animator.play(anim_name, 0.0)
-				current_anim = anim_name
-			animator.seek(clampf(seconds, 0.0, anim.length), true, true)
-			animator.pause()
-			return
-	push_error("Missing required clip %s on %s" % [clip, root.name])
+	var anim_name := animation_name(clip)
+	if anim_name == &"":
+		push_error("Missing required clip %s on %s" % [clip, root.name])
+		return
+	var anim = animator.get_animation(anim_name)
+	if current_anim != anim_name:
+		animator.play(anim_name, 0.0)
+		current_anim = anim_name
+	animator.seek(clampf(seconds, 0.0, anim.length), true, true)
+	animator.pause()
 
 func _find_node_of_type(n: Node, type_name: String) -> Node:
 	if n.is_class(type_name):

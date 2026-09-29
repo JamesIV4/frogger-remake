@@ -52,6 +52,21 @@ function pcm(length = 792) {
     return Buffer.from(samples.buffer).toString('base64');
 }
 
+test('reused decode scratch preserves queued samples and drops only the oldest overflow', () => {
+    const app = setup();
+    app.event('pointerdown');
+    app.api.set_active(true);
+    app.api.push_pcm(pcm(792));
+    const first = app.contexts[0].nodes[0].buffer.samples;
+    const expected = Float32Array.from(first);
+    app.api.push_pcm(pcm(4800));
+    const newest = app.contexts[0].nodes.at(-1).buffer.samples;
+    assert.deepEqual(first, expected);
+    assert.equal(newest.length, 2400);
+    assert.equal(newest[0], 0.5);
+    assert.equal(app.api.diagnostics().droppedFrames, 2400);
+});
+
 test('all web platforms use browser transport by default; explicit Godot override works', () => {
     assert.equal(setup().api.enabled, true);
     assert.equal(setup({ platform: 'MacIntel', userAgent: 'Macintosh' }).api.enabled, true);

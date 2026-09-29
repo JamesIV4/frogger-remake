@@ -5,13 +5,27 @@ class Track:
 	var display_x: float
 	var velocity: float = 0.0
 	var frame: int
-	var history: Array = []
+	var history_frames: PackedInt32Array = []
+	var history_x: PackedFloat64Array = []
+	var history_next: int = 0
+	var history_count: int = 0
 
-	func _init(pos: float, f: int):
+	func _init(pos: float, f: int, capacity: int):
 		native_x = pos
 		display_x = pos
 		frame = f
-		history.append({"frame": f, "x": pos})
+		history_frames.resize(capacity)
+		history_x.resize(capacity)
+		append_history(f, pos)
+
+	func append_history(f: int, pos: float) -> void:
+		history_frames[history_next] = f
+		history_x[history_next] = pos
+		history_next = (history_next + 1) % history_frames.size()
+		history_count = mini(history_count + 1, history_frames.size())
+
+	func oldest_index() -> int:
+		return history_next if history_count == history_frames.size() else 0
 
 var tracks: Dictionary = {}
 var history_frames: int
@@ -39,27 +53,25 @@ func velocity_x(id: int) -> float:
 
 func step(id: int, native_pos: float, native_frame: int, render_seconds: float, paused: bool = false) -> float:
 	if not tracks.has(id):
-		tracks[id] = Track.new(native_pos, native_frame)
+		tracks[id] = Track.new(native_pos, native_frame, history_frames)
 		return wrap_val(native_pos)
 	var track: Track = tracks[id]
 	var elapsed: int = native_frame - track.frame
 	if elapsed < 0 or elapsed > 24:
-		tracks[id] = Track.new(native_pos, native_frame)
+		tracks[id] = Track.new(native_pos, native_frame, history_frames)
 		return wrap_val(native_pos)
 	if elapsed > 0:
 		var advance: float = native_pos - track.native_x
 		advance -= 256.0 * roundf(advance / 256.0)
 		if absf(advance) > 12.0:
-			tracks[id] = Track.new(native_pos, native_frame)
+			tracks[id] = Track.new(native_pos, native_frame, history_frames)
 			return wrap_val(native_pos)
 		track.native_x += advance
 		track.frame = native_frame
-		track.history.append({"frame": native_frame, "x": track.native_x})
-		while track.history.size() > history_frames:
-			track.history.pop_front()
-		var oldest: Dictionary = track.history[0]
-		if native_frame > oldest.frame:
-			var desired: float = (track.native_x - oldest.x) / float(native_frame - oldest.frame)
+		track.append_history(native_frame, track.native_x)
+		var oldest: int = track.oldest_index()
+		if native_frame > track.history_frames[oldest]:
+			var desired: float = (track.native_x - track.history_x[oldest]) / float(native_frame - track.history_frames[oldest])
 			track.velocity += (desired - track.velocity) * (1.0 - exp(-0.55 * elapsed))
 	if not paused:
 		track.display_x += track.velocity * clampf(render_seconds / FRAME_SECONDS, 0.0, 1.5)
@@ -73,8 +85,8 @@ func step(id: int, native_pos: float, native_frame: int, render_seconds: float, 
 		var shift: float = 256.0 * floorf(track.display_x / 256.0)
 		track.display_x -= shift
 		track.native_x -= shift
-		for item in track.history:
-			item.x -= shift
+		for index in range(track.history_count):
+			track.history_x[index] -= shift
 	return wrap_val(track.display_x)
 
 static func wrap_val(x: float) -> float:

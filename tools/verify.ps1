@@ -15,6 +15,7 @@ try {
     node tools/audit.mjs; Assert-FroggerExit 'Coverage audit'
     & (Get-FroggerGodot) --headless --path godot --quit; Assert-FroggerExit 'Godot headless verification'
     & (Get-FroggerGodot) --headless --path godot --script ../tests/presentation_test.gd; Assert-FroggerExit 'Presentation and menu behavior'
+    & (Get-FroggerGodot) --headless --path godot --script ../tests/hitch_regression_test.gd; Assert-FroggerExit 'Hitch regression and actor reuse'
     & (Get-FroggerGodot) --headless --path godot --script ../tests/beaver_motion_test.gd; Assert-FroggerExit 'Native beaver movement and presentation continuity'
     & (Get-FroggerGodot) --headless --path godot --script ../tests/camera_test.gd; Assert-FroggerExit 'Mobile and desktop camera behavior'
     & (Get-FroggerGodot) --headless --path godot --script ../tests/mobile_ui_test.gd -- --mobile-ui; Assert-FroggerExit 'Mobile UI orientation scaling'

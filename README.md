@@ -28,7 +28,7 @@ The setup verifies the exact ROM set, prepares local data, regenerates native C#
 
 The checked-in GLBs need no Blender installation to play. To regenerate them, install Blender 5.1+, set `BLENDER_EXE` if necessary, and run `./tools/setup.ps1 -RebuildModels`. Editable source files are in `art/source/`; the reproducible recipe is `art/scripts/build_assets.py`.
 
-For a private Windows build, install Godot's matching .NET export templates and run `./BuildGame.ps1`. The output is under `builds/windows/`. The build includes your local ROM data and is not a ROM-free distribution.
+For a private Windows build, install Godot's matching export templates and run `./BuildGame.ps1`. The runnable files are under `builds/windows/`. The script also creates `builds/windows/Frogger Remake.zip`, a compressed download containing the executable, its GDExtension DLL, and licenses. Extract the ZIP before running the game. The build includes your local ROM data and is not a ROM-free distribution.
 
 ## Web version
 

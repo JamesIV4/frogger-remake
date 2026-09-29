@@ -26,6 +26,10 @@
     let clockAnchor = null;
     let lastReport = -Infinity;
     const sources = new Set();
+    // Reuse the bounded PCM decode storage. AudioBuffer copies the submitted
+    // view synchronously, so the next frame can overwrite this scratch buffer.
+    const pcmScratch = new Float32Array(RATE * 0.05);
+    const byteScratch = new Uint8Array(pcmScratch.buffer);
     const stats = { resets: 0, droppedFrames: 0, submittedFrames: 0, clockDriftMs: 0, error: '' };
 
     function clear() {
@@ -147,16 +151,14 @@
         push_pcm(encoded) {
             if (!this.enabled || !active || !context || context.state !== 'running' || root.document.hidden) return;
             const binary = root.atob(encoded);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; ++i) bytes[i] = binary.charCodeAt(i);
-            if (bytes.length % 4) return;
-            let pcm = new Float32Array(bytes.buffer);
+            if (binary.length % 4) return;
             // No pending PCM exists outside the source nodes. Catch-up frames
             // retain the newest 50 ms; a blocked device cannot build a backlog.
-            if (pcm.length > RATE * 0.05) {
-                stats.droppedFrames += pcm.length - RATE * 0.05;
-                pcm = pcm.subarray(pcm.length - RATE * 0.05);
-            }
+            const length = Math.min(binary.length, byteScratch.length);
+            const offset = binary.length - length;
+            stats.droppedFrames += offset / 4;
+            for (let i = 0; i < length; ++i) byteScratch[i] = binary.charCodeAt(offset + i);
+            const pcm = pcmScratch.subarray(0, length / 4);
             if (!pcm.length) return;
             const now = context.currentTime;
             const duration = pcm.length / RATE;

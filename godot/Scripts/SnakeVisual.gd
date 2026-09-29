@@ -14,6 +14,7 @@ var yaw: float = 0.0
 var turn_start: float = -100.0
 var last_time: float = -1.0
 var lateral: float = 0.0
+var segment_bones: PackedInt32Array = []
 
 func reset() -> void:
 	trail.clear()
@@ -93,6 +94,11 @@ func update(actor: ModelActor, head_x: float, direction: int, origin: Vector3,
 		actor.root.position.y += log_surface_offset(head, left, right)
 	actor.pose("Move", fmod(time, 1.2))
 	var skeleton: Skeleton3D = actor.skeleton
+	if segment_bones.is_empty():
+		for segment in range(1, 15):
+			segment_bones.append(skeleton.find_bone("Segment%d" % segment))
+	var inverse_basis := skeleton.global_basis.inverse()
+	var inverse_transform := skeleton.global_transform.affine_inverse()
 	# Global bone poses let each section follow the curved trail while keeping
 	# its original skin weights and the steady head. Everything remains planar.
 	for segment in range(1, 15):
@@ -107,8 +113,8 @@ func update(actor: ModelActor, head_x: float, direction: int, origin: Vector3,
 		world_point.y -= (body_bottom(distance) - ModelFootprints.SnakeBottomTiles) * Scale
 		if on_log:
 			world_point.y += log_surface_offset(point, left, right)
-		var pose := Transform3D((skeleton.global_basis.inverse() * basis).orthonormalized(), skeleton.to_local(world_point))
-		skeleton.set_bone_global_pose_override(skeleton.find_bone("Segment%d" % segment), pose, 1.0, true)
+		var pose := Transform3D((inverse_basis * basis).orthonormalized(), inverse_transform * world_point)
+		skeleton.set_bone_global_pose_override(segment_bones[segment - 1], pose, 1.0, true)
 
 func body_point(distance: float, time: float, left: float, right: float) -> Vector2:
 	var point: Vector2 = sample_trail(distance)
