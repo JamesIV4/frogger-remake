@@ -467,6 +467,69 @@ static std::unique_ptr<ArcadeSimulationCore> StartedSim(const std::vector<uint8_
     return s;
 }
 
+static void RunTopLogInputTests(const std::vector<uint8_t>& rom) {
+    auto fixture = [&](bool modern, int player, int bay, int x, int row, bool occupied) {
+        auto sim = StartedSim(rom);
+        sim->Modern(modern);
+        sim->Poke(0x83fd, player);
+        sim->Poke(0x8044, x); sim->Poke(0x8047, row);
+        sim->Poke(0x8004, 0); sim->Poke(0x83cd, 0); sim->Poke(0x8268, 0);
+        for (int a = 0x8248; a < 0x8254; a++) sim->Poke(a, 0);
+        // Stop top-log motion and its carry using the ROM speed and phase
+        // bytes, not repeated frog-position corrections or modified opcodes.
+        sim->Poke(0x819b, 0); sim->Poke(0x81a6, 0);
+        sim->Poke(0x8100, 1); sim->Poke(0x8101, (x + 40) & 255);
+        sim->Poke((player == 2 ? 0x8263 : 0x825e) + bay, occupied ? 1 : 0);
+        return sim;
+    };
+    int cases = 0;
+    for (int player : {1, 2}) for (int bay = 0; bay < 5; bay++) {
+        for (int offset = -3; offset <= 4; offset++) for (int buttons : {2, 4, 8}) {
+            int x = 24 + bay * 48 + offset;
+            auto empty = fixture(true, player, bay, x, 48, false);
+            auto filled = fixture(true, player, bay, x, 48, true);
+            for (int frame = 0; frame < 24; frame++) {
+                empty->Step(buttons); filled->Step(buttons);
+                for (int address : {0x8044, 0x8047, 0x8004, 0x8248, 0x8249, 0x824a, 0x824b,
+                                    0x824c, 0x824d, 0x824e, 0x824f, 0x8250, 0x8251, 0x8252, 0x8253}) {
+                    Check(empty->Peek(address) == filled->Peek(address),
+                          "Filled home interrupted a Modern sideways/down hop on the top log");
+                }
+                Check(filled->BonusAwards.empty(), "Sideways/down input awarded a home");
+            }
+            cases++;
+        }
+        // The original ROM starves even down input while under a filled bay.
+        auto classic = fixture(false, player, bay, 24 + bay * 48, 48, true);
+        for (int frame = 0; frame < 24; frame++) classic->Step(2);
+        Check(classic->Peek(0x8047) == 48, "Classic top-row behavior was changed");
+
+        // Upward attempts and already-entered rows stay on the original path,
+        // including occupied-home refusal and empty-home awards.
+        for (bool occupied : {false, true}) for (int row : {48, 46, 42, 40, 32}) {
+            auto original = fixture(false, player, bay, 24 + bay * 48, row, occupied);
+            auto modern = fixture(true, player, bay, 24 + bay * 48, row, occupied);
+            for (int frame = 0; frame < 12; frame++) {
+                original->Step(1); modern->Step(1);
+                for (int address : {0x8044, 0x8047, 0x8004, 0x825c, 0x825d, 0x83ed, 0x83ee, 0x83eb, 0x83ec})
+                    Check(original->Peek(address) == modern->Peek(address), "Upward home decision changed");
+                Check(original->BonusAwards.size() == modern->BonusAwards.size(), "Upward home award changed");
+            }
+        }
+    }
+    for (int nextInput : {0, 1}) {
+        auto empty = fixture(true, 1, 2, 110, 48, false);
+        auto filled = fixture(true, 1, 2, 110, 48, true);
+        for (int frame = 0; frame < 16; frame++) {
+            int input = frame < 6 ? 8 : nextInput;
+            empty->Step(input); filled->Step(input);
+            Check(empty->Peek(0x8044) == filled->Peek(0x8044) && empty->Peek(0x8047) == filled->Peek(0x8047),
+                  "A released/changed button interrupted a sideways hop entering an occupied bay band");
+        }
+    }
+    std::cout << "Top log input: " << cases << " stationary sideways/down cases, both players, all bay edges; Classic and upward decisions preserved\n";
+}
+
 static void RunFeedbackTests(const std::vector<uint8_t>& rom) {
     Check(GameDefaults::FromStored(0, false, false, false, false) == GameOptions{true, true, true, true},
           "older settings did not migrate to modern collision and fullscreen follow perspective");
@@ -1385,6 +1448,7 @@ int main(int argc, char** argv) {
         }
         std::cout << "Turtle presentation follows original surface, warning and submerged tiles" << std::endl;
 
+        RunTopLogInputTests(rom);
         RunFeedbackTests(rom);
         return 0;
     } catch (const std::exception& ex) {

@@ -144,6 +144,16 @@ void ArcadeSimulationCore::Step(int buttons) {
             homeAwardOrigin = true;
         }
         if (Cpu.PC == 0x08e0) ObserveBonusAward();
+        if (ModernCollision && Cpu.PC == 0x1cff && Peek(0x8047) == 48) {
+            // The home scan starts a full row before entry. Its occupied-bay
+            // RETs (0x1d91 + bay*0x51) skip 0x1acb, starving sideways/down
+            // input until log drift carries the frog past the bay. Continue
+            // the ROM input path on the log; keep upward attempts and all
+            // actual home-entry rows on the original decision path.
+            bool otherHop = Peek(0x8248) || Peek(0x824a) || Peek(0x824b);
+            bool upward = Peek(0x8249) || ((buttons & 1) && !otherHop);
+            if (!upward) Cpu.PC = 0x1acb;
+        }
         if (ModernCollision && Cpu.PC == 0x28bb && ResolveModernRiverGator()) {
             Cpu.ReturnFromHook();
         } else if (ModernCollision && Cpu.PC == 0x11bf && ResolveModernRoad()) {
