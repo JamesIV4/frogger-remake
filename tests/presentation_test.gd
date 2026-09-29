@@ -76,6 +76,55 @@ func run() -> void:
 	game.navigate_back()
 	await process_frame
 	check(not game.options_open and not game.started and game.menu.visible, "Options Back returns to main menu")
+	game.select_player_frog("lady_frog")
+	game.start_game(2)
+	check(game.game_players == 2 and game.simulation.peek(0x83fe) == 2, "Two-player selection starts both players")
+	check(game.active_frog_model() == "lady_frog", "Player one starts pink in a two-player game")
+	var saw_player_two: bool = false
+	var reached_two_player_game_over: bool = false
+	for frame in range(22000):
+		game.simulation.step()
+		if not saw_player_two and game.simulation.peek(0x83fd) == 2:
+			saw_player_two = true
+			game.observe_frame()
+			check(game.active_frog_model() == "frog", "Player two keeps the alternate green frog")
+		if saw_player_two and game.simulation.peek(0x83fe) == 0:
+			reached_two_player_game_over = true
+			break
+	check(saw_player_two and reached_two_player_game_over, "Two-player game reaches player two and then game over after both run out of frogs")
+	game.observe_frame()
+	var restart_key := InputEventKey.new()
+	restart_key.pressed = true
+	restart_key.physical_keycode = KEY_ENTER
+	game._unhandled_input(restart_key)
+	check(game.game_players == 2 and game.simulation.peek(0x83fe) == 2, "Enter restarts a finished two-player game with two players")
+	check(game.player_frog == "lady_frog" and game.active_frog_model() == "lady_frog", "Two-player restart keeps player one pink")
+	game.update_player(0.0)
+	check(game.actors["player"].root.scene_file_path.ends_with("/lady_frog.glb"), "Two-player restart renders player one pink")
+	game.simulation.poke(0x83fe, 0)
+	game.observe_frame()
+	var restart_button := InputEventJoypadButton.new()
+	restart_button.pressed = true
+	restart_button.button_index = JOY_BUTTON_A
+	game._unhandled_input(restart_button)
+	check(game.game_players == 2 and game.simulation.peek(0x83fe) == 2, "Controller A restarts a finished two-player game with two players")
+	game.simulation.poke(0x83fe, 0)
+	game.observe_frame()
+	var restart_touch := InputEventScreenTouch.new()
+	restart_touch.position = Vector2(200, 200)
+	restart_touch.pressed = true
+	game._unhandled_input(restart_touch)
+	restart_touch.pressed = false
+	game._unhandled_input(restart_touch)
+	check(game.game_players == 2 and game.simulation.peek(0x83fe) == 2, "Touch restarts a finished two-player game with two players")
+	game.start_game(1)
+	game.simulation.poke(0x83fe, 0)
+	game.observe_frame()
+	game._unhandled_input(restart_key)
+	check(game.game_players == 1 and game.simulation.peek(0x83fe) == 1, "Enter restarts a finished one-player game with one player")
+	check(game.player_frog == "lady_frog" and game.active_frog_model() == "lady_frog", "One-player restart keeps the pink frog")
+	game.update_player(0.0)
+	check(game.actors["player"].root.scene_file_path.ends_with("/lady_frog.glb"), "One-player restart renders the pink frog")
 	game.start_game(1)
 	game.update_hud()
 	await process_frame

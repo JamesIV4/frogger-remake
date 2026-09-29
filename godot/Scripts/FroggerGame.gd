@@ -26,6 +26,7 @@ var web_layout_callback: JavaScriptObject = null
 var ui_safe_rect: Rect2
 
 var started: bool = false
+var game_players: int = 1
 var paused: bool = false
 var modern: bool = true
 var muted: bool = false
@@ -267,6 +268,7 @@ func start_game(players: int) -> void:
 		if not bool(web_crazygames.request_start(players)):
 			return
 		web_crazygames.begin_game(high_score)
+	game_players = players
 	reset_machine()
 	for i in range(180):
 		simulation.step()
@@ -294,6 +296,9 @@ func start_game(players: int) -> void:
 	reset_mouse_idle()
 	message_label.text = ""
 	message_panel.visible = false
+
+func restart_game() -> void:
+	start_game(game_players if started else 1)
 
 func sync_crazygames() -> void:
 	if web_crazygames == null:
@@ -481,7 +486,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if ad_busy():
 		# A restart pressed while the timed ad is open is remembered once.
 		if (event is InputEventKey and event.pressed and not event.echo and event.physical_keycode in [KEY_ENTER, KEY_SPACE, KEY_1, KEY_2, KEY_R]) or (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_A, JOY_BUTTON_START]) or (event is InputEventScreenTouch and event.pressed):
-			start_game(2 if event is InputEventKey and event.physical_keycode == KEY_2 else 1)
+			if event is InputEventKey and event.physical_keycode in [KEY_1, KEY_2]:
+				start_game(2 if event.physical_keycode == KEY_2 else 1)
+			else:
+				restart_game()
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
@@ -489,7 +497,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				if options_open:
 					return
 				if not started or BoardVisuals.at(state, 0x83fe) == 0:
-					start_game(1)
+					restart_game()
 				elif paused:
 					resume_game()
 			KEY_1:
@@ -504,7 +512,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				coin_frames = 6
 			KEY_R:
 				if started:
-					start_game(1)
+					restart_game()
 			KEY_M:
 				muted = not muted
 				save_preferences()
@@ -514,7 +522,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				save_preferences()
 	if event is InputEventJoypadButton and event.pressed:
 		if event.button_index == JOY_BUTTON_A and not options_open and (not started or BoardVisuals.at(state, 0x83fe) == 0):
-			start_game(1)
+			restart_game()
 		elif event.button_index == JOY_BUTTON_START:
 			if not started and not options_open:
 				start_game(1)
@@ -538,7 +546,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				var dist: float = (event.position - touch_start_pos).length()
 				if elapsed < 350 and dist < 25.0:
 					if not started or BoardVisuals.at(state, 0x83fe) == 0:
-						start_game(1)
+						restart_game()
 					elif not paused and (menu == null or not menu.visible):
 						trigger_swipe(1)
 			touch_active = false
@@ -549,7 +557,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			var offset: Vector2 = event.position - touch_start_pos
 			if offset.length() >= SWIPE_THRESHOLD:
 				if not started or BoardVisuals.at(state, 0x83fe) == 0:
-					start_game(1)
+					restart_game()
 				elif not paused:
 					var dir: int = 0
 					if absf(offset.x) > absf(offset.y):
@@ -573,7 +581,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					var dist: float = (event.position - touch_start_pos).length()
 					if elapsed < 350 and dist < 25.0:
 						if not started or BoardVisuals.at(state, 0x83fe) == 0:
-							start_game(1)
+							restart_game()
 						elif not paused and (menu == null or not menu.visible):
 							trigger_swipe(1)
 				touch_active = false
@@ -584,7 +592,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			var offset: Vector2 = event.position - touch_start_pos
 			if offset.length() >= SWIPE_THRESHOLD:
 				if not started or BoardVisuals.at(state, 0x83fe) == 0:
-					start_game(1)
+					restart_game()
 				elif not paused:
 					var dir: int = 0
 					if absf(offset.x) > absf(offset.y):
