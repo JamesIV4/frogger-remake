@@ -13,6 +13,7 @@ try {
         $froggerTarget=Join-Path $FroggerRoot ('builds/windows/Frogger Remake - '+(Get-Date -Format 'yyyyMMdd-HHmmss')+'.exe')
         Write-Host 'The existing game is running; exporting this build alongside it.'
     }
+    Write-FroggerBuildTimestamp
     $froggerExe='"'+$froggerTarget+'"'
     $froggerExport=Start-Process -FilePath (Get-FroggerGodot) -ArgumentList '--headless','--path',$froggerProject,'--export-release','"Windows Desktop"',$froggerExe -WindowStyle Hidden -RedirectStandardOutput $froggerExportOut -RedirectStandardError $froggerExportErr -Wait -PassThru
     if($froggerExport.ExitCode -ne 0 -or (Select-String -LiteralPath $froggerExportErr -Pattern '^ERROR:' -Quiet)){throw 'Export failed. See docs/evidence/export-stderr.log.'}

@@ -1570,6 +1570,11 @@ func show_options(return_to_pause: bool) -> void:
 	for child in menu_items.get_children():
 		if child is CheckButton:
 			child.custom_minimum_size.y = 48.0 if touch_device else 34.0
+	var build_stamp_path := "res://build_timestamp.txt"
+	var build_text := "Development build"
+	if FileAccess.file_exists(build_stamp_path):
+		build_text = "Built %s" % FileAccess.get_file_as_string(build_stamp_path).strip_edges()
+	menu_items.add_child(make_text(build_text, 13, Color("adb8cc")))
 	enable_menu_swipe_scrolling(menu_items)
 
 func add_button(text_val: String, action: Callable) -> void:

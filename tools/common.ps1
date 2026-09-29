@@ -23,3 +23,8 @@ function Get-FroggerGodotStandard {
     return Get-FroggerGodot
 }
 function Assert-FroggerExit([string]$Step) { if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "$Step failed (exit $LASTEXITCODE)." } }
+function Write-FroggerBuildTimestamp {
+    $timestamp = [DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm', [System.Globalization.CultureInfo]::InvariantCulture) + ' UTC'
+    [System.IO.File]::WriteAllText((Join-Path $FroggerRoot 'godot/build_timestamp.txt'), $timestamp)
+    Write-Host "Build timestamp: $timestamp"
+}

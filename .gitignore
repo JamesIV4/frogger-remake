@@ -23,6 +23,7 @@ __pycache__/
 **/export_credentials.cfg
 /builds/
 /godot/rom/
+/godot/build_timestamp.txt
 /godot/audio/generated/
 /godot/art/source/
 /docs/evidence/native-frames.bin

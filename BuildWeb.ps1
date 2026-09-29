@@ -93,6 +93,7 @@ try {
     $froggerTarget = (Join-Path $FroggerRoot "$webOutput/index.html")
 
     $godotExe = Get-FroggerGodotStandard
+    Write-FroggerBuildTimestamp
     Write-Host "Exporting Web target using $godotExe..."
     $froggerExport = Start-Process -FilePath $godotExe -ArgumentList '--headless','--path',"`"$froggerProject`"",'--export-release','"Web"',"`"$froggerTarget`"" -WindowStyle Hidden -RedirectStandardOutput $froggerExportOut -RedirectStandardError $froggerExportErr -Wait -PassThru
     if ($froggerExport.ExitCode -ne 0 -or (Select-String -LiteralPath $froggerExportErr -Pattern '^ERROR:' -Quiet)) {
