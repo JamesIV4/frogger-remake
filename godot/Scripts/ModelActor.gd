@@ -26,11 +26,13 @@ static func _get_unclipped_shader(animated_squash: bool) -> Shader:
 		var unclipped_shader := Shader.new()
 		unclipped_shader.code = """shader_type spatial;
 render_mode depth_draw_opaque;
+#include "res://Shaders/curve.gdshaderinc"
 uniform float squash_color = 0.0;
 uniform vec4 tint : source_color = vec4(1.0);
 varying float intact_shade;
 void vertex(){
     intact_shade=0.35+0.65*max(dot(normalize(NORMAL),normalize(vec3(-0.45,0.8,0.35))),0.0);
+    VERTEX+=curve_offset(MODEL_MATRIX,VERTEX);
 }
 void fragment(){
     ALBEDO=tint.rgb*(1.0-squash_color);
@@ -47,6 +49,7 @@ static func _get_clipped_shader(animated_squash: bool) -> Shader:
 	if not clipped_shaders.has(animated_squash):
 		var clipped_shader := Shader.new()
 		clipped_shader.code = """shader_type spatial;
+#include "res://Shaders/curve.gdshaderinc"
 uniform float squash_color = 0.0;
 uniform vec4 tint : source_color = vec4(1.0);
 varying vec3 world;
@@ -54,12 +57,18 @@ varying float intact_shade;
 void vertex(){
     world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
     intact_shade=0.35+0.65*max(dot(normalize(NORMAL),normalize(vec3(-0.45,0.8,0.35))),0.0);
+    VERTEX+=curve_offset(MODEL_MATRIX,VERTEX);
 }
 void fragment(){
-    if(abs(world.x)>7.0)discard;
-    ALBEDO=tint.rgb*(1.0-squash_color);
-    EMISSION=tint.rgb*intact_shade*0.9*squash_color;
-    SPECULAR=0.5*(1.0-squash_color);
+    // Past the board edge a prop fades into the tunnel's darkness (road) or the
+    // swamp's mist (river) before it is cut, instead of vanishing at |x| = 7.
+    float edge=abs(world.x);
+    if(edge>7.85)discard;
+    float fade=smoothstep(7.0,7.8,edge);
+    vec3 murk=world.z<0.0?vec3(0.38,0.5,0.42):vec3(0.0);
+    ALBEDO=mix(tint.rgb*(1.0-squash_color),murk,fade);
+    EMISSION=tint.rgb*intact_shade*0.9*squash_color*(1.0-fade);
+    SPECULAR=0.5*(1.0-squash_color)*(1.0-fade);
     ROUGHNESS=.75;
 }"""
 		if not animated_squash:

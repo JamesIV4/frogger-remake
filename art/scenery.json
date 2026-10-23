@@ -1,0 +1,257 @@
+[
+  {
+    "asset": "broadleaf_a",
+    "triangles": 798,
+    "leaves": 48,
+    "gltf": "godot/Models/Scenery/broadleaf_a.gltf",
+    "source": "art/source/scenery_broadleaf_a.blend",
+    "footprintTiles": {
+      "minX": -1.52373,
+      "maxX": 0.82203,
+      "minY": -1.19631,
+      "maxY": 1.3618,
+      "minZ": -0.11036,
+      "maxZ": 3.02341
+    }
+  },
+  {
+    "asset": "broadleaf_b",
+    "triangles": 798,
+    "leaves": 48,
+    "gltf": "godot/Models/Scenery/broadleaf_b.gltf",
+    "source": "art/source/scenery_broadleaf_b.blend",
+    "footprintTiles": {
+      "minX": -1.08804,
+      "maxX": 0.99585,
+      "minY": -1.4286,
+      "maxY": 1.20862,
+      "minZ": -0.10802,
+      "maxZ": 2.78707
+    }
+  },
+  {
+    "asset": "pine_a",
+    "triangles": 546,
+    "leaves": 36,
+    "gltf": "godot/Models/Scenery/pine_a.gltf",
+    "source": "art/source/scenery_pine_a.blend",
+    "footprintTiles": {
+      "minX": -0.80215,
+      "maxX": 0.9041,
+      "minY": -0.89834,
+      "maxY": 1.05589,
+      "minZ": -0.08567,
+      "maxZ": 3.09916
+    }
+  },
+  {
+    "asset": "pine_b",
+    "triangles": 546,
+    "leaves": 36,
+    "gltf": "godot/Models/Scenery/pine_b.gltf",
+    "source": "art/source/scenery_pine_b.blend",
+    "footprintTiles": {
+      "minX": -0.87766,
+      "maxX": 0.87145,
+      "minY": -1.01372,
+      "maxY": 1.03877,
+      "minZ": -0.08681,
+      "maxZ": 3.05879
+    }
+  },
+  {
+    "asset": "shrub_a",
+    "triangles": 252,
+    "leaves": 21,
+    "gltf": "godot/Models/Scenery/shrub_a.gltf",
+    "source": "art/source/scenery_shrub_a.blend",
+    "footprintTiles": {
+      "minX": -0.66849,
+      "maxX": 0.54766,
+      "minY": -0.73857,
+      "maxY": 0.63077,
+      "minZ": 0.05356,
+      "maxZ": 0.86543
+    }
+  },
+  {
+    "asset": "shrub_b",
+    "triangles": 336,
+    "leaves": 28,
+    "gltf": "godot/Models/Scenery/shrub_b.gltf",
+    "source": "art/source/scenery_shrub_b.blend",
+    "footprintTiles": {
+      "minX": -0.76223,
+      "maxX": 0.60934,
+      "minY": -0.56174,
+      "maxY": 0.51397,
+      "minZ": 0.11033,
+      "maxZ": 0.95521
+    }
+  },
+  {
+    "asset": "edge_hedge_long",
+    "triangles": 402,
+    "leaves": 44,
+    "gltf": "godot/Models/Scenery/edge_hedge_long.gltf",
+    "source": "art/source/scenery_edge_hedge_long.blend",
+    "footprintTiles": {
+      "minX": 0.02,
+      "maxX": 1.07507,
+      "minY": -1.20546,
+      "maxY": 1.21598,
+      "minZ": 0.0,
+      "maxZ": 1.16769
+    }
+  },
+  {
+    "asset": "edge_hedge_short",
+    "triangles": 156,
+    "leaves": 17,
+    "gltf": "godot/Models/Scenery/edge_hedge_short.gltf",
+    "source": "art/source/scenery_edge_hedge_short.blend",
+    "footprintTiles": {
+      "minX": 0.02,
+      "maxX": 0.99903,
+      "minY": -0.46,
+      "maxY": 0.49659,
+      "minZ": 0.0,
+      "maxZ": 1.16513
+    }
+  },
+  {
+    "asset": "edge_hedge_front",
+    "triangles": 972,
+    "leaves": 111,
+    "gltf": "godot/Models/Scenery/edge_hedge_front.gltf",
+    "source": "art/source/scenery_edge_hedge_front.blend",
+    "footprintTiles": {
+      "minX": 0.02,
+      "maxX": 1.07401,
+      "minY": -2.9799,
+      "maxY": 3.00464,
+      "minZ": 0.0,
+      "maxZ": 1.16595
+    }
+  },
+  {
+    "asset": "grass_tuft",
+    "triangles": 7,
+    "leaves": 7,
+    "gltf": "godot/Models/Scenery/grass_tuft.gltf",
+    "source": "art/source/scenery_grass_tuft.blend",
+    "footprintTiles": {
+      "minX": -0.12815,
+      "maxX": 0.11856,
+      "minY": -0.19069,
+      "maxY": 0.13344,
+      "minZ": -0.0329,
+      "maxZ": 0.36302
+    }
+  },
+  {
+    "asset": "flower_tuft",
+    "triangles": 152,
+    "leaves": 8,
+    "gltf": "godot/Models/Scenery/flower_tuft.gltf",
+    "source": "art/source/scenery_flower_tuft.blend",
+    "footprintTiles": {
+      "minX": -0.22191,
+      "maxX": 0.11156,
+      "minY": -0.20908,
+      "maxY": 0.21928,
+      "minZ": -0.03448,
+      "maxZ": 0.41024
+    }
+  },
+  {
+    "asset": "reeds_a",
+    "triangles": 73,
+    "leaves": 13,
+    "gltf": "godot/Models/Scenery/reeds_a.gltf",
+    "source": "art/source/scenery_reeds_a.blend",
+    "footprintTiles": {
+      "minX": -0.26196,
+      "maxX": 0.36262,
+      "minY": -0.32906,
+      "maxY": 0.42619,
+      "minZ": -0.03582,
+      "maxZ": 1.00578
+    }
+  },
+  {
+    "asset": "reeds_b",
+    "triangles": 73,
+    "leaves": 13,
+    "gltf": "godot/Models/Scenery/reeds_b.gltf",
+    "source": "art/source/scenery_reeds_b.blend",
+    "footprintTiles": {
+      "minX": -0.23083,
+      "maxX": 0.30678,
+      "minY": -0.30023,
+      "maxY": 0.26852,
+      "minZ": -0.036,
+      "maxZ": 1.01878
+    }
+  },
+  {
+    "asset": "reed_wall",
+    "triangles": 1088,
+    "leaves": 476,
+    "gltf": "godot/Models/Scenery/reed_wall.gltf",
+    "source": "art/source/scenery_reed_wall.blend",
+    "footprintTiles": {
+      "minX": 0.03026,
+      "maxX": 1.24937,
+      "minY": -2.73305,
+      "maxY": 2.73267,
+      "minZ": -0.06326,
+      "maxZ": 1.2458
+    }
+  },
+  {
+    "asset": "lily_pads",
+    "triangles": 83,
+    "leaves": 0,
+    "gltf": "godot/Models/Scenery/lily_pads.gltf",
+    "source": "art/source/scenery_lily_pads.blend",
+    "footprintTiles": {
+      "minX": -0.41096,
+      "maxX": 0.26328,
+      "minY": -0.45898,
+      "maxY": 0.21788,
+      "minZ": 0.0,
+      "maxZ": 0.0909
+    }
+  },
+  {
+    "asset": "swamp_cypress_a",
+    "triangles": 1087,
+    "leaves": 85,
+    "gltf": "godot/Models/Scenery/swamp_cypress_a.gltf",
+    "source": "art/source/scenery_swamp_cypress_a.blend",
+    "footprintTiles": {
+      "minX": -0.79394,
+      "maxX": 1.29203,
+      "minY": -1.18539,
+      "maxY": 1.43286,
+      "minZ": -0.14774,
+      "maxZ": 3.76294
+    }
+  },
+  {
+    "asset": "swamp_cypress_b",
+    "triangles": 1089,
+    "leaves": 87,
+    "gltf": "godot/Models/Scenery/swamp_cypress_b.gltf",
+    "source": "art/source/scenery_swamp_cypress_b.blend",
+    "footprintTiles": {
+      "minX": -1.21112,
+      "maxX": 0.56055,
+      "minY": -1.19918,
+      "maxY": 1.12065,
+      "minZ": -0.14753,
+      "maxZ": 3.646
+    }
+  }
+]

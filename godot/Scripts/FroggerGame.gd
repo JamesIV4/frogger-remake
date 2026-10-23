@@ -12,6 +12,7 @@ var player_frog: String = "frog"
 var batched_lanes: Dictionary = {}
 var warmup_node: Node3D = null
 var warmup_frames: int = 0
+var web_loader_released: bool = false
 var input_pulse: InputPulse = InputPulse.new()
 var audio_player: AudioStreamPlayer = null
 var audio_playback: AudioStreamGeneratorPlayback = null
@@ -46,6 +47,21 @@ var screenshot: String = ""
 var water: ShaderMaterial = null
 var camera: Camera3D = null
 var sun: DirectionalLight3D = null
+var environment: Environment = null
+## Strength of the presentation-only rolling-log bend (Shaders/curve.gdshaderinc)
+## at 100%: the world drops by WorldCurve * dz^2 tiles at dz tiles in front of or
+## behind the camera's focus row.
+const WorldCurve: float = 0.0352
+const DefaultCurvePercent: float = 100.0
+const MaxCurvePercent: float = 200.0
+## Options slider (0 = off); the bend also switches off in orthographic view.
+var world_curve_percent: float = DefaultCurvePercent
+## Every 3D object is culled as if this much larger, so geometry the bend
+## lowers into view is never culled by its unbent bounds (no pop-in).
+const CurveCullMargin: float = 12.0
+const MenuFocusPadding: int = 8
+## Height of the top HUD bar (it grows only if its contents need more).
+const HeaderHeight: float = 66.0
 
 # Camera options
 var perspective_view: bool = true
@@ -80,7 +96,7 @@ class BonusPopup:
 
 var popups: Array = []
 var death_ripple: MeshInstance3D = null
-var ripple_material: StandardMaterial3D = null
+var ripple_material: ShaderMaterial = null
 var turtle_supports: Array = []
 var turtle_support_cache: Array = []
 enum BeaverVisualPhase { Hidden, Approach, Grab, Look, Bite, Sink, Done }
@@ -143,6 +159,7 @@ const BatchedLaneModels: Dictionary = {0: "log", 2: "log", 3: "log", 6: "truck",
 var score_label: Label = null
 var high_label: Label = null
 var level_label: Label = null
+var title_bottom: Label = null
 var lives_label: Label = null
 var lives_icons: BoxContainer = null
 var frog_icon_texture: Texture2D = null
@@ -165,6 +182,11 @@ var last_input_method: String = "keyboard"
 var player_header: Label = null
 var timer_bar: ProgressBar = null
 var menu: PanelContainer = null
+var menu_card: PanelContainer = null
+const MenuCardLedge: float = 8.0
+var timer_fill_style: StyleBoxFlat = null
+var shown_message: String = ""
+var menu_page: String = ""
 var menu_scroll: ScrollContainer = null
 var message_panel: PanelContainer = null
 var menu_items: VBoxContainer = null
@@ -189,9 +211,10 @@ var fps_update_seconds: float = 0.25
 var display_font: Font = null
 var body_font: Font = null
 
-const Cream: Color = Color("eee6c9")
-const RedColor: Color = Color("ff6655")
-const LimeColor: Color = Color("b6df56")
+const Cream: Color = UiKit.Cream
+const RedColor: Color = UiKit.Red
+const LimeColor: Color = UiKit.Lime
+const SkyHaze: Color = Color("73c7ff")
 
 # Review harness
 var review: String = ""
@@ -226,6 +249,12 @@ func _ready() -> void:
 		if arg.begins_with("--screenshot="):
 			screenshot = arg.substr(13)
 	read_review_args()
+	apply_curved_world()
+	# Geometry is culled by its unbent bounds; widen every 3D object's bounds
+	# by the bend so nothing the curve lowers into view pops in late.
+	get_tree().node_added.connect(func(node: Node):
+		if node is GeometryInstance3D:
+			(node as GeometryInstance3D).extra_cull_margin = CurveCullMargin)
 	setup_world()
 	setup_ui()
 	load_preferences()
@@ -353,6 +382,11 @@ func _process(delta: float) -> void:
 		if warmup_frames >= 2:
 			warmup_node.visible = false
 			warmup_node.process_mode = Node.PROCESS_MODE_DISABLED
+	if not web_loader_released and warmup_frames >= 2 and OS.has_feature("web"):
+		# The web shell's loader stays up until the precompile frames have
+		# drawn, then reveals a ready menu (and skips its sound when muted).
+		web_loader_released = true
+		JavaScriptBridge.eval("window.FroggerLoader && window.FroggerLoader.ready(%s)" % ("true" if muted else "false"))
 	var t_start: int = Time.get_ticks_usec()
 	presentation_delta = clampf(delta, 0.0, 0.1)
 	var steps: int = 0
@@ -690,9 +724,9 @@ func select_player_frog(model: String) -> void:
 	show_menu(false)
 
 func setup_frog_selector(parent: VBoxContainer) -> void:
-	parent.add_child(make_text("CHOOSE YOUR FROG", 15, Cream))
+	parent.add_child(make_text("CHOOSE YOUR FROG", 15, UiKit.SoftText))
 	var choices := HBoxContainer.new()
-	choices.add_theme_constant_override("separation", 10)
+	choices.add_theme_constant_override("separation", 12)
 	parent.add_child(choices)
 	for model in ["frog", "lady_frog"]:
 		var choice := FrogChoice.new()
@@ -781,10 +815,7 @@ func setup_world() -> void:
 	var warm_ripple := MeshInstance3D.new()
 	warm_ripple.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	warm_ripple.mesh = warm_torus
-	var warm_ripple_mat := StandardMaterial3D.new()
-	warm_ripple_mat.albedo_color = Color(0.65, 0.88, 1.0, 0.6)
-	warm_ripple_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	warm_ripple_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var warm_ripple_mat := make_ripple_material()
 	warm_ripple.material_override = warm_ripple_mat
 	warmup_node.add_child(warm_ripple)
 	# Keep the actual effect's mesh/material ready as well as its shader.
@@ -797,8 +828,29 @@ func setup_world() -> void:
 	add_child(death_ripple)
 	var is_web: bool = OS.has_feature("web")
 	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color("171e29")
+	environment = env
+	# A blue sky with slowly drifting stylized clouds fills in above the curved
+	# world. Its horizon matches the haze that depth fog fades the far woods
+	# into (fog starts beyond the board's farthest corner; see
+	# update_camera_clip_planes), so the two meet without a seam.
+	var sky_material := ShaderMaterial.new()
+	sky_material.shader = load("res://Shaders/sky.gdshader")
+	sky_material.set_shader_parameter("horizon", SkyHaze)
+	var sky := Sky.new()
+	sky.sky_material = sky_material
+	# Ambient and reflections stay fixed below, so a tiny radiance map suffices.
+	sky.radiance_size = Sky.RADIANCE_SIZE_32
+	sky.process_mode = Sky.PROCESS_MODE_REALTIME
+	env.background_mode = Environment.BG_SKY
+	env.sky = sky
+	env.background_color = SkyHaze
+	env.fog_enabled = true
+	env.fog_mode = Environment.FOG_MODE_DEPTH
+	env.fog_light_color = SkyHaze
+	env.fog_light_energy = 1.0
+	env.fog_density = 1.0
+	env.fog_sky_affect = 0.0
+	env.fog_depth_curve = 1.6
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color.WHITE
 	env.ambient_light_energy = 0.30
@@ -838,7 +890,9 @@ func setup_world() -> void:
 	add_child(fill_light)
 
 	var board_scene = load("res://Models/board.glb")
-	add_child(board_scene.instantiate())
+	var board: Node = board_scene.instantiate()
+	add_child(board)
+	apply_curved_board_materials(board)
 
 	# Logs and vehicle bodies are rigid: one MultiMesh per lane draws every log
 	# and every car, truck, dozer or racecar with four spinning wheel pivots,
@@ -867,6 +921,80 @@ func setup_world() -> void:
 	water.set_shader_parameter("compatibility_color", RenderingServer.get_current_rendering_method() == "gl_compatibility")
 	surface.material_override = water
 	add_child(surface)
+
+	# Meadow, woods, tunnel mouths and the river's swamp beyond the board edge.
+	# The swamp water continues this river surface with the same material.
+	var scenery := Scenery.new()
+	scenery.name = "Scenery"
+	scenery.water_material = water
+	add_child(scenery)
+
+func apply_curved_world() -> void:
+	RenderingServer.global_shader_parameter_set("world_curve", world_curve())
+
+func world_curve() -> float:
+	return WorldCurve * world_curve_percent / 100.0 if perspective_view else 0.0
+
+## How far the curved-world bend lowers a point at world z (matches the shader).
+func curve_drop(world_z: float) -> float:
+	if camera == null:
+		return 0.0
+	var dz: float = clampf(world_z - camera_look_target.z, -30.0, 30.0)
+	return world_curve() * dz * dz
+
+const BoardShader: String = """shader_type spatial;
+#include "res://Shaders/curve.gdshaderinc"
+uniform vec4 tint : source_color = vec4(1.0);
+uniform float roughness_value = 0.72;
+void vertex(){
+    VERTEX += curve_offset(MODEL_MATRIX, VERTEX);
+}
+void fragment(){
+    ALBEDO = tint.rgb;
+    ROUGHNESS = roughness_value;
+}"""
+
+## The imported board keeps its palette colors but draws through a shader that
+## follows the curved-world bend, like every other world material.
+func apply_curved_board_materials(board: Node) -> void:
+	var shader := Shader.new()
+	shader.code = BoardShader
+	var converted: Dictionary = {}
+	for node in board.find_children("*", "MeshInstance3D", true, false):
+		var mesh_node := node as MeshInstance3D
+		# Automatic mesh LODs would merge the flat road's half-tile slices back
+		# into long faces that cannot bend; always draw the full mesh.
+		mesh_node.lod_bias = 128.0
+		for surface in range(mesh_node.mesh.get_surface_count()):
+			var original := mesh_node.mesh.surface_get_material(surface) as BaseMaterial3D
+			if original == null:
+				continue
+			if not converted.has(original):
+				var material := ShaderMaterial.new()
+				material.shader = shader
+				material.set_shader_parameter("tint", original.albedo_color)
+				material.set_shader_parameter("roughness_value", original.roughness)
+				converted[original] = material
+			mesh_node.set_surface_override_material(surface, converted[original])
+
+const RippleShader: String = """shader_type spatial;
+render_mode unshaded, blend_mix, depth_draw_never, cull_disabled;
+#include "res://Shaders/curve.gdshaderinc"
+uniform vec4 tint : source_color = vec4(0.65, 0.88, 1.0, 1.0);
+uniform float alpha = 0.6;
+void vertex(){
+    VERTEX += curve_offset(MODEL_MATRIX, VERTEX);
+}
+void fragment(){
+    ALBEDO = tint.rgb;
+    ALPHA = alpha;
+}"""
+
+func make_ripple_material() -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader = Shader.new()
+	material.shader.code = RippleShader
+	return material
 
 func feed_audio() -> void:
 	if simulation == null:
@@ -961,6 +1089,7 @@ func load_preferences() -> void:
 		show_fps = bool(c.get_value("play", "show_fps", false))
 		shadows_enabled = bool(c.get_value("play", "shadows_enabled", true))
 		antialiasing_enabled = bool(c.get_value("play", "antialiasing_enabled", true))
+		world_curve_percent = clampf(float(c.get_value("play", "world_curve_strength", DefaultCurvePercent)), 0.0, MaxCurvePercent)
 		top_down_camera = bool(c.get_value("play", "top_down_camera", false))
 		desktop_follow_zoom_percent = clampf(float(c.get_value("play", "desktop_follow_zoom_percent", 0.0)), -50.0, 100.0)
 		mobile_follow_zoom_percent = clampf(float(c.get_value("play", "mobile_follow_zoom_percent", 0.0)), -50.0, 100.0)
@@ -980,6 +1109,7 @@ func load_preferences() -> void:
 		save_preferences()
 	apply_fullscreen()
 	apply_antialiasing()
+	apply_curved_world()
 	if fps_container != null:
 		fps_container.visible = show_fps
 	if sun != null:
@@ -1002,6 +1132,7 @@ func save_preferences() -> void:
 	c.set_value("play", "show_fps", show_fps)
 	c.set_value("play", "shadows_enabled", shadows_enabled)
 	c.set_value("play", "antialiasing_enabled", antialiasing_enabled)
+	c.set_value("play", "world_curve_strength", world_curve_percent)
 	c.set_value("play", "perspective_view", perspective_view)
 	c.set_value("play", "top_down_camera", top_down_camera)
 	c.set_value("play", "follow_camera", follow_camera)
@@ -1026,39 +1157,59 @@ func _exit_tree() -> void:
 func style_box(color: Color, radius: int = 12, border: int = 0) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = color
-	s.corner_radius_top_left = radius
-	s.corner_radius_top_right = radius
-	s.corner_radius_bottom_left = radius
-	s.corner_radius_bottom_right = radius
+	# Bubbly panels: rounded corners on rounded callers.
+	if radius > 0:
+		s.set_corner_radius_all(UiKit.Radius + 2)
 	s.content_margin_left = 22
 	s.content_margin_right = 22
 	s.content_margin_top = 14
 	s.content_margin_bottom = 14
 	s.set_border_width_all(border)
-	s.border_color = Color("70614e")
+	s.border_color = UiKit.Ink
+	s.anti_aliasing = true
+	return s
+
+## Raised modal card: rounded face, thick ink outline and a hard ink ledge.
+func modal_style(color: Color) -> StyleBoxFlat:
+	var s := style_box(color, 20, 4)
+	s.shadow_color = UiKit.Ink
+	s.shadow_size = 1
+	s.shadow_offset = Vector2(0, 7)
 	return s
 
 func edge_panel_style(color: Color, at_top: bool, at_side: bool = false) -> StyleBoxFlat:
-	var s = style_box(color, 0, 2)
+	# HUD bars join the screen edge; the exposed sides carry a thick pixel frame
+	# and the board-facing edge a hard black drop, like the buttons.
+	var s = style_box(color, 0, 4)
+	s.shadow_color = UiKit.Ink
+	s.shadow_size = 1
 	if at_side:
 		s.content_margin_left = 12
 		s.content_margin_right = 12
 		if at_top:
 			s.border_width_left = 0
-			s.corner_radius_top_right = 16
-			s.corner_radius_bottom_right = 16
+			s.corner_radius_top_right = UiKit.Radius + 4
+			s.corner_radius_bottom_right = UiKit.Radius + 4
+			s.shadow_offset = Vector2(6, 0)
 		else:
 			s.border_width_right = 0
-			s.corner_radius_top_left = 16
-			s.corner_radius_bottom_left = 16
+			s.corner_radius_top_left = UiKit.Radius + 4
+			s.corner_radius_bottom_left = UiKit.Radius + 4
+			s.shadow_offset = Vector2(-6, 0)
 	elif at_top:
 		s.border_width_top = 0
-		s.corner_radius_bottom_left = 16
-		s.corner_radius_bottom_right = 16
+		# A slim top bar: just enough room for the labels and scores.
+		s.content_margin_top = 4
+		s.content_margin_bottom = 8
+		s.corner_radius_bottom_left = UiKit.Radius + 4
+		s.corner_radius_bottom_right = UiKit.Radius + 4
+		s.shadow_offset = Vector2(0, 6)
 	else:
 		s.border_width_bottom = 0
-		s.corner_radius_top_left = 16
-		s.corner_radius_top_right = 16
+		s.corner_radius_top_left = UiKit.Radius + 4
+		s.corner_radius_top_right = UiKit.Radius + 4
+		# The same hard ink edge facing the board as the top bar.
+		s.shadow_offset = Vector2(0, -6)
 	return s
 
 func make_text(text_val: String, size_val: int, color_val: Color) -> Label:
@@ -1068,9 +1219,12 @@ func make_text(text_val: String, size_val: int, color_val: Color) -> Label:
 	l.add_theme_font_size_override("font_size", size_val)
 	l.add_theme_font_override("font", display_font if size_val >= 23 else body_font)
 	l.add_theme_color_override("font_color", color_val)
+	# Chunky ink outlines keep retro pixel type readable over any backdrop;
+	# display sizes add an extruded ink shadow like the key art's title.
 	if size_val >= 23:
-		l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.45))
-		l.add_theme_constant_override("shadow_offset_y", 2)
+		UiKit.outline_label(l, 10, 4)
+	else:
+		UiKit.outline_label(l, 6 if size_val >= 15 else 5)
 	return l
 
 func setup_ui() -> void:
@@ -1088,14 +1242,15 @@ func setup_ui() -> void:
 		get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	display_font = load("res://Fonts/PressStart2P-Regular.ttf")
 	body_font = load("res://Fonts/Silkscreen-Regular.ttf")
-	frog_icon_texture = load("res://frogger.svg")
+	frog_icon_texture = UiKit.svg_texture(UiKit.FrogLife, 128.0, Vector2i(36, 36))
 	var ui := CanvasLayer.new()
 	add_child(ui)
 
 	fps_container = PanelContainer.new()
 	var fps_style := StyleBoxFlat.new()
-	fps_style.bg_color = Color(0.06, 0.09, 0.14, 0.85)
-	fps_style.set_corner_radius_all(6)
+	fps_style.bg_color = Color(UiKit.Ink, 0.88)
+	fps_style.border_color = UiKit.PanelRim
+	fps_style.set_border_width_all(2)
 	fps_style.content_margin_left = 10
 	fps_style.content_margin_right = 10
 	fps_style.content_margin_top = 6
@@ -1108,19 +1263,17 @@ func setup_ui() -> void:
 	fps_label = Label.new()
 	fps_label.add_theme_font_override("font", body_font)
 	fps_label.add_theme_font_size_override("font_size", 13)
-	fps_label.add_theme_color_override("font_color", Color("55ff77"))
+	fps_label.add_theme_color_override("font_color", UiKit.Lime)
+	fps_label.add_theme_constant_override("outline_size", 0)
 	fps_container.add_child(fps_label)
 
 	var root := Control.new()
 	ui.add_child(root)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	var th := Theme.new()
-	th.default_font = body_font
-	th.default_font_size = 20 if touch_device else 17
-	root.theme = th
+	root.theme = UiKit.build_theme(body_font, 20 if touch_device else 17)
 
-	var frame_color := Color("202733")
+	var frame_color := UiKit.PanelFace
 	var header := PanelContainer.new()
 	hud_header = header
 	header.size = Vector2(870, 94)
@@ -1132,7 +1285,7 @@ func setup_ui() -> void:
 	row.add_theme_constant_override("separation", 12)
 	header.add_child(row)
 
-	for title in ["1-UP", "FROGGER", "HI-SCORE"]:
+	for title in ["1-UP", "FROGGER 3D", "HI-SCORE"]:
 		var col := VBoxContainer.new()
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -1141,13 +1294,17 @@ func setup_ui() -> void:
 		col.add_child(heading)
 		if title == "1-UP":
 			player_header = heading
-			score_label = make_text("00000", 26, RedColor)
+			score_label = make_text("00000", 26, UiKit.Yellow)
 			col.add_child(score_label)
 		elif title == "HI-SCORE":
-			high_label = make_text("00000", 26, RedColor)
+			high_label = make_text("00000", 26, UiKit.Yellow)
 			col.add_child(high_label)
 		else:
-			level_label = make_text("THE GREAT CROSSING", 12, LimeColor)
+			# Stacked layouts split the title across both rows: FROGGER on the
+			# heading row, 3D on the score row.
+			title_bottom = make_text("3D", 23, Cream)
+			col.add_child(title_bottom)
+			level_label = make_text("THE GREAT CROSSING", 12, Cream)
 			col.add_child(level_label)
 
 	var bottom := PanelContainer.new()
@@ -1169,23 +1326,27 @@ func setup_ui() -> void:
 	gameplay_options_button.expand_icon = true
 	gameplay_options_button.add_theme_constant_override("icon_max_width", 26)
 	gameplay_options_button.custom_minimum_size = Vector2(52, 48)
-	for button_state in ["normal", "hover", "pressed", "disabled"]:
-		var gear_style := style_box(Color("6f914d") if button_state == "hover" else Color("526e3e"), 7)
-		gear_style.content_margin_left = 12
-		gear_style.content_margin_right = 12
-		gear_style.content_margin_top = 10
-		gear_style.content_margin_bottom = 10
-		gameplay_options_button.add_theme_stylebox_override(button_state, gear_style)
+	# Content margins make the candy gear 52 tall in every orientation.
+	UiKit.style_button(gameplay_options_button, UiKit.Orange, 12, Vector4(12, 10, 12, 10))
+	UiKit.juice(gameplay_options_button)
 	gameplay_options_button.pressed.connect(toggle_pause_from_gear)
 	foot.add_child(gameplay_options_button)
 
 	var before_extra := Control.new()
 	before_extra.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(before_extra)
-	var extra_life_label := make_text("EXTRA LIFE\n20,000", 12, LimeColor)
+	# Styled like the top bar: a cream heading over a yellow value in the score
+	# font. The value rides inside the heading label so the group stays one block.
+	var extra_life_label := make_text("EXTRA LIFE", 16, Cream)
 	extra_life_label.name = "ExtraLifeLabel"
-	extra_life_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	extra_life_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	foot.add_child(extra_life_label)
+	var extra_life_value := make_text("20,000", 19, UiKit.Yellow)
+	extra_life_value.add_theme_font_override("font", display_font)
+	UiKit.outline_label(extra_life_value, 8, 3)
+	extra_life_value.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	extra_life_value.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	extra_life_label.add_child(extra_life_value)
 	var before_lives := Control.new()
 	before_lives.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(before_lives)
@@ -1196,7 +1357,7 @@ func setup_ui() -> void:
 	lives_box.add_theme_constant_override("separation", 10)
 	foot.add_child(lives_box)
 
-	lives_label = make_text("FROGS", 19, LimeColor)
+	lives_label = make_text("FROGS", 16, Cream)
 	lives_box.add_child(lives_label)
 
 	lives_icons = BoxContainer.new()
@@ -1219,17 +1380,20 @@ func setup_ui() -> void:
 	timer_bar.custom_minimum_size = Vector2(70, 18)
 	timer_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	timer_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	timer_bar.add_theme_stylebox_override("background", style_box(Color("121a29"), 4))
-	timer_bar.add_theme_stylebox_override("fill", style_box(Color("9ac75d"), 4))
+	var timer_well := style_box(UiKit.PanelDeep, 10, 3)
+	timer_well.set_content_margin_all(0)
+	timer_bar.add_theme_stylebox_override("background", timer_well)
+	timer_fill_style = style_box(UiKit.Green, 10, 3)
+	timer_fill_style.set_content_margin_all(0)
+	timer_bar.add_theme_stylebox_override("fill", timer_fill_style)
 	timer_box.add_child(timer_bar)
-	var time_label := make_text("TIME", 19, Cream)
+	var time_label := make_text("TIME", 16, Cream)
 	timer_box.add_child(time_label)
 
 	message_panel = PanelContainer.new()
 	message_panel.visible = false
 	message_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var msg_style = style_box(Color(0.06, 0.10, 0.17, 0.93), 12, 2)
-	msg_style.border_color = Color("ffce57")
+	var msg_style = modal_style(UiKit.PanelFace)
 	msg_style.content_margin_top = ModalVerticalPadding
 	msg_style.content_margin_bottom = ModalVerticalPadding
 	message_panel.add_theme_stylebox_override("panel", msg_style)
@@ -1244,10 +1408,9 @@ func setup_ui() -> void:
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	message_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	message_label.add_theme_color_override("font_shadow_color", Color.BLACK)
-	message_label.add_theme_constant_override("shadow_offset_y", 3)
+	message_label.resized.connect(func(): message_label.pivot_offset = message_label.size * 0.5)
 	message_content.add_child(message_label)
-	message_hint = make_text("", 18, Cream)
+	message_hint = make_text("", 18, UiKit.Yellow)
 	message_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	message_hint.visible = false
@@ -1255,19 +1418,38 @@ func setup_ui() -> void:
 
 	menu = PanelContainer.new()
 	menu.size = Vector2(440, 484)
-	menu.add_theme_stylebox_override("panel", style_box(Color(0.075, 0.10, 0.15, 0.97), 18, 2))
+	# The layout owns the menu's rect; the visible card inside it carries the
+	# candy face and the pop-in, so animation never moves the measured menu.
+	menu.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	root.add_child(menu)
+	menu_card = PanelContainer.new()
+	var card_style := CandyStyle.make(UiKit.PanelFace, 24, MenuCardLedge, 4, false)
+	card_style.rim = true
+	card_style.bevel = 6.0
+	# Inner margins less MenuFocusPadding, which the scroll content adds back.
+	card_style.set_margins(22 - MenuFocusPadding, 18 - MenuFocusPadding, 22 - MenuFocusPadding, 18 - MenuFocusPadding)
+	menu_card.add_theme_stylebox_override("panel", card_style)
+	menu_card.resized.connect(func(): menu_card.pivot_offset = menu_card.size * 0.5)
+	menu.add_child(menu_card)
 	menu_scroll = ScrollContainer.new()
 	menu_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	menu_scroll.follow_focus = true
 	menu_scroll.scroll_deadzone = 12
-	menu.add_child(menu_scroll)
+	menu_card.add_child(menu_scroll)
 
 	menu_items = VBoxContainer.new()
 	menu_items.mouse_filter = Control.MOUSE_FILTER_PASS
 	menu_items.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	menu_items.add_theme_constant_override("separation", 14)
-	menu_scroll.add_child(menu_items)
+	# The scroll area clips its contents; this padding leaves room for the focus
+	# ring, which is drawn outside each button, so no edge of it is cut off.
+	var menu_padding := MarginContainer.new()
+	menu_padding.mouse_filter = Control.MOUSE_FILTER_PASS
+	menu_padding.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for edge in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		menu_padding.add_theme_constant_override(edge, MenuFocusPadding)
+	menu_scroll.add_child(menu_padding)
+	menu_padding.add_child(menu_items)
 
 	var header_groups := row.get_children()
 	var footer_groups := foot.get_children()
@@ -1297,21 +1479,46 @@ func setup_ui() -> void:
 			header_groups[i].size_flags_vertical = Control.SIZE_EXPAND_FILL if sidebars else Control.SIZE_FILL
 		for i in range(footer_groups.size()):
 			foot.move_child(footer_groups[i], footer_groups.size() - 1 - i if sidebars else i)
-		header.add_theme_stylebox_override("panel", edge_panel_style(frame_color, true, sidebars))
+		# On iOS 26 the strip under the status bar is blurred by Safari; the top
+		# bar's panel extends up under it while its text stays below.
+		var top_edge_blur: float = 0.0 if web_layout == null or sidebars else float(web_layout.top_edge_blur(viewport_size.y))
+		var header_style := edge_panel_style(frame_color, true, sidebars)
+		header_style.content_margin_top += top_edge_blur
+		header.add_theme_stylebox_override("panel", header_style)
 		var current_footer_style := edge_panel_style(frame_color, false, sidebars)
 		current_footer_style.content_margin_left = 12
 		current_footer_style.content_margin_right = 12
 		bottom.add_theme_stylebox_override("panel", current_footer_style)
-		header.size = Vector2(panel_width, 94)
+		header.size = Vector2(panel_width, HeaderHeight + top_edge_blur)
 		header.position = Vector2(ui_safe_rect.get_center().x - panel_width / 2.0, ui_safe_rect.position.y)
 		for label in [score_label, high_label]:
 			label.add_theme_font_size_override("font_size", 19 if compact_text else 26)
+			UiKit.outline_label(label, 8 if compact_text else 10, 3 if compact_text else 4)
 		var title_label: Label = row.get_child(1).get_child(0)
-		title_label.add_theme_font_size_override("font_size", 14 if sidebars else (18 if compact_text else 23))
-		level_label.visible = not narrow and not sidebars
-		lives_label.add_theme_font_size_override("font_size", 10 if compact_text else 19)
+		# Narrow headers and the landscape sidebar stack the title on two rows.
+		var stacked: bool = compact_text or sidebars
+		title_label.text = "FROGGER" if stacked else "FROGGER 3D"
+		title_bottom.visible = stacked
+		for part in [title_label, title_bottom]:
+			part.add_theme_font_size_override("font_size", 14 if sidebars else (18 if compact_text else 23))
+			UiKit.outline_label(part, 6 if sidebars else (8 if compact_text else 10), 2 if sidebars else (3 if compact_text else 4))
+		level_label.visible = not stacked and not narrow
+		# Every column shares the same two row heights, so headings, title and
+		# scores line up across the bar.
+		var heading_row: float = 22.0 if sidebars else (26.0 if compact_text else 32.0)
+		var score_row: float = 26.0 if compact_text else 36.0
+		for label in [player_header, header_groups[2].get_child(0), title_label]:
+			label.custom_minimum_size.y = heading_row
+			label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		for label in [score_label, high_label, title_bottom, level_label]:
+			label.custom_minimum_size.y = score_row
+			label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lives_label.add_theme_font_size_override("font_size", 13 if compact_text else 16)
 		time_label.visible = not narrow and not sidebars
-		extra_life_label.add_theme_font_size_override("font_size", 10 if compact_text else 12)
+		extra_life_label.add_theme_font_size_override("font_size", 13 if compact_text else 16)
+		var extra_value: Label = extra_life_label.get_child(0)
+		extra_value.add_theme_font_size_override("font_size", 15 if compact_text else 19)
+		extra_life_label.custom_minimum_size.y = (13.0 + 15.0 if compact_text else 16.0 + 19.0) + 12.0
 		foot.add_theme_constant_override("separation", 0 if portrait_footer or sidebars else (4 if narrow else 12))
 		lives_box.add_theme_constant_override("separation", 4 if narrow else 10)
 		lives_box.custom_minimum_size = Vector2(116.0 if narrow and not sidebars else 0.0, 0.0)
@@ -1339,7 +1546,7 @@ func setup_ui() -> void:
 			timer_box.size_flags_horizontal = Control.SIZE_FILL
 		message_label.add_theme_font_size_override("font_size", 18 if touch_device or viewport_size.x < 620 else (24 if viewport_size.x < 900 else 30))
 		update_message_layout()
-		var menu_height: float = clampf(menu_items.get_combined_minimum_size().y + 28.0, 220.0, 620.0)
+		var menu_height: float = clampf(menu_items.get_combined_minimum_size().y + 36.0 + MenuCardLedge, 220.0, 640.0)
 		menu.size = Vector2(minf(480.0 if touch_device else 520.0, ui_safe_rect.size.x - 24.0), minf(menu_height, ui_safe_rect.size.y - 40.0))
 		menu.position = ui_safe_rect.get_center() - menu.size / 2.0
 	layout_ui.call()
@@ -1369,9 +1576,17 @@ func hud_uses_sidebars() -> bool:
 func hud_message_top() -> float:
 	# Modals retain their existing placement rather than using the height of a
 	# sidebar as a top obstruction.
-	return ui_safe_rect.position.y + 94.0 if hud_uses_sidebars() else hud_header.get_global_rect().end.y
+	return ui_safe_rect.position.y + HeaderHeight if hud_uses_sidebars() else hud_header.get_global_rect().end.y
 
-func clear_menu() -> void:
+## UI tweens are presentation only. Captures and tests read settled layouts.
+func animate_ui() -> bool:
+	return screenshot == ""
+
+func clear_menu(page: String = "") -> void:
+	# A new page pops its card in; rebuilding the same page (frog choice) does not.
+	if animate_ui() and (not menu.visible or page != menu_page):
+		UiKit.pop_in(menu_card, 0.86, 0.32)
+	menu_page = page
 	menu.visible = true
 	message_label.text = ""
 	message_panel.visible = false
@@ -1397,29 +1612,52 @@ func enable_menu_swipe_scrolling(node: Node) -> void:
 func show_menu(resume: bool) -> void:
 	if ad_busy():
 		return
-	clear_menu()
+	clear_menu("pause" if resume else "main")
 	options_open = false
 	paused = resume
 	if resume:
-		menu_items.add_child(make_text("PAUSED", 23, Cream))
-		add_button("RESUME", resume_game)
-		add_button("OPTIONS", func(): show_options(true))
-		add_button("RETURN TO MAIN MENU", return_to_main_menu)
+		menu_items.add_child(make_heading("PAUSED"))
+		add_button("RESUME", resume_game, UiKit.Green)
+		add_button("OPTIONS", func(): show_options(true), UiKit.Orange)
+		add_button("RETURN TO MAIN MENU", return_to_main_menu, UiKit.Red)
 	else:
-		menu_items.add_child(make_text("FROGGER", 30, Cream))
+		menu_items.add_child(make_title())
 		setup_frog_selector(menu_items)
-		add_button("ONE PLAYER", func(): start_game(1))
-		add_button("TWO PLAYERS - TAKE TURNS", func(): start_game(2))
-		add_button("OPTIONS", func(): show_options(false))
-		var instructions := make_text("Swipe to hop" if touch_device else "Arrow keys / WASD / D-pad to hop", 14, Color("adb8cc"))
+		add_button("ONE PLAYER", func(): start_game(1), UiKit.Green)
+		add_button("TWO PLAYERS - TAKE TURNS", func(): start_game(2), UiKit.Secondary)
+		add_button("OPTIONS", func(): show_options(false), UiKit.Orange)
+		var instructions := make_text("Swipe to hop" if touch_device else "Arrow keys / WASD / D-pad to hop", 14, UiKit.SoftText)
 		menu_items.add_child(instructions)
 	if web_crazygames != null:
 		account_progress_label = make_account_progress_label()
 		menu_items.add_child(account_progress_label)
 	enable_menu_swipe_scrolling(menu_items)
 
+## Key-art title: cream FROGGER and yellow 3D in extruded, ink-outlined pixels.
+func make_title() -> Control:
+	var title := HBoxContainer.new()
+	title.alignment = BoxContainer.ALIGNMENT_CENTER
+	title.add_theme_constant_override("separation", 14)
+	for part in [["FROGGER", Cream], ["3D", UiKit.Yellow]]:
+		var word := make_text(part[0], 30, part[1])
+		UiKit.outline_label(word, 12, 6)
+		title.add_child(word)
+	# Leave room under the extrusion before the frog cards.
+	title.custom_minimum_size.y = 44
+	if animate_ui():
+		title.resized.connect(func(): title.pivot_offset = title.size * 0.5)
+		var breathe := title.create_tween().set_loops()
+		breathe.tween_property(title, "scale", Vector2.ONE * 1.035, 0.9).set_trans(Tween.TRANS_SINE)
+		breathe.tween_property(title, "scale", Vector2.ONE, 0.9).set_trans(Tween.TRANS_SINE)
+	return title
+
+func make_heading(text_val: String) -> Label:
+	var heading := make_text(text_val, 23, UiKit.Yellow)
+	heading.custom_minimum_size.y = 34
+	return heading
+
 func make_account_progress_label() -> Label:
-	var label := make_text("Progress is linked to CrazyGames Account", 12, Color("adb8cc"))
+	var label := make_text("Progress is linked to CrazyGames Account", 12, UiKit.SoftText)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.text = "Progress is linked to CrazyGames Account" if web_crazygames != null and bool(web_crazygames.account_linked) else "High scores saved on this device"
 	return label
@@ -1433,6 +1671,42 @@ func set_follow_zoom_percent(value: float) -> void:
 	else:
 		desktop_follow_zoom_percent = clampf(value, -50.0, 100.0)
 	save_preferences()
+
+func add_world_curve_control() -> void:
+	var curve_group := VBoxContainer.new()
+	curve_group.name = "WorldCurveControl"
+	menu_items.add_child(curve_group)
+	var heading := HBoxContainer.new()
+	curve_group.add_child(heading)
+	var label := make_text("", 18, Cream)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_child(label)
+	var reset := Button.new()
+	reset.name = "WorldCurveDefault"
+	reset.text = "DEFAULT"
+	reset.custom_minimum_size.y = 40
+	UiKit.juice(reset)
+	heading.add_child(reset)
+	var slider := HSlider.new()
+	slider.name = "WorldCurveSlider"
+	slider.tooltip_text = "How strongly the world rolls away like a log (perspective view only)"
+	slider.min_value = 0.0
+	slider.max_value = MaxCurvePercent
+	slider.step = 10.0
+	slider.value = world_curve_percent
+	slider.custom_minimum_size.y = 40
+	curve_group.add_child(slider)
+	var update_control := func():
+		label.text = "World curve: %d%%" % int(world_curve_percent) if world_curve_percent > 0.0 else "World curve: off"
+		reset.disabled = is_equal_approx(world_curve_percent, DefaultCurvePercent)
+	slider.value_changed.connect(func(value: float):
+		world_curve_percent = clampf(value, 0.0, MaxCurvePercent)
+		apply_curved_world()
+		save_preferences()
+		update_control.call())
+	reset.pressed.connect(func(): slider.value = DefaultCurvePercent)
+	update_control.call()
 
 func add_follow_zoom_control(follow: CheckButton) -> void:
 	var zoom_group := VBoxContainer.new()
@@ -1448,6 +1722,7 @@ func add_follow_zoom_control(follow: CheckButton) -> void:
 	reset.name = "FollowZoomDefault"
 	reset.text = "DEFAULT"
 	reset.custom_minimum_size.y = 40
+	UiKit.juice(reset)
 	heading.add_child(reset)
 	var slider := HSlider.new()
 	slider.name = "FollowZoomSlider"
@@ -1488,12 +1763,12 @@ func return_to_main_menu() -> void:
 func show_options(return_to_pause: bool) -> void:
 	if ad_busy():
 		return
-	clear_menu()
+	clear_menu("options")
 	options_open = true
 	options_return_to_pause = return_to_pause
 	paused = started
-	menu_items.add_child(make_text("OPTIONS", 23, Cream))
-	add_button("BACK", func(): show_menu(options_return_to_pause))
+	menu_items.add_child(make_heading("OPTIONS"))
+	add_button("BACK", func(): show_menu(options_return_to_pause), UiKit.Secondary)
 
 	var collision := CheckButton.new()
 	collision.text = "Classic collision"
@@ -1511,6 +1786,7 @@ func show_options(return_to_pause: bool) -> void:
 	perspective.button_pressed = perspective_view
 	perspective.toggled.connect(func(val):
 		perspective_view = val
+		apply_curved_world()
 		save_preferences())
 	menu_items.add_child(perspective)
 	var top_down := CheckButton.new()
@@ -1559,6 +1835,8 @@ func show_options(return_to_pause: bool) -> void:
 		save_preferences())
 	menu_items.add_child(fps_btn)
 
+	add_world_curve_control()
+
 	var sound_btn := CheckButton.new()
 	sound_btn.text = "Sound"
 	sound_btn.button_pressed = not muted
@@ -1570,20 +1848,36 @@ func show_options(return_to_pause: bool) -> void:
 	for child in menu_items.get_children():
 		if child is CheckButton:
 			child.custom_minimum_size.y = 48.0 if touch_device else 34.0
-	var build_stamp_path := "res://build_timestamp.txt"
-	var build_text := "Development build"
-	if FileAccess.file_exists(build_stamp_path):
-		build_text = "Built %s" % FileAccess.get_file_as_string(build_stamp_path).strip_edges()
-	menu_items.add_child(make_text(build_text, 13, Color("adb8cc")))
+	var build_label := make_text(get_build_time_text(), 13, UiKit.SoftText)
+	build_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	menu_items.add_child(build_label)
 	enable_menu_swipe_scrolling(menu_items)
 
-func add_button(text_val: String, action: Callable) -> void:
+func get_build_time_text() -> String:
+	var build_stamp_path := "res://build_timestamp.txt"
+	if not FileAccess.file_exists(build_stamp_path):
+		return "Development build"
+	var stamp := FileAccess.get_file_as_string(build_stamp_path).strip_edges()
+	if not stamp.is_valid_int() or int(stamp) <= 0:
+		return "Build time unavailable"
+	var unix_seconds := int(stamp)
+	if OS.has_feature("web"):
+		var script := "new Date(%d).toLocaleString(undefined, {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'})" % (unix_seconds * 1000)
+		var localized: Variant = JavaScriptBridge.eval(script)
+		if localized is String and not localized.is_empty():
+			return "Built %s" % localized
+	var utc := Time.get_datetime_dict_from_unix_time(unix_seconds)
+	return "Built %04d-%02d-%02d %02d:%02d UTC" % [utc.year, utc.month, utc.day, utc.hour, utc.minute]
+
+func add_button(text_val: String, action: Callable, face: Color = UiKit.Secondary) -> void:
 	var b := Button.new()
 	b.text = text_val
-	b.custom_minimum_size = Vector2(0, 52 if touch_device else 43)
-	b.add_theme_font_size_override("font_size", 17)
-	b.add_theme_stylebox_override("normal", style_box(Color("526e3e"), 7))
-	b.add_theme_stylebox_override("hover", style_box(Color("6f914d"), 7))
+	b.custom_minimum_size = Vector2(0, 58 if touch_device else 52)
+	b.add_theme_font_override("font", display_font)
+	b.add_theme_font_size_override("font_size", 15)
+	b.add_theme_constant_override("outline_size", 8)
+	UiKit.style_button(b, face, 16)
+	UiKit.juice(b)
 	b.pressed.connect(action)
 	menu_items.add_child(b)
 	var btn_count: int = 0
@@ -1716,6 +2010,11 @@ func update_hud() -> void:
 		for i in range(lives_icons.get_child_count()):
 			lives_icons.get_child(i).visible = (i < count)
 	timer_bar.value = clampf(float(BoardVisuals.at(state, 0x83dd)) / 60.0, 0.0, 1.0) * 100.0
+	# The time pill ripens from green through yellow to red as it drains.
+	var remaining: float = timer_bar.value / 100.0
+	var fill: Color = UiKit.Yellow.lerp(UiKit.Green, clampf((remaining - 0.35) / 0.3, 0.0, 1.0)) if remaining > 0.2 else UiKit.Red.lerp(UiKit.Yellow, clampf((remaining - 0.1) / 0.1, 0.0, 1.0))
+	if not timer_fill_style.bg_color.is_equal_approx(fill):
+		timer_fill_style.bg_color = fill
 	var next_hint: String = ""
 	message_panel.modulate.a = 1.0
 	update_level_intro()
@@ -1732,6 +2031,14 @@ func update_hud() -> void:
 	message_hint.text = next_hint
 	message_panel.visible = message_label.text.length() > 0
 	message_hint.visible = not message_hint.text.is_empty()
+	var shown: String = message_label.text + "\n" + message_hint.text
+	if shown != shown_message:
+		# New banner text lands with a squash-and-stretch pop on the label only.
+		if animate_ui() and not message_label.text.is_empty():
+			message_label.pivot_offset = message_label.size * 0.5
+			message_label.scale = Vector2.ONE * 1.45
+			UiKit.bounce(message_label, 1.0, 0.35)
+		shown_message = shown
 	update_message_layout()
 	fps_update_seconds += presentation_delta
 	if fps_label != null and show_fps and fps_update_seconds >= 0.25:
@@ -1849,6 +2156,8 @@ func update_camera(delta: float) -> void:
 		camera.position.x = clampf(camera.position.x, -pan_limit, pan_limit)
 		camera_look_target.x = clampf(camera_look_target.x, -pan_limit, pan_limit)
 	camera.look_at(camera_look_target, Vector3.FORWARD if top_down_camera else Vector3.UP)
+	# The rolling-log bend stays centred on the camera's focus row as it follows.
+	RenderingServer.global_shader_parameter_set("curve_center_z", camera_look_target.z)
 	update_camera_clip_planes()
 
 func portrait_follow_pan_limit(position: Vector3, target: Vector3, row: float) -> float:
@@ -1870,6 +2179,11 @@ func update_camera_clip_planes() -> void:
 	var scene_distance: float = camera.position.length()
 	camera.near = maxf(0.1, scene_distance - 16.0)
 	camera.far = scene_distance + 16.0
+	if environment != null:
+		# Haze only the scenery past every board corner, and reach full haze
+		# before the far plane so clipped woods never show a hard edge.
+		environment.fog_depth_begin = scene_distance + 8.0
+		environment.fog_depth_end = scene_distance + 15.5
 
 func fit_board_overview(position: Vector3, target: Vector3, view_size: Vector2, crop_frame: bool) -> Dictionary:
 	# Fit the board into the live HUD opening, preserving the chosen angle.
@@ -2153,7 +2467,7 @@ func update_lanes(fraction: float) -> void:
 					if crocodile:
 						half_width = BoardVisuals.RiverGatorLengthPixels / 2.0
 						bounds_center = x + float(width) / 2.0 + 12.0 - BoardVisuals.RiverGatorTipInset - half_width
-					if not BoardVisuals.intersects_playfield(bounds_center, half_width):
+					if not BoardVisuals.intersects_presentation(bounds_center, half_width, BoardVisuals.TurtleFadePixels if is_turtle else BoardVisuals.EdgeFadePixels):
 						continue
 					if batch != null and not crocodile:
 						batch.place(batched_lane_transform(lane, width, model, render_x, float(row)))
@@ -2519,8 +2833,9 @@ func update_bonuses(fraction: float) -> void:
 			display_text = "TIME BONUS +%d" % amount
 			var panel := PanelContainer.new()
 			panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			var st = style_box(Color(0.06, 0.10, 0.20, 0.94), 12, 2)
-			st.border_color = Color("ffce57")
+			# The same deep blue as every panel, picked out with a gold border.
+			var st = modal_style(UiKit.PanelFace)
+			st.border_color = UiKit.Yellow
 			st.content_margin_top = ModalVerticalPadding
 			st.content_margin_bottom = ModalVerticalPadding
 			panel.add_theme_stylebox_override("panel", st)
@@ -2531,21 +2846,29 @@ func update_bonuses(fraction: float) -> void:
 			var heading = make_text("TIME BONUS", 20, Cream)
 			heading.add_theme_font_override("font", display_font)
 			content.add_child(heading)
-			content.add_child(make_text("+%d" % amount, 29, Color("7beaff")))
+			content.add_child(make_text("+%d" % amount, 29, UiKit.Yellow))
 			panel.size = panel.get_combined_minimum_size()
+			if animate_ui():
+				panel.pivot_offset = panel.size * 0.5
+				panel.scale = Vector2.ONE * 0.55
+				UiKit.bounce(panel, 1.0, 0.3)
 			view = panel
 			screen = viewport_size * 0.5
 			if follow_camera:
 				screen.y = hud_message_top() + 16.0 + panel.size.y * 0.5
 		else:
 			display_text = "+%d" % amount
-			var label = make_text(display_text, 28, Color("ff75da") if kind == 1 else Color("fff32f"))
+			var label = make_text(display_text, 28, UiKit.Pink if kind == 1 else UiKit.Yellow)
 			label.size = Vector2(180, 50)
 			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			label.add_theme_color_override("font_shadow_color", Color.BLACK)
-			label.add_theme_constant_override("shadow_offset_y", 3)
+			if animate_ui():
+				label.pivot_offset = label.size * 0.5
+				label.scale = Vector2.ONE * 0.4
+				UiKit.bounce(label, 1.0, 0.3)
 			view = label
-			screen = camera.unproject_position(pos3(float(award.get("x", 0)), maxf(32.0, float(award.get("row", 0))), 0.83))
+			var award_point: Vector3 = pos3(float(award.get("x", 0)), maxf(32.0, float(award.get("row", 0))), 0.83)
+			award_point.y -= curve_drop(award_point.z)
+			screen = camera.unproject_position(award_point)
 			screen.x += -65.0 if kind == 0 else 65.0
 			screen.x = clampf(screen.x, 90.0, maxf(90.0, viewport_size.x - 90.0))
 			screen.y = clampf(screen.y, minf(140.0, viewport_size.y * 0.2), maxf(140.0, viewport_size.y - 120.0))
@@ -2579,10 +2902,7 @@ func update_death_ripple(fraction: float) -> void:
 			death_ripple.visible = false
 		return
 	if death_ripple == null:
-		ripple_material = StandardMaterial3D.new()
-		ripple_material.albedo_color = Color(0.65, 0.88, 1.0, 0.6)
-		ripple_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		ripple_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		ripple_material = make_ripple_material()
 		var torus := TorusMesh.new()
 		torus.inner_radius = 0.42
 		torus.outer_radius = 0.45
@@ -2596,9 +2916,7 @@ func update_death_ripple(fraction: float) -> void:
 	death_ripple.visible = true
 	death_ripple.position = pos3(float(frog_visual.death_x), float(frog_visual.death_row), 0.025)
 	death_ripple.scale = Vector3(1.0 + age * 0.6, 0.18, 1.0 + age * 0.6)
-	var tint = ripple_material.albedo_color
-	tint.a = maxf(0.0, 0.65 - age * 0.4)
-	ripple_material.albedo_color = tint
+	ripple_material.set_shader_parameter("alpha", maxf(0.0, 0.65 - age * 0.4))
 
 # Review tests implementation
 func read_review_args() -> void:

@@ -1,0 +1,104 @@
+[
+  {
+    "asset": "broadleaf_a",
+    "triangles": 798,
+    "leaves": 48,
+    "passed": true
+  },
+  {
+    "asset": "broadleaf_b",
+    "triangles": 798,
+    "leaves": 48,
+    "passed": true
+  },
+  {
+    "asset": "pine_a",
+    "triangles": 546,
+    "leaves": 36,
+    "passed": true
+  },
+  {
+    "asset": "pine_b",
+    "triangles": 546,
+    "leaves": 36,
+    "passed": true
+  },
+  {
+    "asset": "shrub_a",
+    "triangles": 252,
+    "leaves": 21,
+    "passed": true
+  },
+  {
+    "asset": "shrub_b",
+    "triangles": 336,
+    "leaves": 28,
+    "passed": true
+  },
+  {
+    "asset": "edge_hedge_long",
+    "triangles": 402,
+    "leaves": 44,
+    "passed": true
+  },
+  {
+    "asset": "edge_hedge_short",
+    "triangles": 156,
+    "leaves": 17,
+    "passed": true
+  },
+  {
+    "asset": "edge_hedge_front",
+    "triangles": 972,
+    "leaves": 111,
+    "passed": true
+  },
+  {
+    "asset": "grass_tuft",
+    "triangles": 7,
+    "leaves": 7,
+    "passed": true
+  },
+  {
+    "asset": "flower_tuft",
+    "triangles": 152,
+    "leaves": 8,
+    "passed": true
+  },
+  {
+    "asset": "reeds_a",
+    "triangles": 73,
+    "leaves": 13,
+    "passed": true
+  },
+  {
+    "asset": "reeds_b",
+    "triangles": 73,
+    "leaves": 13,
+    "passed": true
+  },
+  {
+    "asset": "reed_wall",
+    "triangles": 1088,
+    "leaves": 476,
+    "passed": true
+  },
+  {
+    "asset": "lily_pads",
+    "triangles": 83,
+    "leaves": 0,
+    "passed": true
+  },
+  {
+    "asset": "swamp_cypress_a",
+    "triangles": 1087,
+    "leaves": 85,
+    "passed": true
+  },
+  {
+    "asset": "swamp_cypress_b",
+    "triangles": 1089,
+    "leaves": 87,
+    "passed": true
+  }
+]

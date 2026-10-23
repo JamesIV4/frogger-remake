@@ -107,6 +107,8 @@ try {
     }
     Copy-Item -LiteralPath tools/web_audio.js -Destination $webOutput/frogger-audio.js -Force
     Copy-Item -LiteralPath tools/web_layout.js -Destination $webOutput/frogger-layout.js -Force
+    # Loading screen key art, whistle and font subsets used by godot/web_shell.html.
+    Get-ChildItem -LiteralPath tools/web_loader -File | Copy-Item -Destination $webOutput -Force
 
     New-Item -ItemType Directory -Force $webOutput/licenses | Out-Null
     Copy-Item -LiteralPath LICENSE,THIRD_PARTY.md -Destination $webOutput/licenses -Force
@@ -230,7 +232,7 @@ try {
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="apple-mobile-web-app-title" content="Frogger">
-		<meta name="theme-color" content="#000000">
+		<meta name="theme-color" content="#00aafa">
 		<script>
 			if ('serviceWorker' in navigator) {
 				window.addEventListener('load', () => {
@@ -257,8 +259,8 @@ try {
   "scope": "./",
   "display": "fullscreen",
   "orientation": "portrait",
-  "background_color": "#182332",
-  "theme_color": "#000000",
+  "background_color": "#00aafa",
+  "theme_color": "#00aafa",
   "icons": [
     {
       "src": "icon-192.png",

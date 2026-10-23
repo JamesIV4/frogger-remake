@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="26" fill="#182332"/>
-  <path d="M16 77C16 62 25 51 26 39C27 25 34 18 43 18C53 18 59 26 64 32C69 26 75 18 85 18C95 18 102 26 103 39C104 51 113 62 113 77C113 97 95 108 64 108C33 108 16 97 16 77Z" fill="#72b438"/>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00aafa"/>
+      <stop offset="1" stop-color="#1d4fc8"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="26" fill="url(#sky)"/>
+  <path d="M16 77C16 62 25 51 26 39C27 25 34 18 43 18C53 18 59 26 64 32C69 26 75 18 85 18C95 18 102 26 103 39C104 51 113 62 113 77C113 97 95 108 64 108C33 108 16 97 16 77Z" fill="#72b438" stroke="#101b32" stroke-width="6" stroke-linejoin="round"/>
   <ellipse cx="64" cy="79" rx="47" ry="25" fill="#97ce43"/>
   <path d="M18 86C28 98 45 100 64 100C83 100 101 98 111 86C106 102 88 108 64 108C40 108 23 102 18 86Z" fill="#38823a"/>
   <g fill="#8bc741"><ellipse cx="43" cy="42" rx="22" ry="26"/><ellipse cx="85" cy="42" rx="22" ry="26"/></g>

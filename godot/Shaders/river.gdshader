@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_never, cull_disabled, unshaded;
+#include "res://Shaders/curve.gdshaderinc"
 
 uniform float clock = 0.0;
 uniform bool compatibility_color = false;
@@ -10,6 +11,7 @@ void vertex() {
     // Gentle continuous surface motion. No cell quantization or square noise.
     VERTEX.y += sin(VERTEX.x * 1.7 + VERTEX.z * 2.2 + clock * 1.1) * 0.014;
     VERTEX.y += sin(VERTEX.x * 3.1 - VERTEX.z * 1.4 - clock * 0.8) * 0.007;
+    VERTEX += curve_offset(MODEL_MATRIX, VERTEX);
 }
 
 void fragment() {

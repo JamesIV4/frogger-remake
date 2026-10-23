@@ -5,6 +5,8 @@
 - **MAME**, MAMEdev / contributors: https://github.com/mamedev/mame, version 0.289. Used locally to capture independent function fixtures and inspect the board wiring; not bundled. Hardware notes are grounded in `src/mame/galaxian/galaxian.cpp`.
 - **Press Start 2P**, CodeMan38: https://github.com/google/fonts/tree/main/ofl/pressstart2p. SIL Open Font License; license included beside the font.
 - **Silkscreen**, Jason Kottke / contributors: https://github.com/google/fonts/tree/main/ofl/silkscreen. SIL Open Font License; license included beside the font.
+- **Loading whistle**: "FX swanee whistle up.wav" by v0idation, https://freesound.org/people/v0idation/sounds/497092/, Creative Commons 0 (public domain). Shipped unchanged as the web loader's `loading-whistle.mp3` (Freesound high-quality preview of the original ACME swanee whistle recording).
+- **Web loader fonts**: subsets of Press Start 2P and Silkscreen (above), SIL Open Font License; `tools/web_loader/` key art is the project's own promotional artwork.
 - **Godot Engine**: https://godotengine.org, MIT license. **Blender**: https://blender.org, GPL. The model generation workflow adapts the editable recipe / rig / validation approach from the user's NetHack PixelHack guide; no NetHack assets were copied.
 
 The original Frogger game and ROM data remain their respective owners' work. Original binaries are user-provided and ignored by Git. This repository does not download or publish ROMs.

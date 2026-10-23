@@ -3,6 +3,8 @@ class_name FrogChoice
 
 var preview_model: Node3D
 
+const SelectedFace: Color = Color("ffdd00")
+
 func _process(delta: float) -> void:
 	if is_visible_in_tree() and is_instance_valid(preview_model):
 		preview_model.rotate_y(deg_to_rad(36.0) * delta)
@@ -11,31 +13,36 @@ func _process(delta: float) -> void:
 # stops rendering when the menu is hidden, and never consumes gameplay input.
 func configure(model: String, selected: bool, font: Font) -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	custom_minimum_size = Vector2(0, 142)
+	custom_minimum_size = Vector2(0, 150)
 	tooltip_text = "Play as the pink frog" if model == "lady_frog" else "Play as the green frog"
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color("334937") if selected else Color("253442")
-	normal.border_color = Color("b6df56") if selected else Color("617080")
-	normal.set_border_width_all(3 if selected else 1)
-	normal.set_corner_radius_all(8)
-	add_theme_stylebox_override("normal", normal)
-	var hover := normal.duplicate() as StyleBoxFlat
-	hover.bg_color = Color("466044")
-	add_theme_stylebox_override("hover", hover)
-	add_theme_stylebox_override("pressed", hover)
-	var focus := StyleBoxFlat.new()
-	focus.bg_color = Color.TRANSPARENT
-	focus.border_color = Color("eee6c9")
-	focus.set_border_width_all(3)
-	focus.set_corner_radius_all(8)
-	add_theme_stylebox_override("focus", focus)
+	# The chosen frog sits on a sunny yellow candy card with a cream ring; the
+	# other on a blue well.
+	var face: Color = SelectedFace if selected else UiKit.PanelDeep
+	UiKit.style_button(self, face, 16, Vector4(6, 6, 6, 6), 7.0)
+	if selected:
+		add_theme_stylebox_override("hover", get_theme_stylebox("normal"))
+	UiKit.juice(self)
+	if selected:
+		# Drawn inside the card, so a scroll area never clips it.
+		var ring := Panel.new()
+		ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ring.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		ring.offset_bottom = -7
+		var ring_style := StyleBoxFlat.new()
+		ring_style.draw_center = false
+		ring_style.border_color = UiKit.Cream
+		ring_style.set_border_width_all(4)
+		ring_style.set_corner_radius_all(UiKit.Radius)
+		ring_style.anti_aliasing = true
+		ring.add_theme_stylebox_override("panel", ring_style)
+		add_child(ring)
 	var container := SubViewportContainer.new()
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	container.offset_left = 4
-	container.offset_right = -4
-	container.offset_top = 4
-	container.offset_bottom = -32
+	container.offset_left = 6
+	container.offset_right = -6
+	container.offset_top = 6
+	container.offset_bottom = -40
 	container.stretch = true
 	add_child(container)
 	var viewport := SubViewport.new()
@@ -78,12 +85,13 @@ func configure(model: String, selected: bool, font: Font) -> void:
 				node.play(clip)
 	var caption := Label.new()
 	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	caption.text = "Pink" if model == "lady_frog" else "Green"
+	caption.text = "PINK" if model == "lady_frog" else "GREEN"
 	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	caption.add_theme_font_override("font", font)
-	caption.add_theme_font_size_override("font_size", 16)
-	caption.add_theme_color_override("font_color", Color("eee6c9"))
+	caption.add_theme_font_size_override("font_size", 18)
+	caption.add_theme_color_override("font_color", UiKit.Cream)
+	UiKit.outline_label(caption, 7)
 	caption.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	caption.offset_top = -30
-	caption.offset_bottom = -6
+	caption.offset_top = -40
+	caption.offset_bottom = -12
 	add_child(caption)

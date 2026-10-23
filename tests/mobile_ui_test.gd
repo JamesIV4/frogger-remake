@@ -44,7 +44,8 @@ func measure(game: FroggerGame, window_size: Vector2i, density: float) -> Dictio
 		check(is_zero_approx(game.score_label.get_global_transform().get_rotation()) and is_zero_approx(game.gameplay_options_button.get_global_transform().get_rotation()), "Sidebar text and controls stay upright")
 	else:
 		check(is_equal_approx(footer.end.y, view.y) and is_zero_approx(header.position.y), "Portrait keeps top and bottom HUD bars")
-		check(absf(header.size.y * ui_scale - 94.0 * 430.0 / 480.0) < 1.0, "Existing portrait HUD scale is preserved")
+		# The top bar is slim: its compact height, or just what its contents need.
+		check(absf(header.size.y - maxf(game.HeaderHeight, game.hud_header.get_combined_minimum_size().y)) < 1.0, "Portrait HUD header keeps its slim height")
 		check(game.timer_bar.size.x > game.timer_bar.size.y and game.timer_bar.fill_mode == ProgressBar.FILL_BEGIN_TO_END, "Portrait restores the horizontal timer")
 	print("MOBILE UI %s @%s: %s" % [window_size, density, result])
 	return result

@@ -114,6 +114,15 @@ test('iOS restores pre-regression viewport fitting and leaves canvas sizing enti
     }
 });
 
+test('Only iOS 26 Safari reports the blurred strip under the status bar, in Godot units', () => {
+    const safari26 = { CSS: { supports: (property, value) => property === 'text-wrap' && value === 'pretty' } };
+    const iphone = { userAgent: 'iPhone', platform: 'iPhone', maxTouchPoints: 5, standalone: true };
+    // 16.5 CSS px on a 430 px tall canvas, stretched to 860 Godot units.
+    assert.equal(setup(iphone, safari26).root.FroggerLayout.top_edge_blur(860), 33);
+    assert.equal(setup(iphone).root.FroggerLayout.top_edge_blur(860), 0, 'Older iOS without the effect');
+    assert.equal(setup(iphone, { CSS: { supports: () => false } }).root.FroggerLayout.top_edge_blur(860), 0);
+    assert.equal(setup(undefined, safari26).root.FroggerLayout.top_edge_blur(860), 0, 'Android never reserves it');
+});
 test('Android retains cover mode and explicit top and bottom safe-area padding', () => {
     const app = setup();
     app.viewportMeta.content = 'width=device-width, initial-scale=1.0';

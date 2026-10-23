@@ -51,6 +51,17 @@ static func fit_river_gator(native_width: int) -> Dictionary:
 static func intersects_playfield(center: float, half_width: float) -> bool:
 	return center + half_width >= LeftEdge and center - half_width <= RightEdge
 
+## Lane props stay drawn this far past the playfield edge while the clipped
+## shaders fade them into a tunnel or the swamp (presentation only; the
+## clip-shader fade ends at |x| = 7.85 tiles, 13.6 px past the edge).
+const EdgeFadePixels: float = 13.6
+## Turtles reuse one rig per group across wrap copies, so their margin must
+## keep the two copies 256 px apart from ever showing at once (2m < 14 px).
+const TurtleFadePixels: float = 6.5
+
+static func intersects_presentation(center: float, half_width: float, margin: float = EdgeFadePixels) -> bool:
+	return intersects_playfield(center, half_width + margin)
+
 static func interpolate_byte(previous: int, current: int, alpha: float) -> float:
 	var d: int = ((current - previous + 128) & 255) - 128
 	if absi(d) > 8:

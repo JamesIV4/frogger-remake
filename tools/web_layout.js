@@ -69,6 +69,17 @@
             const y = height / Math.max(1, area.height);
             return { left: area.left * x, right: area.right * x, top: area.top * y, bottom: area.bottom * y };
         },
+        // iOS 26 (Liquid Glass) softly blurs and fades the strip of the page just
+        // below the status bar, and pages cannot switch that off. Report its
+        // height in Godot units so the HUD can keep its text below it. Safari 26
+        // is detected by a feature it introduced (text-wrap: pretty), since its
+        // user agent string no longer carries the OS version.
+        top_edge_blur(height) {
+            const css = root.CSS;
+            if (!ios || !css || !css.supports || !css.supports('text-wrap', 'pretty')) return 0;
+            const area = geometry();
+            return 16.5 * height / Math.max(1, area.height);
+        },
         subscribe(listener) {
             callback = listener;
             signature = '';

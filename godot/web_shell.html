@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>Frogger 3D</title>
+		<link rel="preload" href="press-start-2p.woff" as="font" type="font/woff" crossorigin>
+		<link rel="preload" href="key-art-landscape.webp" as="image" media="(min-aspect-ratio: 19/20)">
+		<link rel="preload" href="key-art-portrait.webp" as="image" media="(max-aspect-ratio: 19/20)">
+		<style>
+@font-face {
+	font-family: 'Press Start 2P';
+	src: url('press-start-2p.woff') format('woff');
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Silkscreen';
+	src: url('silkscreen.woff') format('woff');
+	font-display: swap;
+}
+
+/* Game palette (art/scripts/build_assets.py) and key-art sky. */
+:root {
+	--cream: #fff3bd;
+	--ink: #101b32;
+	--lime: #b0ff39;
+	--green: #47e51b;
+	--darkgreen: #08732e;
+	--yellow: #ffdd00;
+	--orange: #ff7a16;
+	--pink: #ff269c;
+	--sky: #00aafa;
+	--p: 0;
+}
+
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+body {
+	color: var(--cream);
+	background: var(--sky) linear-gradient(180deg, #00aafa 0%, #34c0ff 52%, #47e51b 52%, #08732e 100%) fixed;
+	overflow: hidden;
+	touch-action: none;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+/* ---------- Loader ---------- */
+
+#loader {
+	position: fixed;
+	inset: 0;
+	z-index: 10;
+	overflow: hidden;
+	background: linear-gradient(180deg, #00aafa 0%, #34c0ff 52%, #47e51b 52%, #08732e 100%);
+	font-family: 'Press Start 2P', 'Courier New', monospace;
+	-webkit-user-select: none;
+	user-select: none;
+	--hole: 0px;
+}
+
+@property --hole {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+
+.loader-art, .loader-art picture, .loader-art img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.loader-art img {
+	object-fit: cover;
+	/* Keep the title (upper right) and frog (right) through every crop. */
+	object-position: 100% 20%;
+	opacity: 0;
+	transform-origin: 85% 25%;
+	transition: opacity 0.45s ease-out;
+	animation: loader-drift 16s ease-in-out infinite alternate;
+}
+
+.loader-art img.loaded {
+	opacity: 1;
+}
+
+@keyframes loader-drift {
+	from { transform: scale(1.0); }
+	to { transform: scale(1.06); }
+}
+
+.loader-shade {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to top, rgba(16, 27, 50, 0.62) 0%, rgba(16, 27, 50, 0.28) 22%, rgba(16, 27, 50, 0) 42%);
+	pointer-events: none;
+}
+
+.loader-bubbles span {
+	position: absolute;
+	bottom: -80px;
+	left: var(--x);
+	width: var(--s);
+	height: var(--s);
+	border-radius: 50%;
+	border: 2px solid rgba(255, 255, 255, 0.7);
+	background: radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.95) 0 12%, rgba(255, 255, 255, 0.28) 22%, rgba(255, 255, 255, 0.06) 62%, rgba(176, 255, 57, 0.18) 100%);
+	box-shadow: inset -3px -4px 8px rgba(0, 170, 250, 0.25);
+	animation: loader-rise var(--t) linear var(--d) infinite;
+	pointer-events: none;
+}
+
+@keyframes loader-rise {
+	0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+	10% { opacity: 1; }
+	50% { transform: translate(calc(var(--w) * 1px), -55vh) scale(1); }
+	85% { opacity: 0.9; }
+	100% { transform: translate(calc(var(--w) * -0.6px), -112vh) scale(1.08); opacity: 0; }
+}
+
+.loader-panel {
+	position: absolute;
+	left: 50%;
+	bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(14px, 4.5vh, 48px));
+	width: min(90vw, 600px);
+	box-sizing: border-box;
+	--bar: clamp(26px, 6vh, 46px);
+	padding: clamp(12px, 2.2vh, 22px) clamp(14px, 2.6vw, 26px) clamp(14px, 2.4vh, 24px);
+	border-radius: clamp(22px, 3.4vh, 34px);
+	background: rgba(16, 27, 50, 0.42);
+	-webkit-backdrop-filter: blur(7px) saturate(1.25);
+	backdrop-filter: blur(7px) saturate(1.25);
+	box-shadow: inset 0 0 0 2px rgba(255, 243, 189, 0.22), 0 14px 34px rgba(16, 27, 50, 0.35);
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: clamp(16px, 3.4vh, 28px);
+	animation: loader-pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Tall screens: fit the art to the space above the panel, anchored at its
+   bottom, so the frog stands fully visible just above the progress card. The
+   grass gradient behind continues below it. */
+@media (max-aspect-ratio: 21/20) {
+	.loader-art {
+		height: auto;
+		bottom: var(--art-bottom, 0px);
+		-webkit-mask-image: linear-gradient(to bottom, #000 93%, transparent);
+		mask-image: linear-gradient(to bottom, #000 93%, transparent);
+	}
+	.loader-art img {
+		object-position: 70% 100%;
+		transform-origin: 70% 100%;
+	}
+	#loader.art-wide .loader-art img {
+		object-position: 100% 50%;
+		transform-origin: 85% 50%;
+	}
+}
+
+/* Wide screens: tuck the loader to the left, clear of the frog. */
+@media (min-aspect-ratio: 21/20) {
+	.loader-panel {
+		left: max(4vw, calc(env(safe-area-inset-left, 0px) + 16px));
+		width: clamp(300px, 46vw, 660px);
+		transform: none;
+		animation-name: loader-pop-in-left;
+	}
+}
+
+@keyframes loader-pop-in {
+	from { transform: translate(-50%, 40px) scale(0.85); opacity: 0; }
+	to { transform: translate(-50%, 0) scale(1); opacity: 1; }
+}
+
+@keyframes loader-pop-in-left {
+	from { transform: translate(0, 40px) scale(0.85); opacity: 0; }
+	to { transform: translate(0, 0) scale(1); opacity: 1; }
+}
+
+.loader-head {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 0.8em;
+	padding: 0 0.3em;
+}
+
+.loader-word {
+	display: flex;
+	justify-content: flex-start;
+	align-items: flex-end;
+	font-size: clamp(15px, min(4.6vw, 5.2vh), 34px);
+	line-height: 1;
+	color: var(--cream);
+	letter-spacing: 0.04em;
+	--o: max(2px, 0.11em);
+	text-shadow:
+		calc(var(--o) * -1) 0 0 var(--ink), var(--o) 0 0 var(--ink), 0 calc(var(--o) * -1) 0 var(--ink), 0 var(--o) 0 var(--ink),
+		calc(var(--o) * -1) calc(var(--o) * -1) 0 var(--ink), var(--o) calc(var(--o) * -1) 0 var(--ink), calc(var(--o) * -1) var(--o) 0 var(--ink), var(--o) var(--o) 0 var(--ink),
+		0 calc(var(--o) * 2.4) 0 var(--ink), var(--o) calc(var(--o) * 2.4) 0 var(--ink), calc(var(--o) * -1) calc(var(--o) * 2.4) 0 var(--ink);
+}
+
+.loader-word span {
+	display: inline-block;
+	animation: loader-bounce 1.3s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+	animation-delay: calc(var(--i) * 0.08s);
+}
+
+.loader-word span.dot {
+	color: var(--lime);
+}
+
+@keyframes loader-bounce {
+	0%, 55%, 100% { transform: translateY(0) scale(1, 1); }
+	18% { transform: translateY(-0.42em) scale(0.94, 1.08); }
+	36% { transform: translateY(0) scale(1.1, 0.9); }
+	44% { transform: translateY(-0.06em) scale(1, 1); }
+}
+
+.loader-bar {
+	position: relative;
+	height: var(--bar);
+	border: max(3px, 0.45vh) solid var(--ink);
+	border-radius: 999px;
+	background: linear-gradient(180deg, #06401c 0%, #0b5a26 100%);
+	box-shadow:
+		inset 0 4px 0 rgba(0, 0, 0, 0.35),
+		0 6px 0 var(--ink),
+		0 12px 26px rgba(16, 27, 50, 0.45);
+}
+
+.loader-fill {
+	position: absolute;
+	inset: 3px;
+	right: auto;
+	width: max(calc((100% - 6px) * var(--p) / 100), calc(var(--bar) - 12px));
+	border-radius: 999px;
+	overflow: hidden;
+	background: linear-gradient(180deg, #e2ff9e 0%, var(--lime) 30%, var(--green) 68%, #2bb114 100%);
+	box-shadow: inset 0 -3px 0 rgba(8, 115, 46, 0.55);
+}
+
+.loader-fill::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.28) 0 10px, rgba(255, 255, 255, 0) 10px 20px);
+	background-size: 28.28px 28.28px;
+	animation: loader-stripes 0.7s linear infinite;
+}
+
+.loader-fill::after {
+	content: '';
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	top: 3px;
+	height: 32%;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.55);
+}
+
+@keyframes loader-stripes {
+	from { background-position: 0 0; }
+	to { background-position: 28.28px 0; }
+}
+
+.loader-pct {
+	flex: none;
+	padding-bottom: 0.15em;
+	font-size: clamp(12px, min(3.2vw, 3.6vh), 22px);
+	line-height: 1;
+	color: #ffffff;
+	--o: 2px;
+	text-shadow:
+		-2px 0 0 var(--ink), 2px 0 0 var(--ink), 0 -2px 0 var(--ink), 0 2px 0 var(--ink),
+		-2px -2px 0 var(--ink), 2px -2px 0 var(--ink), -2px 2px 0 var(--ink), 2px 2px 0 var(--ink), 0 4px 0 var(--ink);
+	font-variant-numeric: tabular-nums;
+}
+
+.loader-frog {
+	position: absolute;
+	left: clamp(24px, calc((100% - 6px) * var(--p) / 100), calc(100% - 24px));
+	top: 50%;
+	width: calc(var(--bar) * 1.4);
+	height: calc(var(--bar) * 1.4);
+	transform: translate(-50%, -52%);
+	pointer-events: none;
+}
+
+.loader-frog svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	filter: drop-shadow(0 3px 0 var(--ink));
+	animation: loader-hop 0.62s cubic-bezier(0.3, 0.7, 0.4, 1) infinite;
+	transform-origin: 50% 100%;
+}
+
+@keyframes loader-hop {
+	0%, 100% { transform: translateY(0) scale(1.08, 0.9); }
+	40% { transform: translateY(-22%) scale(0.95, 1.06); }
+	70% { transform: translateY(-6%) scale(1, 1); }
+}
+
+.loader-frog.leap svg {
+	animation: loader-leap 0.75s cubic-bezier(0.25, 0.6, 0.4, 1) forwards;
+}
+
+@keyframes loader-leap {
+	0% { transform: translateY(0) scale(1.15, 0.8); }
+	12% { transform: translateY(0) scale(1.18, 0.78); }
+	100% { transform: translateY(-120vh) rotate(-28deg) scale(1.5); }
+}
+
+.loader-tip {
+	align-self: center;
+	display: flex;
+	align-items: center;
+	gap: 0.8em;
+	max-width: 100%;
+	box-sizing: border-box;
+	padding: 0.7em 1.1em;
+	border: 3px solid var(--ink);
+	border-radius: 999px;
+	background: var(--cream);
+	box-shadow: 0 4px 0 var(--ink), 0 10px 22px rgba(16, 27, 50, 0.35);
+	color: var(--ink);
+	font-family: 'Silkscreen', 'Courier New', monospace;
+	font-size: clamp(11px, min(2.5vw, 2.8vh), 16px);
+	line-height: 1.15;
+}
+
+.loader-tip b {
+	flex: none;
+	padding: 0.35em 0.6em 0.25em;
+	border-radius: 999px;
+	background: var(--orange);
+	color: #ffffff;
+	font-family: 'Press Start 2P', 'Courier New', monospace;
+	font-weight: normal;
+	font-size: 0.72em;
+	text-shadow: 0 2px 0 rgba(16, 27, 50, 0.6);
+	box-shadow: inset 0 -3px 0 rgba(16, 27, 50, 0.25);
+}
+
+.loader-tip span {
+	transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.loader-tip span.swap {
+	opacity: 0;
+	transform: translateY(6px);
+}
+
+#status-notice {
+	display: none;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: min(86vw, 520px);
+	box-sizing: border-box;
+	padding: 1.2em 1.4em;
+	border: 4px solid var(--ink);
+	border-radius: 22px;
+	background: var(--cream);
+	box-shadow: 0 6px 0 var(--ink), 0 14px 30px rgba(16, 27, 50, 0.45);
+	color: var(--ink);
+	font-family: 'Silkscreen', 'Courier New', monospace;
+	font-size: 15px;
+	line-height: 1.35;
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+
+#loader.failed #status-notice {
+	display: block;
+}
+
+#loader.failed .loader-panel {
+	display: none;
+}
+
+/* Exit: an iris opens from the frog's bar while the loader puffs away. */
+#loader.done {
+	pointer-events: none;
+	-webkit-mask-image: radial-gradient(circle at 50% 58%, transparent var(--hole), #000 calc(var(--hole) + 2px));
+	mask-image: radial-gradient(circle at 50% 58%, transparent var(--hole), #000 calc(var(--hole) + 2px));
+	animation: loader-iris 0.62s cubic-bezier(0.55, 0, 0.75, 0.4) forwards;
+}
+
+@keyframes loader-iris {
+	0% { --hole: 0px; opacity: 1; transform: scale(1); }
+	70% { opacity: 1; }
+	100% { --hole: 150vmax; opacity: 0; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.loader-art img, .loader-bubbles span, .loader-word span, .loader-frog svg, .loader-fill::before {
+		animation: none;
+	}
+	.loader-bubbles {
+		display: none;
+	}
+	#loader.done {
+		-webkit-mask-image: none;
+		mask-image: none;
+		animation: loader-fade 0.3s ease forwards;
+	}
+	@keyframes loader-fade {
+		to { opacity: 0; }
+	}
+}
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<canvas id="canvas">
+			Your browser does not support the canvas tag.
+		</canvas>
+
+		<noscript>
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<div id="loader" role="progressbar" aria-label="Loading Frogger 3D" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+			<div class="loader-art">
+				<picture>
+					<source media="(max-aspect-ratio: 19/20)" srcset="key-art-portrait.webp">
+					<img id="loader-art" src="key-art-landscape.webp" alt="" decoding="async" fetchpriority="high">
+				</picture>
+			</div>
+			<div class="loader-shade"></div>
+			<div class="loader-bubbles" aria-hidden="true">
+				<span style="--x:6%;--s:34px;--t:9s;--d:-1s;--w:30"></span>
+				<span style="--x:14%;--s:18px;--t:7s;--d:-4s;--w:-24"></span>
+				<span style="--x:23%;--s:52px;--t:11s;--d:-6s;--w:40"></span>
+				<span style="--x:31%;--s:22px;--t:8s;--d:-2s;--w:-30"></span>
+				<span style="--x:42%;--s:40px;--t:10s;--d:-8s;--w:26"></span>
+				<span style="--x:50%;--s:16px;--t:6.5s;--d:-3s;--w:-18"></span>
+				<span style="--x:58%;--s:30px;--t:9.5s;--d:-5s;--w:34"></span>
+				<span style="--x:67%;--s:46px;--t:12s;--d:-9s;--w:-36"></span>
+				<span style="--x:75%;--s:20px;--t:7.5s;--d:-1.5s;--w:22"></span>
+				<span style="--x:83%;--s:36px;--t:10.5s;--d:-7s;--w:-28"></span>
+				<span style="--x:91%;--s:24px;--t:8.5s;--d:-2.5s;--w:30"></span>
+				<span style="--x:97%;--s:14px;--t:6s;--d:-4.5s;--w:-16"></span>
+			</div>
+			<div class="loader-panel">
+				<div class="loader-head">
+				<div class="loader-word" aria-hidden="true"><span style="--i:0">L</span><span style="--i:1">O</span><span style="--i:2">A</span><span style="--i:3">D</span><span style="--i:4">I</span><span style="--i:5">N</span><span style="--i:6">G</span><span class="dot" style="--i:7">.</span><span class="dot" style="--i:8">.</span><span class="dot" style="--i:9">.</span></div>
+				<div class="loader-pct" id="loader-pct">0%</div>
+				</div>
+				<div class="loader-bar" id="loader-bar">
+					<div class="loader-fill"></div>
+					<div class="loader-frog" id="loader-frog">
+						<svg viewBox="12 14 104 98" aria-hidden="true">
+							<path d="M16 77C16 62 25 51 26 39C27 25 34 18 43 18C53 18 59 26 64 32C69 26 75 18 85 18C95 18 102 26 103 39C104 51 113 62 113 77C113 97 95 108 64 108C33 108 16 97 16 77Z" fill="#47e51b" stroke="#101b32" stroke-width="5"/>
+							<ellipse cx="64" cy="79" rx="45" ry="23" fill="#b0ff39"/>
+							<path d="M18 86C28 98 45 100 64 100C83 100 101 98 111 86C106 102 88 108 64 108C40 108 23 102 18 86Z" fill="#08732e"/>
+							<g fill="#47e51b" stroke="#101b32" stroke-width="4"><ellipse cx="43" cy="40" rx="21" ry="24"/><ellipse cx="85" cy="40" rx="21" ry="24"/></g>
+							<g fill="#ffc72b"><ellipse cx="43" cy="40" rx="14" ry="17"/><ellipse cx="85" cy="40" rx="14" ry="17"/></g>
+							<g fill="#101b32"><ellipse cx="45" cy="42" rx="7" ry="11"/><ellipse cx="83" cy="42" rx="7" ry="11"/></g>
+							<g fill="#ffffff"><circle cx="42" cy="36" r="4"/><circle cx="80" cy="36" r="4"/></g>
+							<path d="M40 80C51 89 77 89 88 80" stroke="#101b32" stroke-width="5" fill="none" stroke-linecap="round"/>
+							<g fill="#ff269c" opacity="0.55"><ellipse cx="27" cy="78" rx="7" ry="4"/><ellipse cx="101" cy="78" rx="7" ry="4"/></g>
+						</svg>
+					</div>
+				</div>
+				<div class="loader-tip"><b>TIP</b><span id="loader-tip">Every hop forward scores 10 points!</span></div>
+			</div>
+			<div id="status-notice"></div>
+		</div>
+
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+
+// Warm loader: key art, progress, then a frog leap and a rising whistle when
+// the game reports its first frames are ready (FroggerLoader.ready(muted)).
+window.FroggerLoader = (function () {
+	'use strict';
+	const loader = document.getElementById('loader');
+	const bar = document.getElementById('loader-bar');
+	const pct = document.getElementById('loader-pct');
+	const frog = document.getElementById('loader-frog');
+	const tip = document.getElementById('loader-tip');
+	const art = document.getElementById('loader-art');
+	// Keep the key art's frog clear of the progress card on tall screens: the
+	// art box ends just above the card (offsetTop ignores its pop-in transform).
+	const panel = loader.querySelector('.loader-panel');
+	const portraitSource = loader.querySelector('.loader-art source');
+	function fitArt() {
+		if (!loader.isConnected) return;
+		// The art box runs from the top down to just past the card's top edge.
+		const artHeight = panel.offsetTop + 6;
+		loader.style.setProperty('--art-bottom', Math.max(0, loader.clientHeight - artHeight) + 'px');
+		// When the space above the card is wider than the portrait art, cover would
+		// crop the title off its top: use the landscape art cropped from the right,
+		// where the title and frog sit side by side.
+		const tall = window.matchMedia('(max-aspect-ratio: 21/20)').matches;
+		const wide = tall && loader.clientWidth / Math.max(1, artHeight) > 0.74;
+		if (portraitSource) portraitSource.media = wide ? 'not all' : '(max-aspect-ratio: 19/20)';
+		loader.classList.toggle('art-wide', wide);
+	}
+	fitArt();
+	window.addEventListener('resize', fitArt);
+	if (window.ResizeObserver) new ResizeObserver(fitArt).observe(panel);
+	const MIN_VISIBLE_MS = 1200;
+	const FALLBACK_MS = 8000;
+	const tips = [
+		'Every hop forward scores 10 points!',
+		'Catch a fly in a home bay for bonus points!',
+		'Carry the pink frog home for a bonus!',
+		'Some turtles dive — don’t ride them under!',
+		'Logs and turtles carry you sideways. Hop off before the edge!',
+		'Watch out for snakes, otters and gator jaws!',
+		'Fill all five homes to clear the level!',
+		'Extra frog at 20,000 points!',
+	];
+	const demo = new URLSearchParams(window.location.search).get('loader_demo');
+	const started = performance.now();
+	let target = 0;
+	let shown = 0;
+	let downloaded = false;
+	let engineStarted = false;
+	let readyRequested = false;
+	let readyMuted = false;
+	let finishing = false;
+	let finished = false;
+	let failed = false;
+	let fallback = null;
+	let tipIndex = Math.floor(Math.random() * tips.length);
+
+	const whistle = new Audio('loading-whistle.mp3');
+	whistle.preload = 'auto';
+	whistle.volume = 0.6;
+
+	function markArtLoaded() {
+		art.classList.add('loaded');
+	}
+	if (art.complete && art.naturalWidth > 0) {
+		markArtLoaded();
+	} else {
+		art.addEventListener('load', markArtLoaded);
+	}
+
+	function showTip() {
+		tip.classList.add('swap');
+		window.setTimeout(() => {
+			tipIndex = (tipIndex + 1) % tips.length;
+			tip.textContent = tips[tipIndex];
+			tip.classList.remove('swap');
+		}, 250);
+	}
+	tip.textContent = tips[tipIndex];
+	const tipTimer = window.setInterval(showTip, 3400);
+
+	function tick() {
+		if (finished) {
+			return;
+		}
+		if (!failed && demo === null) {
+			if (finishing) {
+				target = 100;
+			} else if (downloaded || engineStarted) {
+				// Engine start-up has no byte count: creep toward 97% meanwhile.
+				target += (97 - target) * 0.012;
+			} else if (target < 60) {
+				target += (60 - target) * 0.0025;
+			}
+		}
+		shown += (target - shown) * (finishing ? 0.22 : 0.08);
+		if (finishing && shown > 99.4) {
+			shown = 100;
+		}
+		bar.style.setProperty('--p', shown.toFixed(2));
+		const whole = Math.floor(shown);
+		pct.textContent = whole + '%';
+		loader.setAttribute('aria-valuenow', String(whole));
+		if (finishing && shown >= 100) {
+			leave();
+			return;
+		}
+		window.requestAnimationFrame(tick);
+	}
+
+	function maybeFinish() {
+		if (!readyRequested || finishing || failed) {
+			return;
+		}
+		const wait = MIN_VISIBLE_MS - (performance.now() - started);
+		if (wait > 0) {
+			window.setTimeout(maybeFinish, wait);
+			return;
+		}
+		finishing = true;
+	}
+
+	function leave() {
+		finished = true;
+		window.clearInterval(tipTimer);
+		const hostMuted = Boolean(window.FroggerCrazyGames && window.FroggerCrazyGames.audio_muted);
+		if (!readyMuted && !hostMuted) {
+			try {
+				const playing = whistle.play();
+				if (playing && typeof playing.catch === 'function') {
+					playing.catch(() => {});
+				}
+			} catch (_) { /* Autoplay may be blocked; the game still starts. */ }
+		}
+		frog.classList.add('leap');
+		window.setTimeout(() => loader.classList.add('done'), 300);
+		window.setTimeout(() => {
+			loader.remove();
+			const canvas = document.getElementById('canvas');
+			if (canvas) {
+				canvas.focus();
+			}
+		}, 1000);
+	}
+
+	if (demo !== null) {
+		target = Math.max(0, Math.min(100, Number(demo) || 62));
+		shown = target;
+	}
+	window.requestAnimationFrame(tick);
+
+	return {
+		demo: demo !== null,
+		progress(current, total) {
+			if (current > 0 && total > 0) {
+				target = Math.max(target, Math.min(85, 85 * current / total));
+				if (current >= total) {
+					downloaded = true;
+				}
+			}
+		},
+		engine_started() {
+			engineStarted = true;
+			downloaded = true;
+			fallback = window.setTimeout(() => this.ready(true), FALLBACK_MS);
+		},
+		ready(muted) {
+			if (readyRequested) {
+				return;
+			}
+			readyRequested = true;
+			readyMuted = Boolean(muted);
+			if (fallback !== null) {
+				window.clearTimeout(fallback);
+			}
+			maybeFinish();
+		},
+		fail(text) {
+			failed = true;
+			window.clearInterval(tipTimer);
+			const notice = document.getElementById('status-notice');
+			while (notice.lastChild) {
+				notice.removeChild(notice.lastChild);
+			}
+			text.split('\n').forEach((line) => {
+				notice.appendChild(document.createTextNode(line));
+				notice.appendChild(document.createElement('br'));
+			});
+			loader.classList.add('failed');
+		},
+	};
+}());
+
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+	const loaderApi = window.FroggerLoader;
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		if (err instanceof Error) {
+			loaderApi.fail(err.message);
+		} else if (typeof err === 'string') {
+			loaderApi.fail(err);
+		} else {
+			loaderApi.fail('An unknown error occurred.');
+		}
+	}
+
+	if (loaderApi.demo) {
+		return;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let serviceWorkerRegistrationPromise;
+			try {
+				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+			} catch (err) {
+				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+			}
+			// There's a chance that installing the service worker would fix the issue
+			Promise.race([
+				serviceWorkerRegistrationPromise.then((registration) => {
+					if (registration != null) {
+						return Promise.reject(new Error('Service worker already exists.'));
+					}
+					return registration;
+				}).then(() => engine.installServiceWorker()),
+				// For some reason, `getRegistration()` can stall
+				new Promise((resolve) => {
+					setTimeout(() => resolve(), 2000);
+				}),
+			]).then(() => {
+				// Reload if there was no error.
+				window.location.reload();
+			}).catch((err) => {
+				console.error('Error while registering service worker:', err);
+			});
+		} else {
+			// Display the message as usual
+			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+			displayFailureNotice(missingMsg + missing.join('\n'));
+		}
+	} else {
+		engine.startGame({
+			'onProgress': function (current, total) {
+				loaderApi.progress(current, total);
+			},
+		}).then(() => {
+			loaderApi.engine_started();
+		}, displayFailureNotice);
+	}
+}());
+		</script>
+	</body>
+</html>

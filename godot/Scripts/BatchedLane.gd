@@ -33,17 +33,23 @@ static func _get_lane_shader() -> Shader:
 	if lane_shader == null:
 		lane_shader = Shader.new()
 		lane_shader.code = """shader_type spatial;
+#include "res://Shaders/curve.gdshaderinc"
 uniform vec4 tint : source_color = vec4(1.0);
 varying vec3 world;
 void vertex(){
     world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
+    VERTEX+=curve_offset(MODEL_MATRIX,VERTEX);
 }
 void fragment(){
-    // Lane props are cut at the board edge exactly like the clipped ModelActor
-    // materials; an instance that fits on the board never reaches the discard.
-    if(abs(world.x)>7.0)discard;
-    ALBEDO=tint.rgb;
-    SPECULAR=0.5;
+    // Lane props fade and are cut past the board edge exactly like the clipped
+    // ModelActor materials: into the tunnel's darkness on the road, the swamp's
+    // mist on the river. An instance on the board never reaches the fade.
+    float edge=abs(world.x);
+    if(edge>7.85)discard;
+    float fade=smoothstep(7.0,7.8,edge);
+    vec3 murk=world.z<0.0?vec3(0.38,0.5,0.42):vec3(0.0);
+    ALBEDO=mix(tint.rgb,murk,fade);
+    SPECULAR=0.5*(1.0-fade);
     ROUGHNESS=.75;
 }"""
 	return lane_shader

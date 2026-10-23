@@ -257,17 +257,17 @@
   },
   {
     "asset": "board",
-    "triangles": 4980,
+    "triangles": 14914,
     "bones": 0,
     "clips": [],
     "source": "art/source/board.blend",
     "glb": "godot/Models/board.glb",
     "footprintTiles": {
-      "minX": -7.425,
-      "maxX": 7.425,
+      "minX": -9.5,
+      "maxX": 9.5,
       "minY": -7.9,
-      "maxY": 7.665,
-      "minZ": -1.42,
+      "maxY": 7.6,
+      "minZ": -1.45,
       "maxZ": 1.29548
     }
   }

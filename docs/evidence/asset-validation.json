@@ -234,10 +234,10 @@
   },
   {
     "asset": "board",
-    "vertices": 11748,
-    "triangles": 4980,
+    "vertices": 19817,
+    "triangles": 14914,
     "mesh_instances": 1,
-    "material_surfaces": 13,
+    "material_surfaces": 12,
     "godot_mesh_optimizations": true,
     "bones": 0,
     "skinned_vertices": 0,

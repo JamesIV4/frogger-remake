@@ -9,6 +9,7 @@ import json
 import os
 import random
 import bpy
+import bmesh
 from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -26,6 +27,7 @@ PALETTE = {
     'hedge':'216a0a','hedgelight':'70b91c','hedgedark':'082f0d',
     'lady':'ff269c','ladylight':'ff9acb','ladydark':'9b075f',
     'beaver':'70462f','beaverlight':'a8764a','beaverdark':'35231e',
+    'soil':'6e4526','tunnel':'0c1a22',
 }
 MATS={}
 RECORDS=[]
@@ -701,9 +703,9 @@ def board():
     # Split the wooden substrate around the river. A solid slab here would sit
     # in front of the lowered bed and turn translucent blue water purple.
     for name,y,length in [('Lower',-3.70,8.40),('Upper',6.55,2.10)]:
-        box(name+' walnut base',(0,y,-.54),(14.85,length,.8),'wooddark',bevel=.10)
-        box(name+' inlay',(0,y,-.14),(14.63,length-.12,.15),'woodlight',bevel=.04)
-    for x in [-7.20,7.20]:box('River wall',(x,3,-.54),(.45,5.10,.8),'wooddark',bevel=.04)
+        box(name+' soil base',(0,y,-.54),(14.85,length,.8),'soil',bevel=.10)
+        box(name+' soil cap',(0,y,-.14),(14.63,length-.12,.15),'soil',bevel=.04)
+    for x in [-7.20,7.20]:box('River wall',(x,3,-.54),(.45,5.10,.8),'soil',bevel=.04)
     box('Road',(0,-3,-.036),(14,5,.10),'road')
     # The bed clears even the paddles at the turtles' maximum .70-unit dive.
     # A deep open cavity keeps the whole animal visible through blue water.
@@ -732,7 +734,7 @@ def board():
     for i in range(5):
         x=-6+i*3
         box('Home bay',(x,6,-.01),(1.23,1.0,.14),'sand',bevel=.05)
-        box('Home back lip',(x,6.48,.08),(1.25,.10,.12),'woodlight',bevel=.03)
+        box('Home back lip',(x,6.48,.08),(1.25,.10,.12),'sand',bevel=.03)
     rng=random.Random(1981)
     for x in [-6.9,-4.5,-1.5,1.5,4.5,6.9]:
         w=.7 if abs(x)>6 else 1.68
@@ -758,11 +760,59 @@ def board():
         for k in range(5):
             px=x+rng.uniform(-.35,.35);py=7.02+rng.uniform(-.24,.24)
             mesh('Back hedge spear',[(px-.17,py,.47),(px+.17,py,.47),(px+rng.uniform(-.14,.14),py+rng.uniform(-.08,.08),rng.uniform(.92,1.30))],[(0,1,2)],'hedgelight' if (n+k)%4==0 else 'hedge')
-    for x in [-7.25,7.25]:box('Side rail',(x,-.15,.04),(.28,15.25,.32),'wood',bevel=.05)
-    box('Top rail',(0,7.55,.0),(14.8,.23,.27),'wood',bevel=.04)
-    box('Bottom lip',(0,-7.72,-.13),(14.8,.22,.18),'wood',bevel=.04)
+    # The wooden arcade frame is gone. Road traffic leaves through a tunnel
+    # portal on each side; the river runs on into a swamp and the grass strips
+    # end in hedges, all dressed at runtime by godot/Scripts/Scenery.gd on a
+    # sculpted heightfield. The native board-edge clip (|x| = 7) then reads as
+    # entering the hillside, the swamp or the hedge rather than vanishing.
+    # The bottom hedge wall (placed at runtime) stands flush against the start
+    # bank's grass edge: no lip, curb or apron.
+    # Line the river cavity's sides in the bed color, so the soil walls never
+    # show through the translucent water as a lighter frame around the river.
+    for y in (.52,5.48):box('River cavity lining',(0,y,-.74),(14,.03,1.36),'water')
+    for x in (-6.965,6.965):box('River cavity lining',(x,3,-.74),(.03,5,1.36),'water')
+    for side in (-1,1):road_portal(side)
     return None
 
+def opening_shape(name,side,y0,y1,z0,z1,rise,x0,x1,color):
+    """A straight-sided opening with a flattened elliptical crown, as solids."""
+    cx=side*(x0+x1)/2;depth=x1-x0;width=y1-y0;cy=(y0+y1)/2
+    body=box(name,(cx,cy,(z0+z1)/2),(depth,width,z1-z0),color)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=48,radius=1,depth=depth,location=(cx,cy,z1),rotation=(0,math.pi/2,0))
+    crown=bpy.context.object;crown.scale=(rise,width/2,1)
+    return [body,finish(crown,name+' crown',color)]
+
+def cut(target,cutters,operation='DIFFERENCE'):
+    for cutter in cutters:
+        mod=target.modifiers.new('Opening','BOOLEAN');mod.operation=operation;mod.object=cutter;mod.solver='EXACT';mod.material_mode='INDEX'
+        bpy.context.view_layer.objects.active=target
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+        bpy.data.objects.remove(cutter,do_unlink=True)
+
+def soften(obj,width,segments=3):
+    """Rounded, smooth-shaded edges: a soft toy look rather than masonry."""
+    mod=obj.modifiers.new('Soft edges','BEVEL');mod.width=width;mod.segments=segments
+    mod.limit_method='ANGLE';mod.angle_limit=math.radians(40)
+    bpy.ops.object.select_all(action='DESELECT');obj.select_set(True)
+    bpy.context.view_layer.objects.active=obj
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    bpy.ops.object.shade_smooth_by_angle(angle=math.radians(40))
+    return obj
+
+def road_portal(side):
+    """Tunnel mouth for all five road lanes; the hill above it is terrain."""
+    top=1.25;y0,y1,z0,z1,rise=-5.5,-.5,-.20,.80,.26
+    portal=box('Road tunnel portal',(side*7.25,-3,(top-1.45)/2),(.5,5.24,top+1.45),'grass')
+    cut(portal,opening_shape('Road tunnel cutter',side,y0,y1,z0,z1,rise,6.6,7.9,'grass'))
+    soften(portal,.12)
+    # A deep, dark passage behind the mouth; runtime fog layers fade it to black.
+    box('Road tunnel interior',(side*8.5,(y0+y1)/2,(z0+z1+rise)/2),(2.0,y1-y0+.2,z1+rise-z0+.1),'tunnel')
+    box('Tunnel road',(side*7.75,(y0+y1)/2,-.036),(1.5,y1-y0,.10),'tunnel')
+    # One smooth rounded rim around the arch, slightly proud of the face.
+    rim=opening_shape('Road tunnel rim',side,y0-.16,y1+.16,-.06,z1,rise+.16,6.93,7.06,'sand')
+    cut(rim[0],[rim[1]],'UNION')
+    cut(rim[0],opening_shape('Road tunnel rim cutter',side,y0,y1,z0-.1,z1,rise,6.8,7.2,'sand'))
+    soften(rim[0],.05)
 def rig_and_clips(specs,kind):
     meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
     bpy.ops.object.select_all(action='DESELECT')
@@ -867,11 +917,23 @@ def rig_and_clips(specs,kind):
         assert (socket.matrix_world.translation-Vector((0,.075,.46))).length<.0001
     return clips
 
+def slice_board(step=.5):
+    """Cut the board every half tile across its rows (Blender y, Godot -z). The
+    runtime curved-world shader bends vertices by their row; a wide face such as
+    the road would otherwise stay a flat plane hinged on its far edges."""
+    for obj in [o for o in bpy.context.scene.objects if o.type=='MESH']:
+        bm=bmesh.new();bm.from_mesh(obj.data)
+        for k in range(-16,17):
+            geom=bm.verts[:]+bm.edges[:]+bm.faces[:]
+            bmesh.ops.bisect_plane(bm,geom=geom,plane_co=(0,k*step,0),plane_no=(0,1,0))
+        bm.to_mesh(obj.data);bm.free()
+
 def export(kind,specs):
     clips=rig_and_clips(specs,kind) if specs else []
     # Rigid models (board, logs, vehicle bodies) have no rig to weight parts, so
     # they bake and merge into one multi-material mesh for their lane batcher.
     if not specs:consolidate(rigid=True)
+    if kind=='board':slice_board()
     bpy.context.scene.frame_set(0)
     bpy.context.view_layer.update()
     meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']

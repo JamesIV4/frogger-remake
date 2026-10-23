@@ -125,3 +125,38 @@ for contract in json.loads((ROOT/'art/models.json').read_text()):
     results.append(result)
 (ROOT/'docs/evidence/asset-validation.json').write_text(json.dumps(results,indent=2)+'\n')
 print(f'{len(results)} Blender exports validated: finite geometry, triangle counts, consolidated meshes, Godot mesh optimizations, all vertices bound, normalized weights, expected joints and moving clips.')
+# Backdrop vegetation (art/scripts/build_scenery.py): glTF-separate files in the
+# board's own untextured, faceted style. Same cheap gates, plus: one vertex-
+# colored material, unit normals, bounded COLOR_0 on every primitive, and edge
+# hedges and reed walls that never cross the board's clip line.
+scenery=[]
+for contract in json.loads((ROOT/'art/scenery.json').read_text()):
+    path=ROOT/contract['gltf']
+    import_text=(ROOT/(contract['gltf']+'.import')).read_text()
+    for setting in ('array_mesh/deduplicate_surfaces=true','meshes/generate_lods=true',
+                    'meshes/create_shadow_meshes=true','meshes/force_disable_compression=false'):
+        assert setting in import_text,(contract['asset'],'missing Godot mesh optimization',setting)
+    doc=json.loads(path.read_text())
+    assert not doc.get('images'),(contract['asset'],'vegetation is untextured like the board models')
+    binary=(path.parent/doc['buffers'][0]['uri']).read_bytes()
+    def read(index):
+        a=doc['accessors'][index];v=doc['bufferViews'][a['bufferView']];fmt=FORMATS[a['componentType']];n=SIZES[a['type']]
+        stride=v.get('byteStride',struct.calcsize(fmt)*n);start=v.get('byteOffset',0)+a.get('byteOffset',0)
+        return [struct.unpack_from('<'+fmt*n,binary,start+i*stride) for i in range(a['count'])]
+    triangles=0;min_x=float('inf')
+    for mesh in doc['meshes']:
+        for p in mesh['primitives']:
+            assert doc['materials'][p['material']]['name']=='Scenery',(contract['asset'],'one shared vertex-colored material')
+            positions=read(p['attributes']['POSITION']);normals=read(p['attributes']['NORMAL'])
+            assert all(math.isfinite(v) for row in positions for v in row),(contract['asset'],'non-finite position')
+            assert all(abs(math.sqrt(sum(c*c for c in n))-1)<.01 for n in normals),(contract['asset'],'non-unit normal')
+            colors=read(p['attributes']['COLOR_0'])
+            assert all(0<=c<=1.0001 for row in colors for c in row[:3]),(contract['asset'],'COLOR_0 out of range')
+            min_x=min(min_x,min(row[0] for row in positions))
+            triangles+=doc['accessors'][p['indices']]['count']//3
+    assert triangles==contract['triangles'] and triangles<=6000,(contract['asset'],triangles,contract['triangles'])
+    if contract['asset'].startswith('edge_hedge') or contract['asset']=='reed_wall':
+        assert min_x>=-.001,(contract['asset'],'crosses the clip line',min_x)
+    scenery.append({'asset':contract['asset'],'triangles':triangles,'leaves':contract['leaves'],'passed':True})
+(ROOT/'docs/evidence/scenery-validation.json').write_text(json.dumps(scenery,indent=2)+'\n')
+print(f'{len(scenery)} backdrop vegetation exports validated: budgets, unit normals, one vertex-colored material with bounded COLOR_0, clip-safe hedges and reed walls.')
