@@ -121,29 +121,32 @@ static func at(state: Dictionary, a: int) -> int:
 	return ram[(a - 0x8000) & 2047] if ram != null and ram.size() > ((a - 0x8000) & 2047) else 0
 
 static func tile_at(state: Dictionary, frog_space_x: float, frog_space_row: int, column_offset: int = 0) -> int:
+	return _tile(state.get("objects", []), state.get("video", []), frog_space_x, frog_space_row, column_offset)
+
+static func _tile(objects, video, frog_space_x: float, frog_space_row: int, column_offset: int) -> int:
 	var col: int = (frog_space_row / 8 + column_offset) & 31
-	var objects = state.get("objects", [])
 	if objects.size() <= col * 2:
 		return 0
 	var raw: int = objects[col * 2]
 	var scroll: int = ((raw >> 4) | (raw << 4)) & 255
 	var native_y: int = (248 - int(roundf(frog_space_x)) + scroll) & 255
-	var video = state.get("video", [])
 	var idx: int = (native_y >> 3) * 32 + col
 	return video[idx] if idx < video.size() else 0
 
 static func turtle_phase(state: Dictionary, x: float, row: int) -> int:
-	var surface: bool = false
+	# Runs for every turtle group each frame: read the tile arrays once and
+	# stop at the first surface tile, which decides the result on its own.
+	var objects = state.get("objects", [])
+	var video = state.get("video", [])
 	var bubbles: bool = false
 	var blank: bool = true
-	for offset in [-4, 0, 4]:
-		for col in [0, 1]:
-			var tile: int = tile_at(state, x + offset, row, col)
-			surface = surface or ((tile >= 0x38 and tile <= 0x3f) or (tile >= 0x70 and tile <= 0x87))
+	for offset in range(-4, 5, 4):
+		for col in range(2):
+			var tile: int = _tile(objects, video, x + offset, row, col)
+			if (tile >= 0x38 and tile <= 0x3f) or (tile >= 0x70 and tile <= 0x87):
+				return 0
 			bubbles = bubbles or (tile >= 0x94 and tile <= 0x9b)
 			blank = blank and (tile == 0x10)
-	if surface:
-		return 0
 	if bubbles:
 		return 1
 	if blank:

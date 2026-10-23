@@ -786,25 +786,18 @@ func setup_world() -> void:
 		_hide_warmup_shadows(double.root)
 		double.set_active(true)
 	# Pre-build the rigid batched equivalents too: touching every log/vehicle
-	# body and wheel mesh compiles the lane shader against those vertex layouts.
+	# body and axle mesh compiles the lane shader against those vertex layouts.
 	for model in WarmupBatched:
 		var template := BatchedLane.get_template(model)
 		if template == null:
 			continue
-		var probe := MeshInstance3D.new()
-		probe.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		probe.mesh = template.body_mesh
-		warmup_node.add_child(probe)
-		if template.wheel_mesh_left != null:
-			var left := MeshInstance3D.new()
-			left.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			left.mesh = template.wheel_mesh_left
-			warmup_node.add_child(left)
-		if template.wheel_mesh_right != null:
-			var right := MeshInstance3D.new()
-			right.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			right.mesh = template.wheel_mesh_right
-			warmup_node.add_child(right)
+		for mesh in [template.body_mesh, template.axle_mesh]:
+			if mesh == null:
+				continue
+			var probe := MeshInstance3D.new()
+			probe.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			probe.mesh = mesh
+			warmup_node.add_child(probe)
 	# The drown ripple builds its torus lazily; compiling it now avoids a
 	# hitch on the first water death.
 	var warm_torus := TorusMesh.new()
@@ -839,8 +832,10 @@ func setup_world() -> void:
 	var sky := Sky.new()
 	sky.sky_material = sky_material
 	# Ambient and reflections stay fixed below, so a tiny radiance map suffices.
+	# The sky shader is static: compute that map once instead of every frame
+	# (realtime skies also force a 256px map).
 	sky.radiance_size = Sky.RADIANCE_SIZE_32
-	sky.process_mode = Sky.PROCESS_MODE_REALTIME
+	sky.process_mode = Sky.PROCESS_MODE_AUTOMATIC
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
 	env.background_color = SkyHaze
@@ -944,9 +939,12 @@ func curve_drop(world_z: float) -> float:
 
 const BoardShader: String = """shader_type spatial;
 #include "res://Shaders/curve.gdshaderinc"
-uniform vec4 tint : source_color = vec4(1.0);
-uniform float roughness_value = 0.72;
+#include "res://Shaders/tint.gdshaderinc"
+uniform float roughness_values[16];
+varying flat float roughness_value;
 void vertex(){
+    READ_TINT;
+    roughness_value = roughness_values[TINT_INDEX];
     VERTEX += curve_offset(MODEL_MATRIX, VERTEX);
 }
 void fragment(){
@@ -954,28 +952,39 @@ void fragment(){
     ROUGHNESS = roughness_value;
 }"""
 
-## The imported board keeps its palette colors but draws through a shader that
-## follows the curved-world bend, like every other world material.
+## The imported board keeps its palette colors and roughness but draws through
+## a shader that follows the curved-world bend, like every other world
+## material. Its palette surfaces merge into one (see TintedMesh), so the board
+## is one draw call per render pass instead of one per color.
 func apply_curved_board_materials(board: Node) -> void:
 	var shader := Shader.new()
 	shader.code = BoardShader
-	var converted: Dictionary = {}
 	for node in board.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node := node as MeshInstance3D
-		# Automatic mesh LODs would merge the flat road's half-tile slices back
-		# into long faces that cannot bend; always draw the full mesh.
+		# The merged mesh has no automatic LODs, which would merge the flat
+		# road's half-tile slices back into long faces that cannot bend.
 		mesh_node.lod_bias = 128.0
+		var palette: Array = []
+		var parts: Array = []
 		for surface in range(mesh_node.mesh.get_surface_count()):
 			var original := mesh_node.mesh.surface_get_material(surface) as BaseMaterial3D
 			if original == null:
+				push_error("Board surfaces need an authored material")
 				continue
-			if not converted.has(original):
-				var material := ShaderMaterial.new()
-				material.shader = shader
-				material.set_shader_parameter("tint", original.albedo_color)
-				material.set_shader_parameter("roughness_value", original.roughness)
-				converted[original] = material
-			mesh_node.set_surface_override_material(surface, converted[original])
+			parts.append({"mesh": mesh_node.mesh, "surface": surface,
+				"slot": TintedMesh.slot(palette, [original.albedo_color, original.roughness])})
+		var tints: Array = []
+		var roughness := PackedFloat32Array()
+		for entry in palette:
+			tints.append(entry[0])
+			roughness.append(entry[1])
+		roughness.resize(TintedMesh.MaxSlots)
+		var material := ShaderMaterial.new()
+		material.shader = shader
+		material.set_shader_parameter("tints", TintedMesh.tints(tints))
+		material.set_shader_parameter("roughness_values", roughness)
+		mesh_node.mesh = TintedMesh.merge(parts)
+		mesh_node.set_surface_override_material(0, material)
 
 const RippleShader: String = """shader_type spatial;
 render_mode unshaded, blend_mix, depth_draw_never, cull_disabled;
@@ -2440,34 +2449,46 @@ func update_lanes(fraction: float) -> void:
 		var batch: BatchedLane = batched_lanes.get(lane)
 		if batch != null:
 			batch.begin(wheel_turn + float(lane) * 0.37)
+		# Per-lane constants, hoisted out of the per-copy loop below, which runs
+		# for every group, member and wrap copy each frame.
+		var members: int = 2 if lane == 1 else (3 if lane == 4 else 1)
+		var lane_half_width: float = (float(width) - 3.0) * 0.52 if (lane < 5 and not is_turtle) else (9.0 if is_turtle else (15.0 if lane == 6 else 10.0))
+		var fade_margin: float = BoardVisuals.TurtleFadePixels if is_turtle else BoardVisuals.EdgeFadePixels
 		for index in range(count):
 			var raw_center: float = float(BoardVisuals.at(state, table + index + 1) - (12 if lane < 5 else 3)) - float(width) / 2.0
 			var center: float = moving_visuals.step(lane * 16 + index, raw_center, cur_frame, presentation_delta, paused)
-			var members: int = 2 if lane == 1 else (3 if lane == 4 else 1)
 			# ROM 0x20fb/0x219c stamps only the last group in each turtle
 			# layout. Empty water is not evidence that a group can dive.
 			var diver: bool = is_turtle and index == BoardVisuals.at(state, 0x8275 if lane == 1 else 0x827e) - 1
 			var depth: float = BoardVisuals.turtle_depth(state, raw_center, row, fraction, diver) if diver else 0.0
 			if is_turtle and not diver and BoardVisuals.turtle_phase(state, raw_center, row) == 2:
 				continue
+			var gator_slot: bool = lane == 0 and index == 0
 			for member in range(members):
-				for wrap in [-1, 0, 1]:
-					var x: float = center + float(wrap) * 256.0 + (float(member) - float(members - 1) / 2.0) * 16.0
-					var crocodile: bool = lane == 0 and index == 0 and river_gator_visual.is_gator(x + 12.0 + float(width) / 2.0)
-					if is_turtle:
+				var member_offset: float = (float(member) - float(members - 1) / 2.0) * 16.0
+				for wrap in range(-1, 2):
+					var x: float = center + float(wrap) * 256.0 + member_offset
+					var crocodile: bool = gator_slot and river_gator_visual.is_gator(x + 12.0 + float(width) / 2.0)
+					# turtle_ride_depth only accepts a support within 10 px of
+					# the frog (x in 0..255), so farther wrap copies are skipped.
+					if is_turtle and x > -10.0 and x < 266.0:
 						var support: Dictionary = turtle_support_cache[turtle_supports.size()]
 						support.x = x
 						support.row = row
 						support.depth = depth
 						turtle_supports.append(support)
-					var half_width: float = (float(width) - 3.0) * 0.52 if (lane < 5 and not is_turtle) else (9.0 if is_turtle else (15.0 if lane == 6 else 10.0))
-					var gator_fit = BoardVisuals.fit_river_gator(width) if crocodile else {}
-					var render_x: float = x + (gator_fit.get("center_offset_pixels", 0.0) if crocodile else 0.0)
+					var half_width: float = lane_half_width
+					var gator_fit = null
+					var render_x: float = x
 					var bounds_center: float = render_x
 					if crocodile:
+						gator_fit = BoardVisuals.fit_river_gator(width)
+						render_x = x + gator_fit["center_offset_pixels"]
 						half_width = BoardVisuals.RiverGatorLengthPixels / 2.0
 						bounds_center = x + float(width) / 2.0 + 12.0 - BoardVisuals.RiverGatorTipInset - half_width
-					if not BoardVisuals.intersects_presentation(bounds_center, half_width, BoardVisuals.TurtleFadePixels if is_turtle else BoardVisuals.EdgeFadePixels):
+					# BoardVisuals.intersects_presentation, inlined for this hot loop.
+					var reach: float = half_width + fade_margin
+					if bounds_center + reach < BoardVisuals.LeftEdge or bounds_center - reach > BoardVisuals.RightEdge:
 						continue
 					if batch != null and not crocodile:
 						batch.place(batched_lane_transform(lane, width, model, render_x, float(row)))

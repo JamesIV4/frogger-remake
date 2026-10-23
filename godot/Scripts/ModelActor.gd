@@ -20,6 +20,12 @@ static var unclipped_materials: Dictionary = {}
 static var clipped_materials: Dictionary = {}
 static var unclipped_shaders: Dictionary = {}
 static var clipped_shaders: Dictionary = {}
+## Per model: the merged mesh of each part group and the shared palette.
+static var merged_models: Dictionary = {}
+## Per model: the imported scene. The resource cache only holds scenes that
+## are still referenced, and actors keep none of the imported meshes, so
+## without this every new actor would re-read its GLB from disk.
+static var scenes: Dictionary = {}
 
 static func _get_unclipped_shader(animated_squash: bool) -> Shader:
 	if not unclipped_shaders.has(animated_squash):
@@ -27,10 +33,11 @@ static func _get_unclipped_shader(animated_squash: bool) -> Shader:
 		unclipped_shader.code = """shader_type spatial;
 render_mode depth_draw_opaque;
 #include "res://Shaders/curve.gdshaderinc"
+#include "res://Shaders/tint.gdshaderinc"
 uniform float squash_color = 0.0;
-uniform vec4 tint : source_color = vec4(1.0);
 varying float intact_shade;
 void vertex(){
+    READ_TINT;
     intact_shade=0.35+0.65*max(dot(normalize(NORMAL),normalize(vec3(-0.45,0.8,0.35))),0.0);
     VERTEX+=curve_offset(MODEL_MATRIX,VERTEX);
 }
@@ -50,11 +57,12 @@ static func _get_clipped_shader(animated_squash: bool) -> Shader:
 		var clipped_shader := Shader.new()
 		clipped_shader.code = """shader_type spatial;
 #include "res://Shaders/curve.gdshaderinc"
+#include "res://Shaders/tint.gdshaderinc"
 uniform float squash_color = 0.0;
-uniform vec4 tint : source_color = vec4(1.0);
 varying vec3 world;
 varying float intact_shade;
 void vertex(){
+    READ_TINT;
     world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
     intact_shade=0.35+0.65*max(dot(normalize(NORMAL),normalize(vec3(-0.45,0.8,0.35))),0.0);
     VERTEX+=curve_offset(MODEL_MATRIX,VERTEX);
@@ -81,60 +89,95 @@ func _init(parent: Node, asset: String):
 	# Frog-owned material uniforms avoid GLES3/WebGL's limited per-instance
 	# uniform pool. Other actors continue sharing immutable materials.
 	supports_squash_color = asset in ["frog", "lady_frog"]
-	var scene = load("res://Models/%s.glb" % asset)
-	root = scene.instantiate() as Node3D
+	if not scenes.has(asset):
+		scenes[asset] = load("res://Models/%s.glb" % asset)
+	root = (scenes[asset] as PackedScene).instantiate() as Node3D
+	var tints := _merge_parts(asset)
 	parent.add_child(root)
-	_setup_materials(root)
+	_setup_materials(tints)
 	animator = _find_node_of_type(root, "AnimationPlayer") as AnimationPlayer
 	passenger_socket = root.find_child("PassengerSocket", true, false) as Node3D
 	skeleton = _find_node_of_type(root, "Skeleton3D") as Skeleton3D
 	play("Idle")
 	set_active(false)
 
-func _setup_materials(node: Node) -> void:
-	if node is MeshInstance3D and node.mesh != null:
-		var mesh: MeshInstance3D = node as MeshInstance3D
-		for i in range(mesh.mesh.get_surface_count()):
-			var original = mesh.mesh.surface_get_material(i)
-			if original is StandardMaterial3D:
-				var id: String = "%d:%s" % [original.get_instance_id(), supports_squash_color]
-				var unclipped_mat: ShaderMaterial
-				if unclipped_materials.has(id):
-					unclipped_mat = unclipped_materials[id]
-				else:
-					unclipped_mat = ShaderMaterial.new()
-					unclipped_mat.shader = _get_unclipped_shader(supports_squash_color)
-					unclipped_mat.set_shader_parameter("tint", original.albedo_color)
-					unclipped_materials[id] = unclipped_mat
+## Blender exports one skinned mesh node per palette color, all bound to the
+## rig's one skeleton and skin. Each group of such parts (same parent, skin,
+## skeleton and placement) becomes one merged node with a single surface, so an
+## actor costs one draw call per render pass instead of one per color. The
+## merged meshes are built once per model and shared by every actor.
+func _merge_parts(asset: String) -> PackedColorArray:
+	var groups: Array = []
+	for node in root.find_children("*", "MeshInstance3D", true, false):
+		var part := node as MeshInstance3D
+		if part.mesh == null:
+			continue
+		var group: Dictionary = {}
+		for candidate in groups:
+			var first: MeshInstance3D = candidate.parts[0]
+			if first.get_parent() == part.get_parent() and first.skin == part.skin and first.skeleton == part.skeleton and first.transform.is_equal_approx(part.transform):
+				group = candidate
+				break
+		if group.is_empty():
+			group = {"parts": []}
+			groups.append(group)
+		group.parts.append(part)
+	if not merged_models.has(asset):
+		var palette: Array = []
+		var meshes: Array = []
+		for group in groups:
+			var parts: Array = []
+			for part in group.parts:
+				parts.append_array(TintedMesh.color_parts((part as MeshInstance3D).mesh, palette))
+			meshes.append(TintedMesh.merge(parts))
+		merged_models[asset] = {"meshes": meshes, "tints": TintedMesh.tints(palette)}
+	var merged_model: Dictionary = merged_models[asset]
+	for index in range(groups.size()):
+		var parts: Array = groups[index].parts
+		var first: MeshInstance3D = parts[0]
+		var merged := MeshInstance3D.new()
+		merged.name = "Merged %s" % first.name if groups.size() > 1 else "Merged"
+		merged.mesh = merged_model.meshes[index]
+		merged.transform = first.transform
+		merged.skin = first.skin
+		merged.cast_shadow = first.cast_shadow
+		var holder := first.get_parent()
+		holder.add_child(merged)
+		merged.skeleton = first.skeleton
+		for part in parts:
+			holder.remove_child(part)
+			part.free()
+		mesh_instances.append(merged)
+	return merged_model.tints
 
-				var clipped_mat: ShaderMaterial
-				if clipped_materials.has(id):
-					clipped_mat = clipped_materials[id]
-				else:
-					clipped_mat = ShaderMaterial.new()
-					clipped_mat.shader = _get_clipped_shader(supports_squash_color)
-					clipped_mat.set_shader_parameter("tint", original.albedo_color)
-					clipped_materials[id] = clipped_mat
-				if supports_squash_color:
-					if not squash_materials.has(id):
-						squash_materials[id] = {
-							"unclipped": unclipped_mat.duplicate(),
-							"clipped": clipped_mat.duplicate()
-						}
-					unclipped_mat = squash_materials[id]["unclipped"]
-					clipped_mat = squash_materials[id]["clipped"]
-
-				mesh.set_surface_override_material(i, unclipped_mat)
-				surface_bindings.append({
-					"mesh": mesh,
-					"surface": i,
-					"unclipped": unclipped_mat,
-					"clipped": clipped_mat
-				})
-				if not mesh_instances.has(mesh):
-					mesh_instances.append(mesh)
-	for child in node.get_children():
-		_setup_materials(child)
+func _setup_materials(tints: PackedColorArray) -> void:
+	var id: String = "%s:%s" % [model_name, supports_squash_color]
+	if not unclipped_materials.has(id):
+		var unclipped := ShaderMaterial.new()
+		unclipped.shader = _get_unclipped_shader(supports_squash_color)
+		unclipped.set_shader_parameter("tints", tints)
+		unclipped_materials[id] = unclipped
+		var clipped := ShaderMaterial.new()
+		clipped.shader = _get_clipped_shader(supports_squash_color)
+		clipped.set_shader_parameter("tints", tints)
+		clipped_materials[id] = clipped
+	var unclipped_mat: ShaderMaterial = unclipped_materials[id]
+	var clipped_mat: ShaderMaterial = clipped_materials[id]
+	if supports_squash_color:
+		squash_materials[id] = {
+			"unclipped": unclipped_mat.duplicate(),
+			"clipped": clipped_mat.duplicate()
+		}
+		unclipped_mat = squash_materials[id]["unclipped"]
+		clipped_mat = squash_materials[id]["clipped"]
+	for mesh in mesh_instances:
+		mesh.set_surface_override_material(0, unclipped_mat)
+		surface_bindings.append({
+			"mesh": mesh,
+			"surface": 0,
+			"unclipped": unclipped_mat,
+			"clipped": clipped_mat
+		})
 
 func set_clipped(clipped: bool) -> void:
 	if is_clipped == clipped:
